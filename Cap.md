@@ -1,0 +1,179 @@
+---
+title: "HTB - Cap"
+date: 2026-06-15
+categories: [HackTheBox, Easy]
+tags: [linux, IDOR, wireshark, capabilities]
+image:
+  path: /assets/img/HTB/Cap/banner.png
+  alt: Cap writeup
+---
+
+| Field      | Details       |
+| ---------- | ------------- |
+| Platform   | HackTheBox    |
+| Difficulty | Easy          |
+| OS         | Linux         |
+| IP         | 10.129.25.130 |
+| Date       | June 2026     |
+
+## Tools Used
+
+| Tool        | Description                                                                |
+| ----------- | -------------------------------------------------------------------------- |
+| ping        | ICMP utility to verify host reachability                                   |
+| nmap        | Network port scanner and service fingerprinter                             |
+| Web browser | Manual web application exploration and parameter tampering                 |
+| Wireshark   | Network protocol analyzer for inspecting packet captures                   |
+| ssh         | Secure shell client for remote login                                       |
+| getcap      | Lists Linux file capabilities assigned to binaries                         |
+| python3     | Interactive Python interpreter, used here to abuse `cap_setuid` capability |
+
+## Reconnaissance & Enumeration
+
+The objective of this phase was to identify the attack surface exposed by the target and pick out anything that hinted at an entry point.
+
+### Host Discovery
+
+Before launching any scans, I confirmed the host was reachable and got a first hint about the operating system from the TTL value:
+
+```bash
+ping 10.129.25.130
+```
+
+```text
+64 bytes from 10.129.25.130: icmp_seq=1 ttl=63 time=49.6 ms
+```
+
+A TTL of 63 indicates a Linux host (default 64, decremented once by the routing hop). With the host alive, I moved on to a full TCP port sweep.
+
+### Port Scan
+
+To enumerate every open TCP port quickly, I ran a SYN scan across the full 65535 range with a high packet rate. `-Pn` was used to skip host discovery since ICMP already confirmed the host is up:
+
+```bash
+sudo nmap -p- --min-rate 5000 -sS -vvv -Pn -n 10.129.25.130 -oG allPorts
+```
+
+```text
+PORT   STATE SERVICE
+21/tcp open  ftp
+22/tcp open  ssh
+80/tcp open  http
+```
+
+Three services were exposed: FTP, SSH, and HTTP. A targeted scan with default scripts and version detection was launched against those three ports to gather more detail:
+
+```bash
+sudo nmap -p21,22,80 -sCV 10.129.25.130 -oN nmap
+```
+
+```text
+21/tcp open  ftp     vsftpd 3.0.3
+22/tcp open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.2
+80/tcp open  http    Gunicorn
+|_http-title: Security Dashboard
+```
+
+Two findings stood out:
+
+- **vsftpd 3.0.3** on FTP — anonymous access was worth checking, but the well-known `vsftpd 2.3.4` backdoor does not apply to this version.
+- **Gunicorn** on HTTP serving a page titled *Security Dashboard* — Gunicorn is a Python WSGI HTTP server, which suggests a custom Flask/Django application rather than a stock CMS. Custom apps are typically where logic flaws live, so the web service became the priority.
+
+### Web Application
+
+Browsing to `http://10.129.25.130/` loaded the *Security Dashboard* logged in as user **Nathan**, with several sidebar entries: *Security Snapshot (5 Second PCAP + Analysis)*, *Network Status*, and a *Dashboard* view. The Security Snapshot feature captures live network traffic for 5 seconds, runs a quick analysis (packet counts, IP/TCP/UDP breakdown), and offers a PCAP download.
+
+After triggering a new capture, the application redirected to `/data/1`:
+
+![/assets/img/HTB/Cap/page1.png](/assets/img/HTB/Cap/page1.png)
+
+
+The page rendered an empty snapshot (0 packets across all counters). The URL itself was the interesting part: `/data/1` looked like a sequential numeric identifier referencing a specific snapshot. If the application did not enforce ownership on that resource, decrementing the ID could expose someone else's capture — a textbook **IDOR (Insecure Direct Object Reference)**.
+
+I tampered with the URL directly, replacing the ID with `0`:
+
+```text
+http://10.129.25.130/data/0
+```
+
+![/assets/img/HTB/Cap/page2.png](/assets/img/HTB/Cap/page2.png)
+
+The response returned a populated snapshot: 72 packets, 69 of which were TCP. The application had no authorization check on the snapshot ID, confirming the IDOR and giving access to a capture that did not belong to the current session. I clicked **Download** to retrieve the PCAP for offline analysis.
+
+## Exploitation
+
+The vulnerability driving the foothold is the IDOR identified above: by walking the `/data/<id>` parameter, an unauthenticated (well, low-privileged) user can pull arbitrary historical PCAPs, including ones generated during privileged operations. PCAPs frequently contain plaintext credentials when cleartext protocols are involved, so the natural next step was to inspect what protocols this capture had recorded.
+
+I opened the downloaded file in Wireshark and applied the `ftp` display filter to isolate any cleartext FTP exchanges:
+
+![/assets/img/HTB/Cap/wireshark.png](/assets/img/HTB/Cap/wireshark.png)
+
+The capture had recorded an FTP login from `192.168.196.1` to `192.168.196.16`:
+
+```text
+36  Request:  USER nathan
+40  Request:  PASS Buck3tH4TF0RM3!
+42  Response: 230 Login successful.
+```
+
+FTP transmits credentials in plaintext, so the username and password were trivially readable. The credential `nathan:Buck3tH4TF0RM3!` was almost certainly reused for SSH given that Nathan is also the logged-in user on the dashboard.
+
+I tested the reuse against the SSH service:
+
+```bash
+ssh nathan@10.129.25.130
+
+Welcome to Ubuntu 20.04.2 LTS
+nathan@cap:~$
+```
+
+
+A shell as `nathan` was returned. The user flag was readable directly from the home directory:
+
+```bash
+cat user.txt
+```
+
+## Privilege Escalation
+
+With a shell as `nathan`, the goal was to escalate to root. The usual quick checks came back empty:
+
+- `sudo -l` — `nathan` had no sudo privileges.
+- SUID binary search — nothing unusual.
+
+The next standard check is **Linux capabilities**, a fine-grained alternative to the SUID bit that lets a binary hold specific kernel privileges without being fully setuid root. `getcap -r /` lists every capability-bearing binary on the system:
+
+```bash
+getcap / -r 2>/dev/null
+```
+
+```text
+/usr/bin/python3.8 = cap_setuid,cap_net_bind_service+eip
+/usr/bin/ping = cap_net_raw+ep
+/usr/bin/traceroute6.iputils = cap_net_raw+ep
+/usr/bin/mtr-packet = cap_net_raw+ep
+/usr/lib/x86_64-linux-gnu/gstreamer1.0/gstreamer-1.0/gst-ptp-helper = cap_net_bind_service,cap_net_admin+ep
+```
+
+The standout entry was `/usr/bin/python3.8` carrying **`cap_setuid+eip`**. This capability grants the binary the ability to call `setuid()` and change its effective UID to any value — including UID 0 (root) — without needing the SUID bit. Because the capability is on the Python interpreter itself, any Python code executed by that binary inherits the privilege, which makes exploitation trivial: invoke `os.setuid(0)` from an interactive session and then spawn a shell.
+
+```bash
+python3
+```
+
+```python
+import os
+os.setuid(0)
+os.system("/bin/bash")
+```
+
+```text
+root@cap:~#
+```
+
+The shell inherited UID 0 and the root flag was readable:
+
+```bash
+cat /root/root.txt
+```
+

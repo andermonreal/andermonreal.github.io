@@ -1,0 +1,16 @@
+title: Monre's Writeups
+tagline: Offensive security
+description: Writeups and technical notes
+url: "https://andermonreal.github.io"
+github:
+  username: andermonreal
+social:
+  name: Ander Monreal
+  email: andermonreal2003@gmail.com
+  links:
+    - https://github.com/andermonreal
+    - https://www.linkedin.com/in/ander-monreal-ayanz-485794291
+theme_mode: dark
+avatar: /assets/img/avatar.jpeg
+timezone: Europe/Madrid
+lang: es-ES
