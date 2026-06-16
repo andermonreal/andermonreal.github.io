@@ -1,0 +1,20 @@
+---
+---
+
+/* prettier-ignore */
+@use 'main
+{%- if jekyll.environment == 'production' -%}
+  .bundle
+{%- endif -%}
+';
+
+/* append your custom style below */
+
+/* Shrink and center the post banner (front-matter preview image).
+   Only affects the image inside a post (<article>), not the home-page
+   thumbnails (#post-list). Tweak max-width to taste. */
+article .preview-img {
+  max-width: 500px;
+  margin-inline: auto;
+  display: block;
+}
