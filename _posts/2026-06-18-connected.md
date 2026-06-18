@@ -85,8 +85,6 @@ echo "10.129.27.223 connected.htb" | sudo tee -a /etc/hosts
 
 Browsing to `http://connected.htb/` loaded the FreePBX administration interface. The footer disclosed the exact version:
 
-![FreePBX 16.0.40.7 admin panel](images/freepbx_panel.png)
-
 ```text
 FreePBX 16.0.40.7
 ```
