@@ -74,11 +74,7 @@ Three details stood out immediately. The web server is **Jetty** (Java), the app
 
 ### Web Application
 
-Browsing to `http://10.129.27.127:8080/` redirected to `/login` and displayed a login form with the footer disclosure:
-
-```text
-v1.2.0 | Powered by pac4j
-```
+Browsing to `http://10.129.27.127:8080/` redirected to `/login`.
 
 pac4j-jwt 6.0.3 is affected by **CVE-2026-29000**, a pre-authentication flaw in how the library handles nested JWT-in-JWE constructions. Before crafting an exploit it was worth understanding how the application uses the framework, so I inspected the client-side bundle at `/static/app.js`. The relevant block was a developer comment documenting the entire token scheme:
 
