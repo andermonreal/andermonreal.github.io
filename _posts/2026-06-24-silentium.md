@@ -2,7 +2,7 @@
 title: "Silentium"
 date: 2026-06-24
 categories: [HackTheBox, Easy]
-tags: [linux, fuzzing, flowise, CVE, docker escape, scripting, gogs, symlink, sudoers]
+tags: [linux, fuzzing, flowise, CVE, docker escape, scripting, tunnel, gogs, symlink, sudoers]
 image:
   path: /assets/img/HTB/Silentium/banner.png
   alt: Silentium writeup
@@ -23,11 +23,10 @@ Three chained CVEs and a credential-reuse container escape. Flowise 3.0.5 expose
 
 | Tool                       | Description                                                                                  |
 |----------------------------|----------------------------------------------------------------------------------------------|
-| ping                       | ICMP utility to verify host reachability                                                     |
 | nmap                       | Network port scanner and service fingerprinter                                               |
 | gobuster (dns mode)        | DNS subdomain brute-forcing against the `silentium.htb` zone                                 |
 | Browser DevTools           | Network tab analysis to discover API endpoints and error-message-based oracles               |
-| Python 3 (requests)        | Custom user-enumeration script and Gogs exploit                                              |
+| Python3                    | Custom user-enumeration script and Gogs exploit                                              |
 | curl                       | Manual exploitation of the Flowise CustomMCP RCE endpoint                                    |
 | netcat (nc)                | Reverse-shell listener                                                                       |
 | ssh (-L)                   | Local port forward to reach the internal Gogs instance on the host                           |
