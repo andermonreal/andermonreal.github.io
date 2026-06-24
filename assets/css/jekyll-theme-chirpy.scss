@@ -234,3 +234,19 @@ article .preview-img {
 #page-tag ul > li {
   padding: 0.75rem 0;
 }
+
+/* -------------------------------------------------------------------------
+   4. Sidebar — Hack The Box icon.
+   Font Awesome has no HTB logo, so we render the official SVG as a CSS mask
+   filled with `currentColor`. That way it inherits the same colour and hover
+   behaviour as the other sidebar contact icons.
+   ------------------------------------------------------------------------- */
+.htb-icon {
+  display: inline-block;
+  width: 1.1rem;
+  height: 1.1rem;
+  line-height: 1; /* override the theme's line-height on sidebar <i> */
+  background-color: currentColor;
+  -webkit-mask: url("/assets/img/hackthebox.svg") center / contain no-repeat;
+  mask: url("/assets/img/hackthebox.svg") center / contain no-repeat;
+}

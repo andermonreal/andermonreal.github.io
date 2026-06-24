@@ -16,9 +16,15 @@
   url: "mailto:andermonreal2003@gmail.com"
   noblank: true # open link in current tab
 
-- type: rss
-  icon: "fas fa-rss"
-  noblank: true
+# Hack The Box profile. Font Awesome has no HTB logo, so `htb-icon` is a
+# custom class styled in assets/css/jekyll-theme-chirpy.scss using the official
+# SVG as a CSS mask (so it inherits the sidebar icon colour + hover).
+# `type` doubles as the link's aria-label in the theme, so we use a readable
+# label here. It falls through to the generic handler (not a built-in type),
+# rendering a normal anchor with our custom `htb-icon`.
+- type: Hack The Box
+  icon: "htb-icon"
+  url: "https://app.hackthebox.com/users/1723818"
 # Uncomment and complete the url below to enable more contact options
 #
 # - type: mastodon
