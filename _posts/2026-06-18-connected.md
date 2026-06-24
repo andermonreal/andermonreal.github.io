@@ -2,7 +2,7 @@
 title: "Connected"
 date: 2026-06-18
 categories: [HackTheBox, Easy]
-tags: [linux, FreePBX, SQLi, RCE, file upload, incron, CVE]
+tags: [linux, FreePBX, SQLi, file upload, incron, CVE]
 image:
   path: /assets/img/HTB/Connected/banner.png
   alt: Connected writeup
