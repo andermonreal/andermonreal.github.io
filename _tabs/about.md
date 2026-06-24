@@ -23,5 +23,6 @@ performed in authorized lab environments.
 
 ## Find me
 
+- Email: [andermonreal2003@gmail.com](mailto:andermonreal2003@gmail.com)
 - GitHub: [@andermonreal](https://github.com/andermonreal)
 - LinkedIn: [Ander Monreal Ayanz](https://www.linkedin.com/in/ander-monreal-ayanz-485794291)

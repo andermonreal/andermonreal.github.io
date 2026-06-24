@@ -7,8 +7,13 @@
   icon: "fab fa-linkedin"
   url: "https://www.linkedin.com/in/ander-monreal-ayanz-485794291"
 
-- type: email
+# Plain, reliable mailto link. We use the type `mail` (not `email`) on purpose:
+# the theme's built-in `email` handler wraps the address in a `javascript:` URL
+# that many browsers/OSes silently ignore. The `mail` type falls through to the
+# generic handler and renders a normal `mailto:` anchor instead.
+- type: mail
   icon: "fas fa-envelope"
+  url: "mailto:andermonreal2003@gmail.com"
   noblank: true # open link in current tab
 
 - type: rss

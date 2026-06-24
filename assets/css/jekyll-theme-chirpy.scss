@@ -18,3 +18,219 @@ article .preview-img {
   margin-inline: auto;
   display: block;
 }
+
+/* =========================================================================
+   Custom theme tweaks — minimalist, accessible, light/dark aware.
+   Everything below uses the theme's CSS custom properties (var(--...)) so it
+   adapts automatically to both colour schemes.
+   ========================================================================= */
+
+/* Shared, visible keyboard-focus ring for the elements we restyle below.
+   Keeps the redesign accessible for keyboard / screen-reader users. */
+#post-list .post-preview:focus-visible,
+#tags .tag:focus-visible,
+.categories a:focus-visible {
+  outline: 2px solid var(--link-color);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+/* -------------------------------------------------------------------------
+   1. Home — the list of machines / writeups.
+   Give each card more breathing room and a gentle, tactile hover lift so the
+   list no longer feels cramped.
+   ------------------------------------------------------------------------- */
+#post-list {
+  .card-wrapper:not(:last-child) {
+    margin-bottom: 1.75rem; /* was 1.25rem — more separation between cards */
+  }
+
+  .post-preview {
+    border: 1px solid var(--main-border-color);
+    border-radius: 12px;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  /* Lift the card on hover / keyboard focus. */
+  .card-wrapper:hover .post-preview,
+  .post-preview:focus-visible {
+    transform: translateY(-4px);
+    border-color: var(--link-color);
+    box-shadow:
+      0 10px 24px -8px rgb(0 0 0 / 35%),
+      0 4px 8px -6px rgb(0 0 0 / 25%);
+  }
+
+  .card-body {
+    padding: 1.25rem 1.35rem;
+
+    @media (min-width: 768px) {
+      padding: 1.6rem 1.75rem;
+    }
+
+    .card-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin-bottom: 0.5rem !important;
+    }
+
+    /* Colour-coded difficulty pill (Easy / Medium / Hard / Insane).
+       Solid backgrounds + white text keep AA contrast on both the light
+       (white) and dark card surfaces. */
+    .difficulty-badge {
+      align-self: flex-start; /* don't stretch across the flex column */
+      margin-bottom: 0.6rem;
+      padding: 0.18rem 0.7rem;
+      border-radius: 2rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #fff;
+      line-height: 1.4;
+    }
+
+    .difficulty-easy {
+      background: #2e7d32;
+    }
+    .difficulty-medium {
+      background: #b45309;
+    }
+    .difficulty-hard {
+      background: #c62828;
+    }
+    .difficulty-insane {
+      background: #6a1b9a;
+    }
+
+    .card-text.content p {
+      line-height: 1.6;
+    }
+
+    /* Date + categories row: a touch more space above it. */
+    .post-meta {
+      margin-top: 0.35rem;
+      font-size: 0.82rem;
+    }
+  }
+}
+
+/* -------------------------------------------------------------------------
+   2. Tags page — live filter box + clean, evenly-spaced pill chips.
+   ------------------------------------------------------------------------- */
+
+/* Search / filter input above the tag cloud. */
+#tag-search {
+  position: relative;
+  max-width: 420px;
+
+  i {
+    position: absolute;
+    top: 50%;
+    left: 0.9rem;
+    transform: translateY(-50%);
+    color: var(--search-icon-color);
+    pointer-events: none;
+    font-size: 0.9rem;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.55rem 0.9rem 0.55rem 2.4rem;
+    color: var(--text-color);
+    background: var(--card-bg);
+    border: 1px solid var(--search-border-color);
+    border-radius: 2rem;
+    outline: none;
+    transition:
+      border-color 0.18s ease,
+      box-shadow 0.18s ease;
+
+    &::placeholder {
+      color: var(--text-muted-color);
+    }
+
+    &:focus {
+      border-color: var(--input-focus-border-color);
+      box-shadow: 0 0 0 3px rgb(138 180 248 / 25%); /* accent glow */
+    }
+  }
+}
+
+#tags {
+  gap: 0.7rem 0.6rem; /* row-gap column-gap, instead of margins + line-height */
+  padding-block: 0.5rem;
+
+  .tag {
+    display: inline-flex;
+    align-items: baseline;
+    line-height: 1.4; /* override theme's 3rem */
+    margin: 0; /* spacing handled by the flex gap above */
+    padding: 0.4rem 0.85rem;
+    border-radius: 2rem;
+    font-size: 0.9rem;
+    background: var(--card-bg);
+    border: 1px solid var(--tag-border) !important;
+    box-shadow: none; /* drop the dated drop-shadow */
+    transition:
+      background-color 0.18s ease,
+      border-color 0.18s ease,
+      transform 0.18s ease;
+
+    &:hover {
+      background: var(--tag-hover);
+      border-color: var(--link-color) !important;
+      transform: translateY(-2px);
+      text-decoration: none;
+    }
+
+    /* The post-count badge sitting next to the tag name. */
+    span {
+      margin-left: 0.5em;
+      font-size: 0.72em;
+      color: var(--text-muted-color);
+    }
+  }
+}
+
+/* -------------------------------------------------------------------------
+   3. Categories page — softer cards with clearer rows.
+   ------------------------------------------------------------------------- */
+.categories {
+  border: 1px solid var(--categories-border);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden; /* keep child rows inside the rounded corners */
+
+  .card-header {
+    padding: 0.9rem 1.1rem;
+
+    a {
+      font-weight: 600;
+    }
+  }
+
+  /* Accent the folder icons just a little — restrained, not loud. */
+  i {
+    color: var(--link-color);
+  }
+
+  .list-group-item {
+    padding: 0.7rem 1.1rem 0.7rem 2.2rem;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: var(--categories-hover-bg);
+    }
+  }
+}
+
+/* Per-category / per-tag listing pages: a bit more line spacing. */
+#page-category ul > li,
+#page-tag ul > li {
+  padding: 0.75rem 0;
+}
