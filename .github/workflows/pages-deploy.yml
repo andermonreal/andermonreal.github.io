@@ -90,27 +90,43 @@ jobs:
 
           npm install -g staticrypt@3
 
-          mapfile -t urls < <(jq -r '.[]' "$MANIFEST")
-          for url in "${urls[@]}"; do
+          TEMPLATE="tools/staticrypt-template.html"
+
+          # Each manifest entry is a JSON object {url, title, image}.
+          mapfile -t rows < <(jq -c '.[]' "$MANIFEST")
+          for row in "${rows[@]}"; do
+            url=$(jq -r '.url' <<<"$row")
+            title=$(jq -r '.title' <<<"$row")
+            image=$(jq -r '.image' <<<"$row")
+            [ -z "$image" ] || [ "$image" = "null" ] && image="/assets/img/avatar.jpeg"
+
             f="${SITE}${url}index.html"
             if [ ! -f "$f" ]; then
               echo "::warning::Protected page not found, skipping: $f"
               continue
             fi
-            tmp="$(mktemp -d)"
+
+            # Build a per-post password page by injecting the banner image into
+            # the site-themed StatiCrypt template.
+            tpl="$(mktemp)"
+            sed "s|%%POST_IMAGE%%|${image}|g" "$TEMPLATE" > "$tpl"
+
+            out="$(mktemp -d)"
             # `--short` skips StatiCrypt's interactive "short password" prompt
-            # (which would hang in CI). `< /dev/null` is a belt-and-braces
-            # guard against any other prompt blocking on stdin.
+            # (which would hang in CI). `< /dev/null` guards against any other
+            # prompt blocking on stdin.
             ( cd "$(dirname "$f")" && staticrypt index.html \
                 --password "$STATICRYPT_PASSWORD" \
                 --config false \
                 --short \
-                --template-title "Protected writeup" \
-                --template-instructions "This writeup is password-protected. Enter the password to read it." \
-                --directory "$tmp" < /dev/null )
-            mv "$tmp/index.html" "$f"
-            rm -rf "$tmp"
-            echo "Encrypted: $f"
+                --template "$tpl" \
+                --template-title "$title" \
+                --template-instructions "This writeup is password-protected. Enter the password to read the full content." \
+                --template-button "Unlock" \
+                --directory "$out" < /dev/null )
+            mv "$out/index.html" "$f"
+            rm -rf "$out" "$tpl"
+            echo "Encrypted: $f  (title: $title)"
           done
 
           # Don't ship the manifest listing which posts are protected.
