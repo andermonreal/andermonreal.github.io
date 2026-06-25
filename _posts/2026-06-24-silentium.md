@@ -6,6 +6,7 @@ tags: [linux, fuzzing, flowise, CVE, docker escape, scripting, tunnel, gogs, sym
 image:
   path: /assets/img/HTB/Silentium/banner.png
   alt: Silentium writeup
+protected: true
 ---
 
 

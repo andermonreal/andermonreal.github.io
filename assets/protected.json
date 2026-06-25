@@ -1,0 +1,8 @@
+---
+permalink: /assets/protected.json
+# Build-time manifest of password-protected posts, consumed by the
+# "Encrypt protected posts" step in the GitHub Actions workflow, which then
+# deletes this file before deploy. Lists the site-relative URL of each post
+# whose front matter has `protected: true`.
+---
+[{% assign prot = site.posts | where_exp: 'post', 'post.protected' %}{% for post in prot %}{{ post.url | jsonify }}{% unless forloop.last %},{% endunless %}{% endfor %}]

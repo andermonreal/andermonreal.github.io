@@ -6,6 +6,7 @@ tags: [linux, FreePBX, SQLi, file upload, incron, CVE]
 image:
   path: /assets/img/HTB/Connected/banner.png
   alt: Connected writeup
+protected: true
 ---
 
 

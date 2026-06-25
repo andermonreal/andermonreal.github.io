@@ -107,16 +107,30 @@ layout: default
 
         <div class="col-md-{{ card_body_col }}">
           <div class="card-body d-flex flex-column">
-            {% if post_difficulty != '' %}
-              <span class="difficulty-badge difficulty-{{ post_difficulty | downcase }}">
-                {{ post_difficulty }}
-              </span>
+            {% if post_difficulty != '' or post.protected %}
+              <div class="card-badges">
+                {% if post_difficulty != '' %}
+                  <span class="difficulty-badge difficulty-{{ post_difficulty | downcase }}">
+                    {{ post_difficulty }}
+                  </span>
+                {% endif %}
+                {% if post.protected %}
+                  <span class="protected-badge"><i class="fas fa-lock" aria-hidden="true"></i> Protected</span>
+                {% endif %}
+              </div>
             {% endif %}
 
             <h1 class="card-title my-2 mt-md-0">{{ post.title }}</h1>
 
             <div class="card-text content mt-0 mb-3">
-              <p>{% include post-summary.html %}</p>
+              {% if post.protected %}
+                <p class="protected-note">
+                  <i class="fas fa-lock fa-fw" aria-hidden="true"></i>
+                  This writeup is password-protected — open it and enter the password to read the full content.
+                </p>
+              {% else %}
+                <p>{% include post-summary.html %}</p>
+              {% endif %}
             </div>
 
             <div class="post-meta flex-grow-1 d-flex align-items-end">

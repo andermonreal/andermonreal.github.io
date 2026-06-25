@@ -45,6 +45,11 @@ jobs:
           ruby-version: 3.4
           bundler-cache: true
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       - name: Build site
         run: bundle exec jekyll b -d "_site${{ steps.pages.outputs.base_path }}"
         env:
@@ -55,6 +60,57 @@ jobs:
           bundle exec htmlproofer _site \
             \-\-disable-external \
             \-\-ignore-urls "/^http:\/\/127.0.0.1/,/^http:\/\/0.0.0.0/,/^http:\/\/localhost/"
+
+      # Encrypt password-protected posts (front-matter `protected: true`) with
+      # StatiCrypt AFTER htmlproofer and BEFORE upload, so the deployed pages
+      # are real AES-encrypted HTML. The shared password lives in the
+      # STATICRYPT_PASSWORD repository secret (Settings → Secrets and variables
+      # → Actions). The list of pages to encrypt is read from the build-time
+      # manifest /assets/protected.json, which is deleted before deploy.
+      - name: Encrypt protected posts
+        env:
+          STATICRYPT_PASSWORD: ${{ secrets.STATICRYPT_PASSWORD }}
+        run: |
+          set -euo pipefail
+          SITE="_site${{ steps.pages.outputs.base_path }}"
+          MANIFEST="$SITE/assets/protected.json"
+
+          # Nothing flagged as protected → nothing to do.
+          if [ ! -f "$MANIFEST" ] || [ "$(jq 'length' "$MANIFEST")" -eq 0 ]; then
+            echo "No protected posts found. Skipping encryption."
+            rm -f "$MANIFEST"
+            exit 0
+          fi
+
+          # Fail loudly rather than publish protected posts in clear text.
+          if [ -z "${STATICRYPT_PASSWORD:-}" ]; then
+            echo "::error::Protected posts found but the STATICRYPT_PASSWORD secret is not set. Aborting to avoid publishing them unencrypted."
+            exit 1
+          fi
+
+          npm install -g staticrypt@3
+
+          mapfile -t urls < <(jq -r '.[]' "$MANIFEST")
+          for url in "${urls[@]}"; do
+            f="${SITE}${url}index.html"
+            if [ ! -f "$f" ]; then
+              echo "::warning::Protected page not found, skipping: $f"
+              continue
+            fi
+            tmp="$(mktemp -d)"
+            ( cd "$(dirname "$f")" && staticrypt index.html \
+                --password "$STATICRYPT_PASSWORD" \
+                --config false \
+                --template-title "Protected writeup" \
+                --template-instructions "This writeup is password-protected. Enter the password to read it." \
+                --directory "$tmp" )
+            mv "$tmp/index.html" "$f"
+            rm -rf "$tmp"
+            echo "Encrypted: $f"
+          done
+
+          # Don't ship the manifest listing which posts are protected.
+          rm -f "$MANIFEST"
 
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v4
