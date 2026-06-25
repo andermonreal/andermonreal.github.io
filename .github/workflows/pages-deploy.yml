@@ -98,12 +98,16 @@ jobs:
               continue
             fi
             tmp="$(mktemp -d)"
+            # `--short` skips StatiCrypt's interactive "short password" prompt
+            # (which would hang in CI). `< /dev/null` is a belt-and-braces
+            # guard against any other prompt blocking on stdin.
             ( cd "$(dirname "$f")" && staticrypt index.html \
                 --password "$STATICRYPT_PASSWORD" \
                 --config false \
+                --short \
                 --template-title "Protected writeup" \
                 --template-instructions "This writeup is password-protected. Enter the password to read it." \
-                --directory "$tmp" )
+                --directory "$tmp" < /dev/null )
             mv "$tmp/index.html" "$f"
             rm -rf "$tmp"
             echo "Encrypted: $f"
