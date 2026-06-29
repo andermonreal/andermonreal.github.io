@@ -2,7 +2,7 @@
 title: "CozyHosting"
 date: 2024-01-22
 categories: [HackTheBox, Easy]
-tags: [linux, spring-boot, CVE, command injection, postgresql, john the ripper]
+tags: [linux, spring-boot, command injection, postgresql, john the ripper]
 image:
   path: /assets/img/HTB/CozyHosting/banner.png
   alt: CozyHosting writeup

@@ -2,7 +2,7 @@
 title: "TwoMillion"
 date: 2026-06-27
 categories: [HackTheBox, Easy]
-tags: [linux, nginx, javascript deobfuscation, dean edwards packer, rot13, base64, API enumeration, mass assignment, command injection, credential reuse, CVE-2023-0386, OverlayFS, FUSE, kernel exploit]
+tags: [linux, nginx, javascript deobfuscation, dean edwards packer, rot13, base64, API enumeration, mass assignment, command injection, credential reuse, CVE, CVE-2023-0386, OverlayFS, FUSE, kernel exploit]
 image:
   path: /assets/img/HTB/TwoMillion/banner.png
   alt: TwoMillion writeup

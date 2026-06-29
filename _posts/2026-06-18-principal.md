@@ -2,7 +2,7 @@
 title: "Principal"
 date: 2026-06-18
 categories: [HackTheBox, Medium]
-tags: [linux, ssh, JWT, scripting, CA private key]
+tags: [linux, ssh, JWT, scripting, CA private key, CVE, CVE-2026-29000]
 image:
   path: /assets/img/HTB/Principal/banner.png
   alt: Principal writeup
