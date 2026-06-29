@@ -41,13 +41,28 @@ article .preview-img {
    list no longer feels cramped.
    ------------------------------------------------------------------------- */
 #post-list {
-  .card-wrapper:not(:last-child) {
-    margin-bottom: 1.75rem; /* was 1.25rem — more separation between cards */
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.75rem;
+  }
+
+  /* Each card fills its grid cell and stacks its contents vertically. */
+  .card-wrapper {
+    margin: 0;
+    height: 100%;
   }
 
   .post-preview {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden; /* clip the banner to the rounded corners */
     border: 1px solid var(--main-border-color);
-    border-radius: 12px;
+    border-radius: 14px;
     transition:
       transform 0.2s ease,
       box-shadow 0.2s ease,
@@ -64,87 +79,122 @@ article .preview-img {
       0 4px 8px -6px rgb(0 0 0 / 25%);
   }
 
-  .card-body {
-    padding: 1.25rem 1.35rem;
+  /* Banner image sitting on top of the card. */
+  .card-img-wrap {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--img-bg);
 
-    @media (min-width: 768px) {
-      padding: 1.6rem 1.75rem;
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
     }
+  }
+
+  .card-wrapper:hover .card-img-wrap img {
+    transform: scale(1.04);
+  }
+
+  /* Difficulty + protected badges, overlaid on the banner (top-left). */
+  .card-badges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    position: absolute;
+    top: 0.65rem;
+    left: 0.65rem;
+    z-index: 1;
+  }
+
+  /* Fallback: a card without a banner shows its badges in the body instead. */
+  .card-body .card-badges {
+    position: static;
+    margin-bottom: 0.6rem;
+  }
+
+  /* Colour-coded difficulty pill (Easy / Medium / Hard / Insane). */
+  .difficulty-badge {
+    padding: 0.2rem 0.7rem;
+    border-radius: 2rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #fff;
+    line-height: 1.4;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 35%);
+  }
+
+  /* "Protected" pill for password-locked writeups (legible over any banner). */
+  .protected-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    padding: 0.2rem 0.6rem;
+    border-radius: 2rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1.4;
+    color: #fff;
+    background: rgb(20 20 20 / 72%);
+    backdrop-filter: blur(2px);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 35%);
+  }
+
+  .difficulty-easy {
+    background: #2e7d32;
+  }
+  .difficulty-medium {
+    background: #b45309;
+  }
+  .difficulty-hard {
+    background: #c62828;
+  }
+  .difficulty-insane {
+    background: #6a1b9a;
+  }
+
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    padding: 1.1rem 1.2rem 1.2rem;
 
     .card-title {
-      font-size: 1.35rem;
+      font-size: 1.2rem;
       font-weight: 700;
       letter-spacing: -0.01em;
-      margin-bottom: 0.5rem !important;
+      margin: 0 0 0.5rem !important;
     }
 
-    /* Row holding the difficulty + protected badges at the top of a card. */
-    .card-badges {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.6rem;
+    .card-text.content {
+      margin-bottom: 0.9rem;
+
+      p {
+        line-height: 1.55;
+        /* Clamp the excerpt to 3 lines so cards keep an even height. */
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
     }
 
-    /* Colour-coded difficulty pill (Easy / Medium / Hard / Insane).
-       Solid backgrounds + white text keep AA contrast on both the light
-       (white) and dark card surfaces. */
-    .difficulty-badge {
-      padding: 0.18rem 0.7rem;
-      border-radius: 2rem;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      color: #fff;
-      line-height: 1.4;
-    }
-
-    /* Subtle "Protected" pill for password-locked writeups. */
-    .protected-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35em;
-      padding: 0.18rem 0.65rem;
-      border-radius: 2rem;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      line-height: 1.4;
-      color: var(--text-muted-color);
-      background: var(--card-bg);
-      border: 1px solid var(--main-border-color);
-    }
-
-    /* Lock notice shown instead of the excerpt on protected cards. */
     .protected-note {
-      margin: 0;
       font-style: italic;
     }
 
-    .difficulty-easy {
-      background: #2e7d32;
-    }
-    .difficulty-medium {
-      background: #b45309;
-    }
-    .difficulty-hard {
-      background: #c62828;
-    }
-    .difficulty-insane {
-      background: #6a1b9a;
-    }
-
-    .card-text.content p {
-      line-height: 1.6;
-    }
-
-    /* Date + categories row: a touch more space above it. */
+    /* Pin meta to the bottom so cards with shorter text still align. */
     .post-meta {
-      margin-top: 0.35rem;
-      font-size: 0.82rem;
+      margin-top: auto;
+      font-size: 0.8rem;
     }
   }
 }
@@ -279,4 +329,161 @@ article .preview-img {
   background-color: currentColor;
   -webkit-mask: url("/assets/img/hackthebox.svg") center / contain no-repeat;
   mask: url("/assets/img/hackthebox.svg") center / contain no-repeat;
+}
+
+/* =========================================================================
+   5. Beige light theme.
+   The theme ships a plain white light scheme. We repaint it as a warm beige
+   by overriding the CSS custom properties, mirroring the exact selectors the
+   theme uses to apply light mode (see _sass/base/_base.scss):
+
+     - html[data-mode='light']            → user explicitly toggled light
+     - html:not([data-mode]) @ light OS   → no choice yet, OS prefers light
+
+   Because these rules are emitted after the theme's `@use 'main'`, they win on
+   equal specificity. Dark mode is left untouched.
+   ========================================================================= */
+@mixin beige-light {
+  /* Framework / surfaces — page < card < sidebar, all warm */
+  --main-bg: #f6efe0;
+  --card-bg: #fdf8ee;
+  --sidebar-bg: #ece2cf;
+  --topbar-bg: rgb(246 239 224 / 80%);
+  --mask-bg: #d8cdb5;
+  --main-border-color: #e6dcc6;
+  --card-hover-bg: #f0e8d6;
+  --card-shadow: rgb(120 100 60 / 8%) 0 2px 6px 0, rgb(180 165 130 / 18%) 0 0 0 1px;
+  --img-bg: radial-gradient(circle, rgb(253 248 238) 0%, rgb(239 230 211) 100%);
+
+  /* Text */
+  --text-color: #3b352a;
+  --text-muted-color: #7c7363;
+  --heading-color: #2c2820;
+  --label-color: #5d5648;
+  --blockquote-border-color: #e3d8c1;
+  --blockquote-text-color: #7c7363;
+  --link-color: #0056b2; /* keep a clear, AA-accessible link blue on beige */
+
+  /* Buttons / inputs */
+  --button-bg: #fdf8ee;
+  --btn-border-color: #e0d5bf;
+  --btn-backtotop-color: #6b6253;
+  --btn-backtotop-border-color: #e6dcc6;
+  --search-border-color: #e0d5bf;
+  --search-icon-color: #b8ab90;
+  --input-focus-border-color: #c5b48f;
+
+  /* Sidebar */
+  --site-title-color: rgb(90 80 62);
+  --site-subtitle-color: #74695a;
+  --sidebar-border-color: #e2d8c4;
+  --sidebar-muted-color: #5d5547;
+  --sidebar-active-color: #2a2419;
+  --sidebar-hover-bg: rgb(208 193 165 / 45%);
+  --sidebar-btn-bg: #f3ecdc;
+  --sidebar-btn-color: #8a7f6b;
+  --avatar-border-color: #fbf6ec;
+
+  /* Home / paginator */
+  --post-list-text-color: #6b6253;
+  --btn-patinator-text-color: #5d5547;
+
+  /* Tags */
+  --tag-border: #dccfb4;
+  --tag-shadow: #e0d5bf;
+  --tag-hover: rgb(220 207 180 / 60%);
+  --search-tag-bg: #efe7d6;
+
+  /* Categories */
+  --categories-border: rgb(70 55 30 / 14%);
+  --categories-hover-bg: #efe6d4;
+
+  /* Tables / misc */
+  --tb-odd-bg: #faf4e8;
+  --tb-border-color: #e6dcc6;
+
+  /* Code — warm the neutral grey blocks so they sit on the beige */
+  --language-border-color: #e6dcc6;
+  --highlight-bg-color: #f3ecda;
+  --highlighter-rouge-color: #3f596f;
+  --inline-code-bg: rgb(60 50 25 / 6%);
+  --code-color: #3a3a3a;
+  --code-header-muted-color: #e3d8c2;
+  --code-header-icon-color: #c4b9a1;
+
+  /* The light syntax theme hard-codes the block background; warm it to match. */
+  .highlight,
+  .highlight .w,
+  .highlight .gr {
+    background-color: #f3ecda;
+  }
+}
+
+html[data-mode="light"] {
+  @include beige-light;
+}
+
+@media (prefers-color-scheme: light) {
+  html:not([data-mode]) {
+    @include beige-light;
+  }
+}
+
+/* =========================================================================
+   6. Language switcher — a compact segmented "pill" toggle on its own row at
+   the bottom of the sidebar, above the social icons. Rendered by the
+   sidebar.html override only when jekyll-polyglot exposes >1 language.
+   ========================================================================= */
+
+/* Give the switch a full row of its own so the social icons wrap underneath
+   instead of being crammed onto the same line. */
+#sidebar .sidebar-bottom .lang-switch-wrap {
+  flex: 0 0 100%;
+  margin-bottom: 1.1rem;
+}
+
+#sidebar .sidebar-bottom .lang-switch {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--sidebar-btn-bg);
+  box-shadow: var(--sidebar-border-color) 0 0 0 1px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1;
+
+  /* Each segment. Reset the theme's round-icon-button styling that otherwise
+     applies to <a> inside .sidebar-bottom (width/height/margin/shadow/radius). */
+  .lang-opt {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    height: auto;
+    min-width: 2.3rem;
+    margin: 0;
+    padding: 0.28rem 0.6rem;
+    border-radius: 999px;
+    background: transparent;
+    box-shadow: none;
+    color: var(--sidebar-muted-color);
+    text-decoration: none;
+    transition:
+      background-color 0.18s ease,
+      color 0.18s ease;
+
+    &:hover {
+      color: var(--sidebar-active-color);
+      background: var(--sidebar-hover-bg);
+    }
+
+    /* The current language: a clearly filled accent segment. */
+    &.active {
+      color: #fff;
+      background: var(--link-color);
+    }
+  }
 }

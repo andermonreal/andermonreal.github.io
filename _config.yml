@@ -8,6 +8,18 @@ theme: jekyll-theme-chirpy
 # otherwise, the layout language will use the default value of 'en'.
 lang: en
 
+# ---- Multi-language (jekyll-polyglot) -------------------------------------
+# English is the default and lives at the site root (/...). Spanish lives under
+# /es/... A page/post is assigned to a language with `lang:` in its front
+# matter; pages without `lang:` are served in every language (untranslated ones
+# fall back to the English content). `assets` is excluded so CSS/JS/images and
+# the protected-posts manifest are emitted once at their normal paths.
+languages: ["en", "es"]
+default_lang: "en"
+exclude_from_localization: ["assets", "tools", "404.html"]
+parallel_localization: false
+# ---------------------------------------------------------------------------
+
 # Change to your timezone › https://zones.arilyn.cc
 timezone: Europe/Madrid
 
@@ -59,7 +71,11 @@ analytics:
   google:
     id: # fill in your Google Analytics ID
   goatcounter:
-    id: # fill in your GoatCounter ID
+    # GoatCounter code only (not the full URL). Dashboard: https://monre.goatcounter.com
+    # Needs (in GoatCounter → Settings): tick "Allow adding visitor counts on
+    # your website" for the per-writeup counters, and set "Dashboard viewable
+    # by → Everyone" if you want the public Stats tab link to be usable.
+    id: monre
   umami:
     id: # fill in your Umami ID
     domain: # fill in your Umami domain
@@ -71,7 +87,11 @@ analytics:
   fathom:
     id: # fill in your Fathom Site ID
 
-# Page views settings
+# Page views settings — left empty on purpose: stats are PRIVATE (owner-only),
+# so we don't show a public per-writeup view counter. Visits are still tracked
+# by the GoatCounter tracker above and viewable only in the logged-in dashboard
+# at https://monre.goatcounter.com. (Would need GoatCounter's "Allow adding
+# visitor counts on your website" enabled to display public counters.)
 pageviews:
   provider: # now only supports 'goatcounter'
 
@@ -86,7 +106,11 @@ pageviews:
 #     light — Use the light color scheme
 #     dark — Use the dark color scheme
 #
-theme_mode: dark # [light | dark]
+# Left empty so the sidebar shows the light/dark toggle button. The default
+# follows the visitor's OS preference (dark OS → dark, light OS → beige) and
+# the toggle switches cleanly between the dark scheme and the custom beige
+# light scheme (see assets/css/jekyll-theme-chirpy.scss).
+theme_mode: # [light | dark]
 
 # The CDN endpoint for media resources.
 # Notice that once it is assigned, the CDN url

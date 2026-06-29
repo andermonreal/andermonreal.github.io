@@ -1,0 +1,26 @@
+{% comment %}
+  Project override of the theme's `lang.html`.
+
+  Detect the UI language and return it through the variable `lang`, but make it
+  follow jekyll-polyglot's active language when polyglot is installed. When it
+  is NOT (e.g. a plain local build), `site.active_lang` is nil and we fall back
+  to the original behaviour, so the site keeps building normally.
+
+  Polyglot uses short codes ("es") for nice URLs (/es/...), while Chirpy ships
+  its Spanish locale file as `es-ES.yml`. We map "es" -> "es-ES" here so the
+  locale lookup resolves without having to duplicate the locale data file.
+{% endcomment %}
+
+{% assign _l = page.lang | default: site.active_lang | default: site.lang %}
+
+{% if _l == 'es' %}
+  {% assign _l = 'es-ES' %}
+{% endif %}
+
+{% if site.data.locales[_l] %}
+  {% assign lang = _l %}
+{% elsif site.data.locales[site.lang] %}
+  {% assign lang = site.lang %}
+{% else %}
+  {% assign lang = 'en' %}
+{% endif %}

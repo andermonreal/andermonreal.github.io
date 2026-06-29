@@ -5,5 +5,15 @@ permalink: /assets/protected.json
 # deletes this file before deploy. For each post with `protected: true` it
 # lists the site-relative URL, the title and the banner image, so the workflow
 # can build a per-post StatiCrypt password page.
+#
+# i18n note: when jekyll-polyglot is enabled, every protected post is ALSO
+# served as an untranslated fallback under each non-default language (e.g.
+# /es/posts/foo/). Those fallback pages contain the same clear-text content, so
+# we must emit an entry for EVERY language to make sure StatiCrypt encrypts all
+# of them — otherwise the password protection could be bypassed via the /es/
+# URL. With polyglot absent, `site.languages` is nil and this collapses to the
+# original single-URL behaviour.
 ---
-[{% assign prot = site.posts | where_exp: 'post', 'post.protected' %}{% for post in prot %}{"url":{{ post.url | jsonify }},"title":{{ post.title | jsonify }},"image":{{ post.image.path | default: post.image | default: '' | jsonify }}}{% unless forloop.last %},{% endunless %}{% endfor %}]
+{% if site.languages %}{% assign langs = site.languages %}{% else %}{% assign langs = site.lang | split: ',' %}{% endif %}
+{% assign def_lang = site.default_lang | default: site.lang %}
+[{% assign prot = site.posts | where_exp: 'post', 'post.protected' %}{% assign first = true %}{% for post in prot %}{% for l in langs %}{% if l == def_lang %}{% assign u = post.url %}{% else %}{% assign u = post.url | prepend: l | prepend: '/' %}{% endif %}{% unless first %},{% endunless %}{% assign first = false %}{"url":{{ u | jsonify }},"title":{{ post.title | jsonify }},"image":{{ post.image.path | default: post.image | default: '' | jsonify }}}{% endfor %}{% endfor %}]
