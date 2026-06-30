@@ -78,8 +78,10 @@
       {% endif %}
 
       {% unless site.theme_mode %}
+        <!-- Font Awesome 7 (loaded by the theme) dropped the legacy `fa-adjust`
+             alias; use the current canonical name so the icon always renders. -->
         <button type="button" class="btn btn-link nav-link" aria-label="Switch Mode" id="mode-toggle">
-          <i class="fas fa-adjust"></i>
+          <i class="fas fa-circle-half-stroke"></i>
         </button>
       {% endunless %}
     </div>
