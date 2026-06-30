@@ -46,21 +46,21 @@
   </nav>
 
   <div class="sidebar-bottom d-flex flex-wrap  align-items-center w-100">
-    <!-- ===== Project addition: EN/ES language switcher ===================== -->
-    <!-- Only rendered when jekyll-polyglot is configured with >1 language, so
-         a plain (non-polyglot) build simply skips it. -->
-    {% if site.languages and site.languages.size > 1 %}
-      {%- comment -%}
-        Polyglot's `page.url` already carries the active language's prefix
-        (e.g. /es/posts/foo/). Strip it to get the language-agnostic path, then
-        re-add each target language's prefix to build the switch links.
-      {%- endcomment -%}
-      {%- assign base_url = page.url -%}
-      {%- unless site.active_lang == site.default_lang -%}
-        {%- assign _active_prefix = '/' | append: site.active_lang -%}
-        {%- assign base_url = page.url | remove_first: _active_prefix -%}
-      {%- endunless -%}
-      <div class="lang-switch-wrap">
+    <!-- ===== Project layout: two stacked rows ============================= -->
+    <!-- Row 1: EN/ES language switch + theme (light/dark) toggle.
+         Row 2 (below): the social / contact icons. -->
+    <div class="sb-row sb-controls">
+      {% if site.languages and site.languages.size > 1 %}
+        {%- comment -%}
+          Polyglot's `page.url` already carries the active language's prefix
+          (e.g. /es/posts/foo/). Strip it to get the language-agnostic path,
+          then re-add each target language's prefix to build the switch links.
+        {%- endcomment -%}
+        {%- assign base_url = page.url -%}
+        {%- unless site.active_lang == site.default_lang -%}
+          {%- assign _active_prefix = '/' | append: site.active_lang -%}
+          {%- assign base_url = page.url | remove_first: _active_prefix -%}
+        {%- endunless -%}
         <div class="lang-switch" role="group" aria-label="Language">
           {% for lang in site.languages %}
             {% if lang == site.active_lang %}
@@ -75,20 +75,16 @@
             {% endif %}
           {% endfor %}
         </div>
-      </div>
-    {% endif %}
-    <!-- ===== End project addition ========================================= -->
-
-    {% unless site.theme_mode %}
-      <button type="button" class="btn btn-link nav-link" aria-label="Switch Mode" id="mode-toggle">
-        <i class="fas fa-adjust"></i>
-      </button>
-
-      {% if site.data.contact.size > 0 %}
-        <span class="icon-border"></span>
       {% endif %}
-    {% endunless %}
 
+      {% unless site.theme_mode %}
+        <button type="button" class="btn btn-link nav-link" aria-label="Switch Mode" id="mode-toggle">
+          <i class="fas fa-adjust"></i>
+        </button>
+      {% endunless %}
+    </div>
+
+    <div class="sb-row sb-socials">
     {% for entry in site.data.contact %}
       {%- assign url = null -%}
 
@@ -137,6 +133,8 @@
         </a>
       {% endif %}
     {% endfor %}
+    </div>
+    <!-- ===== End project layout =========================================== -->
   </div>
   <!-- .sidebar-bottom -->
 </aside>

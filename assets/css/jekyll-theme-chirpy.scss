@@ -41,28 +41,13 @@ article .preview-img {
    list no longer feels cramped.
    ------------------------------------------------------------------------- */
 #post-list {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
-
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.75rem;
-  }
-
-  /* Each card fills its grid cell and stacks its contents vertically. */
-  .card-wrapper {
-    margin: 0;
-    height: 100%;
+  .card-wrapper:not(:last-child) {
+    margin-bottom: 1.75rem; /* was 1.25rem — more separation between cards */
   }
 
   .post-preview {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden; /* clip the banner to the rounded corners */
     border: 1px solid var(--main-border-color);
-    border-radius: 14px;
+    border-radius: 12px;
     transition:
       transform 0.2s ease,
       box-shadow 0.2s ease,
@@ -79,122 +64,87 @@ article .preview-img {
       0 4px 8px -6px rgb(0 0 0 / 25%);
   }
 
-  /* Banner image sitting on top of the card. */
-  .card-img-wrap {
-    position: relative;
-    aspect-ratio: 16 / 9;
-    overflow: hidden;
-    background: var(--img-bg);
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: transform 0.3s ease;
-    }
-  }
-
-  .card-wrapper:hover .card-img-wrap img {
-    transform: scale(1.04);
-  }
-
-  /* Difficulty + protected badges, overlaid on the banner (top-left). */
-  .card-badges {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.4rem;
-    position: absolute;
-    top: 0.65rem;
-    left: 0.65rem;
-    z-index: 1;
-  }
-
-  /* Fallback: a card without a banner shows its badges in the body instead. */
-  .card-body .card-badges {
-    position: static;
-    margin-bottom: 0.6rem;
-  }
-
-  /* Colour-coded difficulty pill (Easy / Medium / Hard / Insane). */
-  .difficulty-badge {
-    padding: 0.2rem 0.7rem;
-    border-radius: 2rem;
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: #fff;
-    line-height: 1.4;
-    box-shadow: 0 1px 3px rgb(0 0 0 / 35%);
-  }
-
-  /* "Protected" pill for password-locked writeups (legible over any banner). */
-  .protected-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35em;
-    padding: 0.2rem 0.6rem;
-    border-radius: 2rem;
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    line-height: 1.4;
-    color: #fff;
-    background: rgb(20 20 20 / 72%);
-    backdrop-filter: blur(2px);
-    box-shadow: 0 1px 3px rgb(0 0 0 / 35%);
-  }
-
-  .difficulty-easy {
-    background: #2e7d32;
-  }
-  .difficulty-medium {
-    background: #b45309;
-  }
-  .difficulty-hard {
-    background: #c62828;
-  }
-  .difficulty-insane {
-    background: #6a1b9a;
-  }
-
   .card-body {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
-    padding: 1.1rem 1.2rem 1.2rem;
+    padding: 1.25rem 1.35rem;
+
+    @media (min-width: 768px) {
+      padding: 1.6rem 1.75rem;
+    }
 
     .card-title {
-      font-size: 1.2rem;
+      font-size: 1.35rem;
       font-weight: 700;
       letter-spacing: -0.01em;
-      margin: 0 0 0.5rem !important;
+      margin-bottom: 0.5rem !important;
     }
 
-    .card-text.content {
-      margin-bottom: 0.9rem;
-
-      p {
-        line-height: 1.55;
-        /* Clamp the excerpt to 3 lines so cards keep an even height. */
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
+    /* Row holding the difficulty + protected badges at the top of a card. */
+    .card-badges {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.6rem;
     }
 
+    /* Colour-coded difficulty pill (Easy / Medium / Hard / Insane).
+       Solid backgrounds + white text keep AA contrast on both the light
+       (beige) and dark card surfaces. */
+    .difficulty-badge {
+      padding: 0.18rem 0.7rem;
+      border-radius: 2rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #fff;
+      line-height: 1.4;
+    }
+
+    /* Subtle "Protected" pill for password-locked writeups. */
+    .protected-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35em;
+      padding: 0.18rem 0.65rem;
+      border-radius: 2rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      line-height: 1.4;
+      color: var(--text-muted-color);
+      background: var(--card-bg);
+      border: 1px solid var(--main-border-color);
+    }
+
+    /* Lock notice shown instead of the excerpt on protected cards. */
     .protected-note {
+      margin: 0;
       font-style: italic;
     }
 
-    /* Pin meta to the bottom so cards with shorter text still align. */
+    .difficulty-easy {
+      background: #2e7d32;
+    }
+    .difficulty-medium {
+      background: #b45309;
+    }
+    .difficulty-hard {
+      background: #c62828;
+    }
+    .difficulty-insane {
+      background: #6a1b9a;
+    }
+
+    .card-text.content p {
+      line-height: 1.6;
+    }
+
+    /* Date + categories row: a touch more space above it. */
     .post-meta {
-      margin-top: auto;
-      font-size: 0.8rem;
+      margin-top: 0.35rem;
+      font-size: 0.82rem;
     }
   }
 }
@@ -435,11 +385,25 @@ html[data-mode="light"] {
    sidebar.html override only when jekyll-polyglot exposes >1 language.
    ========================================================================= */
 
-/* Give the switch a full row of its own so the social icons wrap underneath
-   instead of being crammed onto the same line. */
-#sidebar .sidebar-bottom .lang-switch-wrap {
+/* Two stacked rows in the sidebar bottom:
+     Row 1 (.sb-controls) — the EN/ES language switch + the light/dark toggle.
+     Row 2 (.sb-socials)  — the GitHub / LinkedIn / mail / HTB icons.
+   Each row takes a full line so they never share a line with each other. */
+#sidebar .sidebar-bottom .sb-row {
   flex: 0 0 100%;
-  margin-bottom: 1.1rem;
+  display: flex;
+  align-items: center;
+}
+
+#sidebar .sidebar-bottom .sb-controls {
+  gap: 0.85rem; /* breathing room between the language pill and the toggle */
+  margin-bottom: 1rem; /* separation from the social-icons row below */
+}
+
+/* The theme gives #mode-toggle a bottom margin for its old multi-line layout;
+   inside our single-line controls row the flex gap handles spacing instead. */
+#sidebar .sidebar-bottom .sb-controls #mode-toggle {
+  margin: 0;
 }
 
 #sidebar .sidebar-bottom .lang-switch {

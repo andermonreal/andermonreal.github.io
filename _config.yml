@@ -204,6 +204,19 @@ defaults:
       # DO NOT modify the following parameter unless you are confident enough
       # to update the code of all other post links in this project.
       permalink: /posts/:title/
+  # Posts are split by language into _posts/en and _posts/es; the folder sets
+  # the language automatically (jekyll-polyglot reads `lang`). English at
+  # /posts/:title/, Spanish at /es/posts/:title/ via the same default permalink.
+  - scope:
+      path: _posts/en
+      type: posts
+    values:
+      lang: en
+  - scope:
+      path: _posts/es
+      type: posts
+    values:
+      lang: es
   - scope:
       path: _drafts
     values:
