@@ -2,7 +2,7 @@
 title: "Silentium"
 date: 2026-06-24
 categories: [HackTheBox, Easy]
-tags: [linux, fuzzing, flowise, CVE, CVE-2025-58434, CVE-2025-59528, container escape, scripting, tunnel, gogs, symlink, sudoers]
+tags: [linux, fuzzing, flowise, CVE, CVE-2025-58434, CVE-2025-59528, container escape, scripting, ssh port forward, gogs, symlink, sudoers]
 image:
   path: /assets/img/HTB/Silentium/banner.png
   alt: Silentium writeup
