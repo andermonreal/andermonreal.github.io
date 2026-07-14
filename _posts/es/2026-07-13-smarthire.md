@@ -106,7 +106,6 @@ echo "10.129.245.215 models.smarthire.htb" | sudo tee -a /etc/hosts
 
 Al navegar al subdominio se disparó un prompt de login modal sobre fondo oscuro:
 
-![Modal login prompt with Username, Password, Remember me toggle, Cancel and Login buttons over a dark background](/assets/img/HTB/SmartHire/cap2.png)
 
 El modal está generado por el navegador (HTTP Basic Auth), no renderizado por la aplicación. Es la primera pista sobre el servicio — las apps web modernas casi nunca usan Basic; es la tarjeta de visita del tooling de infraestructura que prioriza simplicidad sobre UX (Prometheus, Jenkins con el plugin de auth más simple, el tracking server de MLflow). El ángulo **AI-first hiring** más un subdominio `models` más HTTP Basic apuntaba con fuerza a **MLflow**.
 
