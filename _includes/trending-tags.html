@@ -1,0 +1,13 @@
+{% comment %}
+  Project override of the theme's `trending-tags.html`, rendering nothing.
+
+  The theme drops this tag cloud into the right-hand panel of every page and
+  into the search overlay's hints. On a writeups blog the tags are long and
+  hyper-specific (CVE ids, tool names), so the "most used" ones are noise
+  rather than navigation — the home finder searches tags directly instead.
+
+  Kept as an empty override (instead of patching the theme's `default.html`)
+  so the theme stays upgradable: the include is still called, it just emits no
+  markup. The per-tag archive pages under /tags/<name>/ are untouched and are
+  still linked from each writeup.
+{% endcomment %}

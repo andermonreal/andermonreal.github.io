@@ -169,7 +169,10 @@ pwa:
     deny_paths:
       # - "/example"  # URLs match `<SITE_URL>/example/*` will not be cached by the PWA
 
-paginate: 10
+# Pagination is intentionally OFF: `_layouts/home.html` renders every writeup
+# so the home page's search + difficulty filter can reach any machine (they run
+# in the browser, over the cards that are actually on the page). Setting
+# `paginate` again would cut the list back to one page and break the finder.
 
 # The base URL of your site
 baseurl: ""

@@ -11,9 +11,9 @@
 /* append your custom style below */
 
 /* Shrink and center the post banner (front-matter preview image).
-   Only affects the image inside a post (<article>), not the home-page
-   thumbnails (#post-list). Tweak max-width to taste. */
-article .preview-img {
+   Scoped to the <article> a post layout renders as a direct child of <main>,
+   so it never touches the home page's avatar thumbnails. */
+main > article .preview-img {
   max-width: 500px;
   margin-inline: auto;
   display: block;
@@ -25,248 +25,415 @@ article .preview-img {
    adapts automatically to both colour schemes.
    ========================================================================= */
 
-/* Shared, visible keyboard-focus ring for the elements we restyle below.
-   Keeps the redesign accessible for keyboard / screen-reader users. */
-#post-list .post-preview:focus-visible,
-#tags .tag:focus-visible,
-.categories a:focus-visible {
-  outline: 2px solid var(--link-color);
-  outline-offset: 3px;
-  border-radius: 8px;
-}
+/* The four HackTheBox difficulties, shared by the card badges and the home
+   filter chips. Solid backgrounds + white text keep AA contrast on both the
+   light (beige) and dark surfaces. */
+$difficulties: (
+  "easy": #2e7d32,
+  "medium": #b45309,
+  "hard": #c62828,
+  "insane": #6a1b9a
+);
 
 /* -------------------------------------------------------------------------
-   1. Home — the list of machines / writeups.
-   Give each card more breathing room and a gentle, tactile hover lift so the
-   list no longer feels cramped.
+   1. Home — the "machine finder" (search + difficulty filter) and the grid of
+   writeups below it. Markup: _layouts/home.html.
    ------------------------------------------------------------------------- */
-#post-list {
-  .card-wrapper:not(:last-child) {
-    margin-bottom: 1.75rem; /* was 1.25rem — more separation between cards */
+
+/* The home page is a full-width, search-first index. The right-hand panel and
+   the topbar's search box would only compete with the finder, so both step
+   aside here. `:has(#home-hero)` matches the home page and nothing else. */
+body:has(#home-hero) {
+  #panel-wrapper {
+    display: none;
   }
 
-  .post-preview {
-    border: 1px solid var(--main-border-color);
-    border-radius: 12px;
-    transition:
-      transform 0.2s ease,
-      box-shadow 0.2s ease,
-      border-color 0.2s ease;
+  /* Reclaim the panel's column for the grid. Only bites at >=1200px: below
+     that the theme already hides the panel and centres the content column. */
+  main.col-xl-9 {
+    width: 100%;
   }
 
-  /* Lift the card on hover / keyboard focus. */
-  .card-wrapper:hover .post-preview,
-  .post-preview:focus-visible {
-    transform: translateY(-4px);
+  #topbar #search,
+  #topbar #search-trigger {
+    display: none;
+  }
+}
+
+#home-hero {
+  margin-top: 1.5rem;
+  padding: 1.5rem 1.5rem 1.4rem;
+  border: 1px solid var(--main-border-color);
+  border-radius: 16px;
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+
+  .finder-title {
+    margin: 0 0 0.35rem;
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .finder-lede {
+    margin: 0 0 1.15rem;
+    color: var(--text-muted-color);
+    font-size: 0.95rem;
+  }
+}
+
+/* The search box itself — the largest, first thing on the page. */
+.finder-search {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--search-border-color);
+  border-radius: 12px;
+  background: var(--main-bg);
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+
+  &:focus-within {
+    border-color: var(--input-focus-border-color);
+    box-shadow: 0 0 0 3px rgb(138 180 248 / 25%); /* accent glow */
+  }
+
+  > i {
+    color: var(--search-icon-color);
+    font-size: 1rem;
+  }
+}
+
+.finder-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.1rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-color);
+  font-size: 1.05rem;
+  outline: none;
+
+  &::placeholder {
+    color: var(--text-muted-color);
+  }
+
+  /* We render our own clear button, so drop the browser's. */
+  &::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+}
+
+.finder-clear {
+  flex: 0 0 auto;
+  padding: 0.2rem 0.35rem;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-muted-color);
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--text-color);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 1px;
+  }
+}
+
+.finder-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.1rem;
+
+  .finder-filters-label {
+    margin-right: 0.15rem;
+    color: var(--text-muted-color);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+}
+
+/* A difficulty filter button: outlined when off, filled with its own colour
+   when on — the same colours as the badges on the cards below. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.32rem 0.8rem;
+  border: 1px solid var(--main-border-color);
+  border-radius: 2rem;
+  background: transparent;
+  color: var(--text-color);
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
+
+  &:hover {
     border-color: var(--link-color);
-    box-shadow:
-      0 10px 24px -8px rgb(0 0 0 / 35%),
-      0 4px 8px -6px rgb(0 0 0 / 25%);
   }
 
-  .card-body {
-    padding: 1.25rem 1.35rem;
+  &:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 2px;
+  }
 
-    @media (min-width: 768px) {
-      padding: 1.6rem 1.75rem;
+  .chip-count {
+    min-width: 1.4rem;
+    padding: 0 0.3rem;
+    border-radius: 1rem;
+    background: var(--main-bg);
+    color: var(--text-muted-color);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  &.is-active {
+    border-color: transparent;
+    background: var(--link-color); /* the "All" chip */
+    color: #fff;
+
+    .chip-count {
+      background: rgb(255 255 255 / 25%);
+      color: #fff;
+    }
+  }
+}
+
+@each $level, $color in $difficulties {
+  .chip-#{$level}.is-active {
+    background: $color;
+  }
+
+  #post-list .difficulty-#{$level} {
+    background: $color;
+  }
+}
+
+/* "Showing 7 of 15" — also the live region announcing filter results. */
+.machine-count {
+  margin: 1.35rem 0 0.75rem;
+  color: var(--text-muted-color);
+  font-size: 0.8rem;
+}
+
+.machine-empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 2rem;
+  color: var(--text-muted-color);
+}
+
+.finder-reset {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--main-border-color);
+  border-radius: 2rem;
+  background: transparent;
+  color: var(--link-color);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--link-color);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 2px;
+  }
+}
+
+/* --- The writeup grid ---------------------------------------------------- */
+#post-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-top: 0; /* the count line above already spaces the grid */
+
+  @media (min-width: 992px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.1rem;
+  }
+
+  /* Cards are grid items now; the theme's stacking margin would double up. */
+  .card-wrapper:not(:last-child) {
+    margin-bottom: 0;
+  }
+
+  /* Filtered out by the finder. Needed because Bootstrap's `.card` sets
+     `display: flex`, which would otherwise beat the `hidden` attribute. */
+  .machine-card[hidden] {
+    display: none;
+  }
+
+  .machine-card {
+    .machine-link {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      height: 100%;
+      padding: 1.15rem 1.2rem;
+      border: 1px solid var(--main-border-color);
+      border-radius: 12px;
+      background: var(--card-bg);
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
     }
 
-    .card-title {
-      font-size: 1.35rem;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-      margin-bottom: 0.5rem !important;
+    /* Lift the card on hover / keyboard focus. */
+    &:hover .machine-link,
+    .machine-link:focus-visible {
+      transform: translateY(-3px);
+      border-color: var(--link-color);
+      box-shadow:
+        0 10px 24px -8px rgb(0 0 0 / 35%),
+        0 4px 8px -6px rgb(0 0 0 / 25%);
     }
 
-    /* Row holding the difficulty + protected badges at the top of a card. */
-    .card-badges {
+    .machine-link:focus-visible {
+      outline: 2px solid var(--link-color);
+      outline-offset: 3px;
+    }
+
+    /* The HackTheBox avatar. The artwork is a circle on a transparent square,
+       so a round thumbnail crops exactly to the artwork.
+       `.preview-img` is the wrapper `refactor-content.html` adds. */
+    .preview-img {
+      flex: 0 0 auto;
+      width: 4.75rem;
+      height: 4.75rem;
+      max-width: none;
+      margin: 0;
+      border-radius: 50%;
+      overflow: hidden;
+
+      img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+    }
+
+    .machine-body {
+      display: flex;
+      flex: 1 1 auto;
+      flex-direction: column;
+      align-self: stretch;
+      min-width: 0;
+    }
+
+    /* Title + difficulty + lock, all on one wrapping row. */
+    .machine-head {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.6rem;
+      gap: 0.4rem 0.5rem;
     }
 
-    /* Colour-coded difficulty pill (Easy / Medium / Hard / Insane).
-       Solid backgrounds + white text keep AA contrast on both the light
-       (beige) and dark card surfaces. */
-    .difficulty-badge {
-      padding: 0.18rem 0.7rem;
-      border-radius: 2rem;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      color: #fff;
-      line-height: 1.4;
-    }
-
-    /* Subtle "Protected" pill for password-locked writeups. */
-    .protected-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35em;
-      padding: 0.18rem 0.65rem;
-      border-radius: 2rem;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      line-height: 1.4;
-      color: var(--text-muted-color);
-      background: var(--card-bg);
-      border: 1px solid var(--main-border-color);
-    }
-
-    /* Lock notice shown instead of the excerpt on protected cards. */
-    .protected-note {
+    .card-title {
       margin: 0;
-      font-style: italic;
+      color: var(--heading-color);
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
     }
 
-    .difficulty-easy {
-      background: #2e7d32;
-    }
-    .difficulty-medium {
-      background: #b45309;
-    }
-    .difficulty-hard {
-      background: #c62828;
-    }
-    .difficulty-insane {
-      background: #6a1b9a;
+    .machine-excerpt {
+      display: -webkit-box;
+      margin: 0.5rem 0 0.8rem;
+      overflow: hidden;
+      color: var(--text-muted-color);
+      font-size: 0.86rem;
+      line-height: 1.55;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+
+      &.is-protected {
+        font-style: italic;
+      }
     }
 
-    .card-text.content p {
-      line-height: 1.6;
-    }
-
-    /* Date + categories row: a touch more space above it. */
     .post-meta {
-      margin-top: 0.35rem;
-      font-size: 0.82rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.2rem 0.9rem;
+      margin-top: auto; /* pin to the bottom, so cards line up */
+      color: var(--text-muted-color);
+      font-size: 0.78rem;
+
+      .meta-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
     }
   }
+}
+
+/* Colour-coded difficulty pill (Easy / Medium / Hard / Insane); the colours
+   themselves come from the $difficulties loop above. */
+#post-list .difficulty-badge {
+  padding: 0.16rem 0.6rem;
+  border-radius: 2rem;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+/* Subtle "Protected" pill for password-locked writeups. */
+#post-list .protected-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.16rem 0.55rem;
+  border: 1px solid var(--main-border-color);
+  border-radius: 2rem;
+  background: var(--main-bg);
+  color: var(--text-muted-color);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.5;
+  text-transform: uppercase;
 }
 
 /* -------------------------------------------------------------------------
-   2. Tags page — live filter box + clean, evenly-spaced pill chips.
+   2. Per-tag / per-category listing pages (/tags/<name>/, /categories/<name>/).
+   Those archives are still generated and linked from every writeup — only the
+   /tags/ and /categories/ index tabs are gone.
    ------------------------------------------------------------------------- */
-
-/* Search / filter input above the tag cloud. */
-#tag-search {
-  position: relative;
-  max-width: 420px;
-
-  i {
-    position: absolute;
-    top: 50%;
-    left: 0.9rem;
-    transform: translateY(-50%);
-    color: var(--search-icon-color);
-    pointer-events: none;
-    font-size: 0.9rem;
-  }
-
-  input {
-    width: 100%;
-    padding: 0.55rem 0.9rem 0.55rem 2.4rem;
-    color: var(--text-color);
-    background: var(--card-bg);
-    border: 1px solid var(--search-border-color);
-    border-radius: 2rem;
-    outline: none;
-    transition:
-      border-color 0.18s ease,
-      box-shadow 0.18s ease;
-
-    &::placeholder {
-      color: var(--text-muted-color);
-    }
-
-    &:focus {
-      border-color: var(--input-focus-border-color);
-      box-shadow: 0 0 0 3px rgb(138 180 248 / 25%); /* accent glow */
-    }
-  }
-}
-
-#tags {
-  gap: 0.7rem 0.6rem; /* row-gap column-gap, instead of margins + line-height */
-  padding-block: 0.5rem;
-
-  .tag {
-    display: inline-flex;
-    align-items: baseline;
-    line-height: 1.4; /* override theme's 3rem */
-    margin: 0; /* spacing handled by the flex gap above */
-    padding: 0.4rem 0.85rem;
-    border-radius: 2rem;
-    font-size: 0.9rem;
-    background: var(--card-bg);
-    border: 1px solid var(--tag-border) !important;
-    box-shadow: none; /* drop the dated drop-shadow */
-    transition:
-      background-color 0.18s ease,
-      border-color 0.18s ease,
-      transform 0.18s ease;
-
-    &:hover {
-      background: var(--tag-hover);
-      border-color: var(--link-color) !important;
-      transform: translateY(-2px);
-      text-decoration: none;
-    }
-
-    /* The post-count badge sitting next to the tag name. */
-    span {
-      margin-left: 0.5em;
-      font-size: 0.72em;
-      color: var(--text-muted-color);
-    }
-  }
-}
-
-/* -------------------------------------------------------------------------
-   3. Categories page — softer cards with clearer rows.
-   ------------------------------------------------------------------------- */
-.categories {
-  border: 1px solid var(--categories-border);
-  border-radius: 12px;
-  box-shadow: var(--card-shadow);
-  overflow: hidden; /* keep child rows inside the rounded corners */
-
-  .card-header {
-    padding: 0.9rem 1.1rem;
-
-    a {
-      font-weight: 600;
-    }
-  }
-
-  /* Accent the folder icons just a little — restrained, not loud. */
-  i {
-    color: var(--link-color);
-  }
-
-  .list-group-item {
-    padding: 0.7rem 1.1rem 0.7rem 2.2rem;
-    transition: background-color 0.15s ease;
-
-    &:hover {
-      background-color: var(--categories-hover-bg);
-    }
-  }
-}
-
-/* Per-category / per-tag listing pages: a bit more line spacing. */
 #page-category ul > li,
 #page-tag ul > li {
   padding: 0.75rem 0;
 }
 
 /* -------------------------------------------------------------------------
-   4. Sidebar — Hack The Box icon.
+   3. Sidebar — Hack The Box icon.
    Font Awesome has no HTB logo, so we render the official SVG as a CSS mask
    filled with `currentColor`. That way it inherits the same colour and hover
    behaviour as the other sidebar contact icons.
@@ -282,7 +449,7 @@ article .preview-img {
 }
 
 /* =========================================================================
-   5. Beige light theme.
+   4. Beige light theme.
    The theme ships a plain white light scheme. We repaint it as a warm beige
    by overriding the CSS custom properties, mirroring the exact selectors the
    theme uses to apply light mode (see _sass/base/_base.scss):
@@ -380,7 +547,7 @@ html[data-mode="light"] {
 }
 
 /* =========================================================================
-   6. Language switcher — a compact segmented "pill" toggle on its own row at
+   5. Language switcher — a compact segmented "pill" toggle on its own row at
    the bottom of the sidebar, above the social icons. Rendered by the
    sidebar.html override only when jekyll-polyglot exposes >1 language.
    ========================================================================= */
