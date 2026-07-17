@@ -1,1 +1,0 @@
-# andermonreal.github.io
