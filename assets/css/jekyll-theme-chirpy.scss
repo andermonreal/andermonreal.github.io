@@ -422,6 +422,36 @@ body:has(#home-hero) {
   text-transform: uppercase;
 }
 
+/* OS pill (Linux / Windows). Neutral pill like "Protected", but the brand
+   icon carries the colour so it reads at a glance on both card themes. */
+#post-list .os-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.16rem 0.55rem;
+  border: 1px solid var(--main-border-color);
+  border-radius: 2rem;
+  background: var(--main-bg);
+  color: var(--text-muted-color);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.5;
+  text-transform: uppercase;
+
+  i {
+    font-size: 1.05em;
+  }
+}
+
+#post-list .os-linux i {
+  color: #e08e0b; /* Tux amber */
+}
+
+#post-list .os-windows i {
+  color: #2b88d8; /* Windows blue */
+}
+
 /* -------------------------------------------------------------------------
    2. Per-tag / per-category listing pages (/tags/<name>/, /categories/<name>/).
    Those archives are still generated and linked from every writeup — only the
