@@ -31,6 +31,10 @@ layout: default
 <!-- Difficulty levels recognised for the colour-coded badge and the filter -->
 {% assign difficulty_levels = 'Easy,Medium,Hard,Insane' | split: ',' %}
 
+<!-- OS levels for the platform filter. A machine's OS is read from its tags
+     (a post tagged `linux` or `windows`); tag your writeups accordingly. -->
+{% assign os_levels = 'linux,windows' | split: ',' %}
+
 <!-- Language-aware UI strings. Uses jekyll-polyglot's `site.active_lang` when
      present; falls back to English otherwise. (Difficulty names stay in
      English on purpose — they are HackTheBox's own labels.) -->
@@ -40,6 +44,7 @@ layout: default
 {% assign t_search_hint = 'Search a machine, technique or CVE…' %}
 {% assign t_clear = 'Clear search' %}
 {% assign t_difficulty = 'Difficulty' %}
+{% assign t_os = 'System' %}
 {% assign t_all = 'All' %}
 {% assign t_count = 'Showing :shown of :total' %}
 {% assign t_empty = 'No writeup matches your search.' %}
@@ -53,6 +58,7 @@ layout: default
   {% assign t_search_hint = 'Busca una máquina, técnica o CVE…' %}
   {% assign t_clear = 'Limpiar búsqueda' %}
   {% assign t_difficulty = 'Dificultad' %}
+  {% assign t_os = 'Sistema' %}
   {% assign t_all = 'Todas' %}
   {% assign t_count = 'Mostrando :shown de :total' %}
   {% assign t_empty = 'Ningún writeup coincide con tu búsqueda.' %}
@@ -105,6 +111,31 @@ layout: default
       {% endif %}
     {% endfor %}
   </div>
+
+  <div class="finder-filters" role="group" aria-label="{{ t_os }}">
+    <span class="finder-filters-label" aria-hidden="true">{{ t_os }}</span>
+
+    <button type="button" class="chip is-active" data-os="all" aria-pressed="true">
+      {{ t_all }}<span class="chip-count">{{ total }}</span>
+    </button>
+
+    <!-- An OS only gets a chip once at least one writeup is tagged with it. -->
+    {% for os in os_levels %}
+      {% assign os_posts = posts | where_exp: 'p', 'p.tags contains os' %}
+      {% assign os_count = os_posts | size %}
+      {% if os_count > 0 %}
+        <button
+          type="button"
+          class="chip chip-os-{{ os }}"
+          data-os="{{ os }}"
+          aria-pressed="false"
+        >
+          <i class="fab fa-{{ os }}" aria-hidden="true"></i>
+          {{ os | capitalize }}<span class="chip-count">{{ os_count }}</span>
+        </button>
+      {% endif %}
+    {% endfor %}
+  </div>
 </section>
 
 <p id="machine-count" class="machine-count" aria-live="polite" data-template="{{ t_count }}">
@@ -125,6 +156,14 @@ layout: default
       {% endif %}
     {% endfor %}
 
+    <!-- The machine's OS, read from its tags (linux / windows). -->
+    {% assign post_os = '' %}
+    {% for os_name in os_levels %}
+      {% if post.tags contains os_name %}
+        {% assign post_os = os_name %}
+      {% endif %}
+    {% endfor %}
+
     {% capture summary %}{% include post-summary.html %}{% endcapture %}
 
     <!-- What the finder matches against. Protected writeups contribute their
@@ -138,6 +177,7 @@ layout: default
     <article
       class="card-wrapper card machine-card"
       data-difficulty="{{ post_difficulty | downcase }}"
+      data-os="{{ post_os }}"
       data-search="{{ haystack | normalize_whitespace | strip | downcase | escape }}"
     >
       <a href="{{ post.url | relative_url }}" class="machine-link">
@@ -233,13 +273,15 @@ layout: default
     }
 
     const cards = Array.from(list.querySelectorAll('.machine-card'));
-    const chips = Array.from(document.querySelectorAll('#home-hero .chip'));
+    const diffChips = Array.from(document.querySelectorAll('#home-hero .chip[data-difficulty]'));
+    const osChips = Array.from(document.querySelectorAll('#home-hero .chip[data-os]'));
     const clearButton = document.getElementById('machine-search-clear');
     const emptyState = document.getElementById('machine-empty');
     const resetButton = document.getElementById('machine-reset');
     const countTemplate = counter.dataset.template;
 
     let difficulty = 'all';
+    let os = 'all';
 
     function syncUrl() {
       const params = new URLSearchParams(window.location.search);
@@ -255,6 +297,12 @@ layout: default
         params.delete('d');
       } else {
         params.set('d', difficulty);
+      }
+
+      if (os === 'all') {
+        params.delete('os');
+      } else {
+        params.set('os', os);
       }
 
       const search = params.toString();
@@ -273,6 +321,7 @@ layout: default
       cards.forEach((card) => {
         const matches =
           (difficulty === 'all' || card.dataset.difficulty === difficulty) &&
+          (os === 'all' || card.dataset.os === os) &&
           terms.every((term) => card.dataset.search.includes(term));
 
         card.hidden = !matches;
@@ -296,7 +345,7 @@ layout: default
     function selectDifficulty(value, sync) {
       difficulty = value;
 
-      chips.forEach((chip) => {
+      diffChips.forEach((chip) => {
         const active = chip.dataset.difficulty === value;
         chip.classList.toggle('is-active', active);
         chip.setAttribute('aria-pressed', active ? 'true' : 'false');
@@ -305,8 +354,24 @@ layout: default
       apply(sync);
     }
 
-    chips.forEach((chip) => {
+    function selectOs(value, sync) {
+      os = value;
+
+      osChips.forEach((chip) => {
+        const active = chip.dataset.os === value;
+        chip.classList.toggle('is-active', active);
+        chip.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+
+      apply(sync);
+    }
+
+    diffChips.forEach((chip) => {
       chip.addEventListener('click', () => selectDifficulty(chip.dataset.difficulty));
+    });
+
+    osChips.forEach((chip) => {
+      chip.addEventListener('click', () => selectOs(chip.dataset.os));
     });
 
     input.addEventListener('input', () => apply());
@@ -327,6 +392,7 @@ layout: default
     resetButton.addEventListener('click', () => {
       input.value = '';
       selectDifficulty('all');
+      selectOs('all');
       input.focus();
     });
 
@@ -351,15 +417,20 @@ layout: default
     const params = new URLSearchParams(window.location.search);
     const query = params.get('q');
     const level = params.get('d');
+    const platform = params.get('os');
 
     if (query) {
       input.value = query;
     }
 
-    if (level && chips.some((chip) => chip.dataset.difficulty === level)) {
+    if (level && diffChips.some((chip) => chip.dataset.difficulty === level)) {
       selectDifficulty(level, false);
-    } else {
-      apply(false);
     }
+
+    if (platform && osChips.some((chip) => chip.dataset.os === platform)) {
+      selectOs(platform, false);
+    }
+
+    apply(false);
   })();
 </script>
