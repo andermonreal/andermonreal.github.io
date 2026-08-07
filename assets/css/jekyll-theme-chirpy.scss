@@ -675,6 +675,8 @@ html[data-mode="light"] {
   border: 1px solid var(--main-border-color);
   border-radius: 12px;
   box-shadow: var(--card-shadow);
+  color: inherit; /* the whole card is a link now */
+  text-decoration: none;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
@@ -686,6 +688,17 @@ html[data-mode="light"] {
     box-shadow:
       0 10px 24px -8px rgb(0 0 0 / 35%),
       0 4px 8px -6px rgb(0 0 0 / 25%);
+    text-decoration: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 2px;
+  }
+
+  /* Nudge the CTA arrow on hover for a bit of feedback. */
+  &:hover .project-cta {
+    color: var(--link-color);
   }
 
   .project-head {
@@ -718,42 +731,113 @@ html[data-mode="light"] {
   }
 
   .project-desc {
-    flex-grow: 1; /* push the button to the bottom, so cards align */
+    flex-grow: 1; /* push the CTA to the bottom, so cards align */
     margin: 0 0 1.1rem;
     color: var(--text-muted-color);
     font-size: 0.88rem;
     line-height: 1.55;
   }
 
-  /* "View on GitHub" button. */
-  .project-link {
-    display: inline-flex;
+  /* "View project →" call to action at the bottom of each card. */
+  .project-cta {
     align-self: flex-start;
-    align-items: center;
-    gap: 0.45em;
-    padding: 0.45rem 0.9rem;
-    border: 1px solid var(--main-border-color);
-    border-radius: 8px;
-    color: var(--text-color);
-    font-size: 0.85rem;
+    margin-top: auto;
+    color: var(--text-muted-color);
+    font-size: 0.82rem;
     font-weight: 600;
-    text-decoration: none;
-    transition:
-      background-color 0.15s ease,
-      border-color 0.15s ease,
-      color 0.15s ease;
-
-    &:hover,
-    &:focus-visible {
-      border-color: var(--link-color);
-      background: var(--link-color);
-      color: #fff;
-      outline: none;
-    }
+    transition: color 0.15s ease;
   }
 }
 
 .projects-empty {
   color: var(--text-muted-color);
   font-style: italic;
+}
+
+/* "View on GitHub" button — used on the per-project README page. */
+.project-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--main-border-color);
+  border-radius: 8px;
+  color: var(--text-color);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--link-color);
+    background: var(--link-color);
+    color: #fff;
+    outline: none;
+    text-decoration: none;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Per-project README page (/projects/<slug>/).
+   ------------------------------------------------------------------------- */
+.project-page-back {
+  margin-bottom: 1rem;
+
+  a {
+    color: var(--link-color);
+    font-size: 0.9rem;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.project-page-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.project-page-desc {
+  margin: 0 0 1.75rem;
+  color: var(--text-muted-color);
+  font-size: 1.02rem;
+  line-height: 1.6;
+}
+
+.project-readme-empty {
+  color: var(--text-muted-color);
+  font-style: italic;
+}
+
+/* The embedded GitHub README. It carries GitHub's `markdown-body` class but not
+   GitHub's stylesheet, so it inherits the theme's content typography; a few
+   tweaks keep it tidy inside our page. */
+.project-readme {
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--main-border-color);
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* GitHub's heading permalink anchors (the little chain icon) — hide them,
+     they have no target here. */
+  .anchor,
+  .octicon-link {
+    display: none;
+  }
+
+  > *:first-child {
+    margin-top: 0;
+  }
 }

@@ -1,0 +1,49 @@
+---
+layout: page
+# One page per project (/projects/<slug>/ and /es/projects/<slug>/), created by
+# _plugins/projects-pages.rb. Renders the repo's README (fetched from GitHub at
+# build time) plus a back link, the language and a GitHub button. The project
+# data hash is passed in as `page.project`.
+---
+
+{% assign p = page.project %}
+
+{% assign t_back = 'Back to projects' %}
+{% assign t_button = 'View on GitHub' %}
+{% assign t_noreadme = 'This project has no README yet — take a look on GitHub.' %}
+{% if site.active_lang == 'es' %}
+  {% assign t_back = 'Volver a proyectos' %}
+  {% assign t_button = 'Ver en GitHub' %}
+  {% assign t_noreadme = 'Este proyecto todavía no tiene README — échale un vistazo en GitHub.' %}
+{% endif %}
+
+<p class="project-page-back">
+  <a href="{{ '/projects/' | relative_url }}">&larr; {{ t_back }}</a>
+</p>
+
+<div class="project-page-bar">
+  {% if p.language %}<span class="project-lang">{{ p.language }}</span>{% endif %}
+  <a
+    class="project-link"
+    href="{{ p.url }}"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <i class="fab fa-github" aria-hidden="true"></i>
+    <span>{{ t_button }}</span>
+  </a>
+</div>
+
+{% assign desc = p.desc_en %}
+{% if site.active_lang == 'es' %}
+  {% assign desc = p.desc_es | default: p.desc_en %}
+{% endif %}
+{% if desc %}
+  <p class="project-page-desc">{{ desc }}</p>
+{% endif %}
+
+{% if p.readme_html %}
+  <div class="project-readme markdown-body">{{ p.readme_html }}</div>
+{% else %}
+  <p class="project-readme-empty">{{ t_noreadme }}</p>
+{% endif %}

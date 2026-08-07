@@ -32,20 +32,68 @@ exclude_archived = config.fetch('exclude_archived', true) ? true : false
 order_list      = Array(config['order'] || config['featured']).map(&:to_s)
 overrides       = config['overrides'] || {}
 
-def fetch_repos(user)
+def gh_get(uri, accept)
   token = ENV['GITHUB_TOKEN']
+  req = Net::HTTP::Get.new(uri)
+  req['Accept'] = accept
+  req['User-Agent'] = 'projects-sync-script'
+  req['Authorization'] = "Bearer #{token}" if token && !token.empty?
+  Net::HTTP.start(uri.host, uri.port, use_ssl: true) { |http| http.request(req) }
+end
+
+# Turn a repo name into a URL slug: "Problema_del_viajante" -> "problema-del-viajante".
+def slugify(name)
+  name.downcase.gsub(/[^a-z0-9]+/, '-').gsub(/\A-+|-+\z/, '')
+end
+
+# Rewrite README-relative image/link URLs to absolute GitHub URLs so they still
+# work when the README is embedded on our own page.
+def absolutize_readme(html, user, repo, branch)
+  return html if html.nil?
+
+  raw  = "https://raw.githubusercontent.com/#{user}/#{repo}/#{branch}/"
+  blob = "https://github.com/#{user}/#{repo}/blob/#{branch}/"
+
+  relative = lambda do |val|
+    val.nil? || val.start_with?('http://', 'https://', '//', '#', 'mailto:', 'data:')
+  end
+
+  # Images -> raw.githubusercontent.com
+  html = html.gsub(/(<img\b[^>]*?\bsrc=")([^"]*)(")/i) do
+    pre, val, post = Regexp.last_match(1), Regexp.last_match(2), Regexp.last_match(3)
+    relative.call(val) ? "#{pre}#{val}#{post}" : "#{pre}#{raw}#{val.sub(%r{\A\./}, '')}#{post}"
+  end
+
+  # Links -> github.com/.../blob (anchors and absolute links left alone)
+  html = html.gsub(/(<a\b[^>]*?\bhref=")([^"]*)(")/i) do
+    pre, val, post = Regexp.last_match(1), Regexp.last_match(2), Regexp.last_match(3)
+    relative.call(val) ? "#{pre}#{val}#{post}" : "#{pre}#{blob}#{val.sub(%r{\A\./}, '')}#{post}"
+  end
+
+  # GitHub renders heading ids as `user-content-foo` but links to `#foo`; drop
+  # the prefix so in-page anchors work on our copy.
+  html.gsub('id="user-content-', 'id="')
+end
+
+def fetch_readme(user, repo, branch)
+  res = gh_get(URI("https://api.github.com/repos/#{user}/#{repo}/readme"),
+               'application/vnd.github.html')
+  return nil unless res.code.to_i == 200
+
+  # Net::HTTP bodies come back as ASCII-8BIT; GitHub's HTML is UTF-8.
+  absolutize_readme(res.body.dup.force_encoding('UTF-8'), user, repo, branch)
+rescue StandardError
+  nil
+end
+
+def fetch_repos(user)
   repos = []
   page = 1
 
   loop do
     uri = URI("https://api.github.com/users/#{user}/repos" \
               "?per_page=100&page=#{page}&sort=updated&type=owner")
-    req = Net::HTTP::Get.new(uri)
-    req['Accept'] = 'application/vnd.github+json'
-    req['User-Agent'] = 'projects-sync-script'
-    req['Authorization'] = "Bearer #{token}" if token && !token.empty?
-
-    res = Net::HTTP.start(uri.host, uri.port, use_ssl: true) { |http| http.request(req) }
+    res = gh_get(uri, 'application/vnd.github+json')
     raise "GitHub API returned #{res.code}: #{res.body.to_s[0, 200]}" unless res.code.to_i == 200
 
     batch = JSON.parse(res.body)
@@ -76,19 +124,24 @@ repos.reject! { |r| r['archived'] && exclude_archived }
 repos.reject! { |r| exclude.include?(r['name']) }
 
 # Build display entries, letting per-repo overrides win over GitHub's data.
+# Each entry also carries its rendered README (for its own /projects/<slug>/ page).
 entries = repos.map do |r|
-  ov   = overrides[r['name']] || {}
-  desc = r['description']
+  ov     = overrides[r['name']] || {}
+  desc   = r['description']
+  readme = fetch_readme(user, r['name'], r['default_branch'])
 
   {
-    'repo'     => r['name'],
-    'name'     => ov['name'] || r['name'],
-    'url'      => ov['url'] || r['html_url'],
-    'language' => ov['language'] || r['language'],
-    'desc_en'  => ov['desc_en'] || desc,
-    'desc_es'  => ov['desc_es'] || ov['desc_en'] || desc,
-    'stars'    => r['stargazers_count'],
-    'updated'  => r['pushed_at']
+    'repo'        => r['name'],
+    'slug'        => slugify(r['name']),
+    'name'        => ov['name'] || r['name'],
+    'url'         => ov['url'] || r['html_url'],
+    'language'    => ov['language'] || r['language'],
+    'desc_en'     => ov['desc_en'] || desc,
+    'desc_es'     => ov['desc_es'] || ov['desc_en'] || desc,
+    'stars'       => r['stargazers_count'],
+    'updated'     => r['pushed_at'],
+    'has_readme'  => !readme.nil?,
+    'readme_html' => readme
   }
 end
 

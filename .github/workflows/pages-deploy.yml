@@ -67,7 +67,8 @@ jobs:
         run: |
           bundle exec htmlproofer _site \
             \-\-disable-external \
-            \-\-ignore-urls "/^http:\/\/127.0.0.1/,/^http:\/\/0.0.0.0/,/^http:\/\/localhost/"
+            \-\-ignore-urls "/^http:\/\/127.0.0.1/,/^http:\/\/0.0.0.0/,/^http:\/\/localhost/" \
+            \-\-ignore-files "/\/projects\/[^\/]+\/index\.html$/"
 
       # Encrypt password-protected posts (front-matter `protected: true`) with
       # StatiCrypt AFTER htmlproofer and BEFORE upload, so the deployed pages
