@@ -1,0 +1,60 @@
+---
+layout: page
+# The Projects page (/projects/ and, via polyglot, /es/projects/). Renders the
+# curated list from _data/projects.yml as a grid of cards, each with a title, a
+# language chip, a description (localised) and a "View on GitHub" button.
+# `layout: page` supplies the standard tab chrome + the localised H1 (the tab's
+# own title). Styling lives in assets/css/jekyll-theme-chirpy.scss.
+---
+
+{% assign t_lede = "A few things I've built — tools, CTF challenges and course projects." %}
+{% assign t_button = 'View on GitHub' %}
+{% assign t_empty = 'Nothing here yet — check back soon.' %}
+
+{% if site.active_lang == 'es' %}
+  {% assign t_lede = 'Algunas cosas que he construido — herramientas, retos CTF y proyectos de clase.' %}
+  {% assign t_button = 'Ver en GitHub' %}
+  {% assign t_empty = 'Todavía nada por aquí — vuelve pronto.' %}
+{% endif %}
+
+<p class="projects-lede">{{ t_lede }}</p>
+
+<!-- The list is generated from GitHub by tools/fetch-projects.rb into
+     _data/projects_generated.json (already ordered: featured first). Curation
+     lives in _data/projects.yml. -->
+{% assign ordered = site.data.projects_generated %}
+
+{% if ordered and ordered.size > 0 %}
+  <div class="projects-grid">
+    {% for p in ordered %}
+      <article class="project-card">
+        <div class="project-head">
+          <h2 class="project-name">{{ p.name }}</h2>
+          {% if p.language %}
+            <span class="project-lang">{{ p.language }}</span>
+          {% endif %}
+        </div>
+
+        {% assign desc = p.desc_en %}
+        {% if site.active_lang == 'es' %}
+          {% assign desc = p.desc_es | default: p.desc_en %}
+        {% endif %}
+        {% if desc %}
+          <p class="project-desc">{{ desc }}</p>
+        {% endif %}
+
+        <a
+          class="project-link"
+          href="{{ p.url }}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <i class="fab fa-github" aria-hidden="true"></i>
+          <span>{{ t_button }}</span>
+        </a>
+      </article>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="projects-empty">{{ t_empty }}</p>
+{% endif %}

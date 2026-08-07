@@ -1,0 +1,77 @@
+# Curation for the auto-synced Projects page.
+#
+# The project LIST itself is fetched from GitHub at build time by
+# tools/fetch-projects.rb, which writes _data/projects_generated.json (that
+# generated file is what the page renders — don't edit it by hand).
+# This file only decides WHAT shows and HOW it's described.
+
+# GitHub account to sync.
+github_user: andermonreal
+
+# Repos to hide (exact GitHub repo names).
+exclude:
+  - andermonreal.github.io   # this site
+  - andermonreal             # the profile README repo
+
+# Show forks too? Default: no.
+include_forks: false
+
+# Hide archived repos? Default: yes.
+exclude_archived: true
+
+# The order projects appear on the page, top to bottom (exact GitHub repo
+# names). Just rearrange these lines to reorder the page. Any repo you create
+# later that isn't listed here is appended at the end automatically (most
+# recently pushed first), so nothing ever disappears — add its name here when
+# you want to place it.
+order:
+  - ProjectManager
+  - minishell
+  - Trabajo-algoritmia
+  - Onitama_BOT
+  - Problema_del_viajante
+  - 4_in_row
+  - WFAudit
+  - fakeWeb
+  - reactNative
+  - cineApp
+  - OnlineShop
+  - Despliegue_de_servicios_multimedia
+  - ProjectManager2
+  - BikeUp
+  - GestionExamenes
+  - OSO_Game
+  - Android_Motion_Suite_App
+
+# Per-repo overrides, keyed by the exact GitHub repo name. Any field set here
+# wins over GitHub's data. Repos not listed here still appear, using GitHub's
+# own name / description / language. Fields: name, url, language, desc_en, desc_es.
+overrides:
+  ProjectManager:
+    name: "Project Manager"
+    desc_en: "A boot2root CTF challenge built around a deliberately vulnerable Project Manager web app."
+    desc_es: "Un reto CTF boot2root construido sobre una aplicación web de gestión de proyectos deliberadamente vulnerable."
+
+  minishell:
+    desc_en: "A minimal Unix shell written in C: parsing, pipes, redirections and built-in commands."
+    desc_es: "Una shell de Unix mínima escrita en C: parseo, tuberías, redirecciones y comandos internos."
+
+  Trabajo-algoritmia:
+    name: "kNN Credit Classifier"
+    desc_en: "A k-NN classifier that predicts whether a credit card should be granted."
+    desc_es: "Un clasificador k-NN que predice si conceder o no una tarjeta de crédito."
+
+  Onitama_BOT:
+    name: "Onitama Bot"
+    desc_en: "An AI bot that plays the Onitama board game."
+    desc_es: "Un bot de IA que juega al juego de mesa Onitama."
+
+  Problema_del_viajante:
+    name: "Traveling Salesman"
+    desc_en: "A solver for the Traveling Salesman Problem."
+    desc_es: "Un solucionador para el Problema del Viajante."
+
+  4_in_row:
+    name: "Connect Four"
+    desc_en: "A Connect Four game implemented in C."
+    desc_es: "Un juego de Cuatro en Raya implementado en C."

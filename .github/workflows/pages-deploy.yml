@@ -50,6 +50,14 @@ jobs:
         with:
           node-version: 20
 
+      # Sync the Projects page with GitHub before building. Uses the automatic
+      # GITHUB_TOKEN only to raise the API rate limit; on any error the script
+      # keeps the committed _data/projects_generated.json as a fallback.
+      - name: Sync GitHub projects
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ruby tools/fetch-projects.rb
+
       - name: Build site
         run: bundle exec jekyll b -d "_site${{ steps.pages.outputs.base_path }}"
         env:

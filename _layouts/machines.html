@@ -1,0 +1,444 @@
+---
+layout: default
+# The "machine finder": a search-first index of every writeup, served at
+# /machines/ (the `machines` tab in _tabs/). It used to be the site index; the
+# root `/` is now the About landing.
+#
+# Notes:
+#   * A hero with a prominent search box + difficulty and OS filter chips.
+#   * NO pagination — every writeup is rendered, so the client-side search and
+#     filter reach ANY machine instead of just the current page. That is why
+#     `paginate` is gone from _config.yml; re-adding it would silently cut the
+#     list back to 10 cards and break the finder.
+#   * Compact cards (round HTB avatar + title + excerpt) laid out in a grid,
+#     each carrying a colour-coded difficulty badge, an OS badge, a lock badge
+#     when the writeup is password-protected, and the `data-difficulty` /
+#     `data-os` / `data-search` attributes the finder filters on.
+#   * The right-hand panel and the topbar search are hidden on this page (CSS)
+#     — the finder replaces both.
+#
+# Styling lives in assets/css/jekyll-theme-chirpy.scss (section 1).
+---
+
+{% include lang.html %}
+
+<!-- Pinned writeups first, then the rest (site.posts is already newest-first
+     and, under jekyll-polyglot, limited to the active language). -->
+{% assign all_pinned = site.posts | where_exp: 'item', 'item.pin == true and item.hidden != true' %}
+{% assign all_normal = site.posts | where_exp: 'item', 'item.pin != true and item.hidden != true' %}
+{% assign posts = all_pinned | concat: all_normal %}
+{% assign total = posts | size %}
+
+<!-- Difficulty levels recognised for the colour-coded badge and the filter -->
+{% assign difficulty_levels = 'Easy,Medium,Hard,Insane' | split: ',' %}
+
+<!-- OS levels for the platform filter. A machine's OS is read from its tags
+     (a post tagged `linux` or `windows`); tag your writeups accordingly. -->
+{% assign os_levels = 'linux,windows' | split: ',' %}
+
+<!-- Language-aware UI strings. Uses jekyll-polyglot's `site.active_lang` when
+     present; falls back to English otherwise. (Difficulty names stay in
+     English on purpose — they are HackTheBox's own labels.) -->
+{% assign t_heading = 'Writeups' %}
+{% assign t_lede = 'Search every writeup by machine name, technique, tool or CVE.' %}
+{% assign t_search_label = 'Search writeups' %}
+{% assign t_search_hint = 'Search a machine, technique or CVE…' %}
+{% assign t_clear = 'Clear search' %}
+{% assign t_difficulty = 'Difficulty' %}
+{% assign t_os = 'System' %}
+{% assign t_all = 'All' %}
+{% assign t_count = 'Showing :shown of :total' %}
+{% assign t_empty = 'No writeup matches your search.' %}
+{% assign t_reset = 'Reset filters' %}
+{% assign protected_label = 'Protected' %}
+{% assign protected_note = 'Password-protected — open it and enter the password to read the full writeup.' %}
+
+{% if site.active_lang == 'es' %}
+  {% assign t_lede = 'Busca cualquier writeup por máquina, técnica, herramienta o CVE.' %}
+  {% assign t_search_label = 'Buscar writeups' %}
+  {% assign t_search_hint = 'Busca una máquina, técnica o CVE…' %}
+  {% assign t_clear = 'Limpiar búsqueda' %}
+  {% assign t_difficulty = 'Dificultad' %}
+  {% assign t_os = 'Sistema' %}
+  {% assign t_all = 'Todas' %}
+  {% assign t_count = 'Mostrando :shown de :total' %}
+  {% assign t_empty = 'Ningún writeup coincide con tu búsqueda.' %}
+  {% assign t_reset = 'Quitar filtros' %}
+  {% assign protected_label = 'Protegido' %}
+  {% assign protected_note = 'Protegido con contraseña — ábrelo e introduce la contraseña para leer el writeup completo.' %}
+{% endif %}
+
+<section id="home-hero" aria-labelledby="home-heading">
+  <h1 id="home-heading" class="finder-title">{{ t_heading }}</h1>
+  <p class="finder-lede">{{ t_lede }}</p>
+
+  <div class="finder-search" role="search">
+    <i class="fas fa-search" aria-hidden="true"></i>
+    <input
+      type="search"
+      id="machine-search-input"
+      class="finder-input"
+      placeholder="{{ t_search_hint }}"
+      aria-label="{{ t_search_label }}"
+      aria-controls="post-list"
+      autocomplete="off"
+      spellcheck="false"
+    >
+    <button type="button" id="machine-search-clear" class="finder-clear" aria-label="{{ t_clear }}" hidden>
+      <i class="fas fa-xmark" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <div class="finder-filters" role="group" aria-label="{{ t_difficulty }}">
+    <span class="finder-filters-label" aria-hidden="true">{{ t_difficulty }}</span>
+
+    <button type="button" class="chip is-active" data-difficulty="all" aria-pressed="true">
+      {{ t_all }}<span class="chip-count">{{ total }}</span>
+    </button>
+
+    <!-- A difficulty only gets a chip once at least one writeup uses it. -->
+    {% for level in difficulty_levels %}
+      {% assign level_posts = posts | where_exp: 'p', 'p.categories contains level' %}
+      {% assign level_count = level_posts | size %}
+      {% if level_count > 0 %}
+        <button
+          type="button"
+          class="chip chip-{{ level | downcase }}"
+          data-difficulty="{{ level | downcase }}"
+          aria-pressed="false"
+        >
+          {{ level }}<span class="chip-count">{{ level_count }}</span>
+        </button>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <div class="finder-filters" role="group" aria-label="{{ t_os }}">
+    <span class="finder-filters-label" aria-hidden="true">{{ t_os }}</span>
+
+    <button type="button" class="chip is-active" data-os="all" aria-pressed="true">
+      {{ t_all }}<span class="chip-count">{{ total }}</span>
+    </button>
+
+    <!-- An OS only gets a chip once at least one writeup is tagged with it. -->
+    {% for os in os_levels %}
+      {% assign os_posts = posts | where_exp: 'p', 'p.tags contains os' %}
+      {% assign os_count = os_posts | size %}
+      {% if os_count > 0 %}
+        <button
+          type="button"
+          class="chip chip-os-{{ os }}"
+          data-os="{{ os }}"
+          aria-pressed="false"
+        >
+          <i class="fab fa-{{ os }}" aria-hidden="true"></i>
+          {{ os | capitalize }}<span class="chip-count">{{ os_count }}</span>
+        </button>
+      {% endif %}
+    {% endfor %}
+  </div>
+</section>
+
+<p id="machine-count" class="machine-count" aria-live="polite" data-template="{{ t_count }}">
+  {{- t_count | replace: ':shown', total | replace: ':total', total -}}
+</p>
+
+<div id="post-list" class="flex-grow-1 px-xl-1">
+  {% for post in posts %}
+    <!-- Detect the post's difficulty from its categories (order-independent);
+         everything else (the platform) stays in the card's meta line. -->
+    {% assign post_difficulty = '' %}
+    {% assign platform_categories = '' | split: '' %}
+    {% for category in post.categories %}
+      {% if difficulty_levels contains category %}
+        {% assign post_difficulty = category %}
+      {% else %}
+        {% assign platform_categories = platform_categories | push: category %}
+      {% endif %}
+    {% endfor %}
+
+    <!-- The machine's OS, read from its tags (linux / windows). -->
+    {% assign post_os = '' %}
+    {% for os_name in os_levels %}
+      {% if post.tags contains os_name %}
+        {% assign post_os = os_name %}
+      {% endif %}
+    {% endfor %}
+
+    {% capture summary %}{% include post-summary.html %}{% endcapture %}
+
+    <!-- What the finder matches against. Protected writeups contribute their
+         title, difficulty and tags only — never their text, which must not
+         leak out of the encrypted page (see assets/js/data/search.json). -->
+    {% capture haystack %}
+      {{- post.title }} {{ post.categories | join: ' ' }} {{ post.tags | join: ' ' }}
+      {%- unless post.protected %} {{ summary }}{% endunless -%}
+    {% endcapture %}
+
+    <article
+      class="card-wrapper card machine-card"
+      data-difficulty="{{ post_difficulty | downcase }}"
+      data-os="{{ post_os }}"
+      data-search="{{ haystack | normalize_whitespace | strip | downcase | escape }}"
+    >
+      <a href="{{ post.url | relative_url }}" class="machine-link">
+        {% if post.image %}
+          {% assign src = post.image.path | default: post.image %}
+
+          {% if post.media_subpath %}
+            {% unless src contains '://' %}
+              {% assign src = post.media_subpath
+                | append: '/'
+                | append: src
+                | replace: '///', '/'
+                | replace: '//', '/'
+              %}
+            {% endunless %}
+          {% endif %}
+
+          {% assign alt = post.image.alt | xml_escape | default: 'Preview Image' %}
+
+          <!-- `refactor-content.html` wraps this in `<div class="preview-img">`
+               and adds lazy loading on the way out. -->
+          <img src="{{ src }}" alt="{{ alt }}">
+        {% endif %}
+
+        <div class="machine-body">
+          <div class="machine-head">
+            <h2 class="card-title">{{ post.title }}</h2>
+
+            {% if post_difficulty != '' %}
+              <span class="difficulty-badge difficulty-{{ post_difficulty | downcase }}">{{ post_difficulty }}</span>
+            {% endif %}
+
+            {% if post_os != '' %}
+              <span class="os-badge os-{{ post_os }}">
+                <i class="fab fa-{{ post_os }}" aria-hidden="true"></i>
+                {{ post_os | capitalize }}
+              </span>
+            {% endif %}
+
+            {% if post.protected %}
+              <span class="protected-badge"><i class="fas fa-lock" aria-hidden="true"></i> {{ protected_label }}</span>
+            {% endif %}
+          </div>
+
+          {% if post.protected %}
+            <p class="machine-excerpt is-protected">{{ protected_note }}</p>
+          {% else %}
+            <p class="machine-excerpt">{{ summary }}</p>
+          {% endif %}
+
+          <div class="post-meta">
+            <span class="meta-item">
+              <i class="far fa-calendar fa-fw" aria-hidden="true"></i>
+              {% include datetime.html date=post.date lang=lang %}
+            </span>
+
+            {% if platform_categories.size > 0 %}
+              <!-- Not `class="categories"` (what the theme's own card uses):
+                   that class belongs to the Categories page's card and drags
+                   its layout in. -->
+              <span class="meta-item">
+                <i class="far fa-folder-open fa-fw" aria-hidden="true"></i>
+                {{ platform_categories | join: ', ' }}
+              </span>
+            {% endif %}
+
+            {% if post.pin %}
+              <span class="meta-item pin">
+                <i class="fas fa-thumbtack fa-fw" aria-hidden="true"></i>
+                {{ site.data.locales[lang].post.pin_prompt }}
+              </span>
+            {% endif %}
+          </div>
+          <!-- .post-meta -->
+        </div>
+        <!-- .machine-body -->
+      </a>
+    </article>
+  {% endfor %}
+</div>
+<!-- #post-list -->
+
+<p id="machine-empty" class="machine-empty" hidden>
+  <span>{{ t_empty }}</span>
+  <button type="button" id="machine-reset" class="finder-reset">{{ t_reset }}</button>
+</p>
+
+<script>
+  /* The machine finder: filters the cards above by free text (title, tags,
+     difficulty and — for unprotected writeups — the excerpt) and by
+     difficulty. The state is mirrored in the URL (?q=…&d=…) so a filtered view
+     can be linked or bookmarked. */
+  (function () {
+    const list = document.getElementById('post-list');
+    const input = document.getElementById('machine-search-input');
+    const counter = document.getElementById('machine-count');
+
+    if (!list || !input || !counter) {
+      return;
+    }
+
+    const cards = Array.from(list.querySelectorAll('.machine-card'));
+    const diffChips = Array.from(document.querySelectorAll('#home-hero .chip[data-difficulty]'));
+    const osChips = Array.from(document.querySelectorAll('#home-hero .chip[data-os]'));
+    const clearButton = document.getElementById('machine-search-clear');
+    const emptyState = document.getElementById('machine-empty');
+    const resetButton = document.getElementById('machine-reset');
+    const countTemplate = counter.dataset.template;
+
+    let difficulty = 'all';
+    let os = 'all';
+
+    function syncUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const query = input.value.trim();
+
+      if (query) {
+        params.set('q', query);
+      } else {
+        params.delete('q');
+      }
+
+      if (difficulty === 'all') {
+        params.delete('d');
+      } else {
+        params.set('d', difficulty);
+      }
+
+      if (os === 'all') {
+        params.delete('os');
+      } else {
+        params.set('os', os);
+      }
+
+      const search = params.toString();
+
+      history.replaceState(
+        null,
+        '',
+        search ? `${window.location.pathname}?${search}` : window.location.pathname
+      );
+    }
+
+    function apply(sync) {
+      const terms = input.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      let shown = 0;
+
+      cards.forEach((card) => {
+        const matches =
+          (difficulty === 'all' || card.dataset.difficulty === difficulty) &&
+          (os === 'all' || card.dataset.os === os) &&
+          terms.every((term) => card.dataset.search.includes(term));
+
+        card.hidden = !matches;
+
+        if (matches) {
+          shown += 1;
+        }
+      });
+
+      counter.textContent = countTemplate
+        .replace(':shown', shown)
+        .replace(':total', cards.length);
+      emptyState.hidden = shown > 0;
+      clearButton.hidden = input.value === '';
+
+      if (sync !== false) {
+        syncUrl();
+      }
+    }
+
+    function selectDifficulty(value, sync) {
+      difficulty = value;
+
+      diffChips.forEach((chip) => {
+        const active = chip.dataset.difficulty === value;
+        chip.classList.toggle('is-active', active);
+        chip.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+
+      apply(sync);
+    }
+
+    function selectOs(value, sync) {
+      os = value;
+
+      osChips.forEach((chip) => {
+        const active = chip.dataset.os === value;
+        chip.classList.toggle('is-active', active);
+        chip.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+
+      apply(sync);
+    }
+
+    diffChips.forEach((chip) => {
+      chip.addEventListener('click', () => selectDifficulty(chip.dataset.difficulty));
+    });
+
+    osChips.forEach((chip) => {
+      chip.addEventListener('click', () => selectOs(chip.dataset.os));
+    });
+
+    input.addEventListener('input', () => apply());
+
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && input.value !== '') {
+        input.value = '';
+        apply();
+      }
+    });
+
+    clearButton.addEventListener('click', () => {
+      input.value = '';
+      input.focus();
+      apply();
+    });
+
+    resetButton.addEventListener('click', () => {
+      input.value = '';
+      selectDifficulty('all');
+      selectOs('all');
+      input.focus();
+    });
+
+    /* "/" jumps to the finder, as long as the visitor isn't already typing. */
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== '/' || event.ctrlKey || event.metaKey || event.altKey) {
+        return;
+      }
+
+      const active = document.activeElement;
+
+      if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) {
+        return;
+      }
+
+      event.preventDefault();
+      input.focus();
+    });
+
+    /* Restore the view from the URL. Nothing is written back on load, so any
+       tracking parameters on an incoming link survive. */
+    const params = new URLSearchParams(window.location.search);
+    const query = params.get('q');
+    const level = params.get('d');
+    const platform = params.get('os');
+
+    if (query) {
+      input.value = query;
+    }
+
+    if (level && diffChips.some((chip) => chip.dataset.difficulty === level)) {
+      selectDifficulty(level, false);
+    }
+
+    if (platform && osChips.some((chip) => chip.dataset.os === platform)) {
+      selectOs(platform, false);
+    }
+
+    apply(false);
+  })();
+</script>

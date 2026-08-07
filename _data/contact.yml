@@ -13,7 +13,7 @@
 # generic handler and renders a normal `mailto:` anchor instead.
 - type: mail
   icon: "fas fa-envelope"
-  url: "mailto:andermonreal2003@gmail.com"
+  url: "mailto:amonreaya@gmail.com"
   noblank: true # open link in current tab
 
 # Hack The Box profile. Font Awesome has no HTB logo, so `htb-icon` is a

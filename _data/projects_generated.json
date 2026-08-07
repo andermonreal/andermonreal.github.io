@@ -1,0 +1,172 @@
+[
+  {
+    "repo": "ProjectManager",
+    "name": "Project Manager",
+    "url": "https://github.com/andermonreal/ProjectManager",
+    "language": "PHP",
+    "desc_en": "A boot2root CTF challenge built around a deliberately vulnerable Project Manager web app.",
+    "desc_es": "Un reto CTF boot2root construido sobre una aplicación web de gestión de proyectos deliberadamente vulnerable.",
+    "stars": 0,
+    "updated": "2025-12-18T11:32:19Z"
+  },
+  {
+    "repo": "minishell",
+    "name": "minishell",
+    "url": "https://github.com/andermonreal/minishell",
+    "language": "C",
+    "desc_en": "A minimal Unix shell written in C: parsing, pipes, redirections and built-in commands.",
+    "desc_es": "Una shell de Unix mínima escrita en C: parseo, tuberías, redirecciones y comandos internos.",
+    "stars": 0,
+    "updated": "2024-06-19T13:42:06Z"
+  },
+  {
+    "repo": "Trabajo-algoritmia",
+    "name": "kNN Credit Classifier",
+    "url": "https://github.com/andermonreal/Trabajo-algoritmia",
+    "language": "C",
+    "desc_en": "A k-NN classifier that predicts whether a credit card should be granted.",
+    "desc_es": "Un clasificador k-NN que predice si conceder o no una tarjeta de crédito.",
+    "stars": 0,
+    "updated": "2022-11-27T18:12:52Z"
+  },
+  {
+    "repo": "Onitama_BOT",
+    "name": "Onitama Bot",
+    "url": "https://github.com/andermonreal/Onitama_BOT",
+    "language": "Python",
+    "desc_en": "An AI bot that plays the Onitama board game.",
+    "desc_es": "Un bot de IA que juega al juego de mesa Onitama.",
+    "stars": 0,
+    "updated": "2024-06-19T13:19:49Z"
+  },
+  {
+    "repo": "Problema_del_viajante",
+    "name": "Traveling Salesman",
+    "url": "https://github.com/andermonreal/Problema_del_viajante",
+    "language": "Python",
+    "desc_en": "A solver for the Traveling Salesman Problem.",
+    "desc_es": "Un solucionador para el Problema del Viajante.",
+    "stars": 0,
+    "updated": "2024-06-19T13:05:30Z"
+  },
+  {
+    "repo": "4_in_row",
+    "name": "Connect Four",
+    "url": "https://github.com/andermonreal/4_in_row",
+    "language": "C",
+    "desc_en": "A Connect Four game implemented in C.",
+    "desc_es": "Un juego de Cuatro en Raya implementado en C.",
+    "stars": 0,
+    "updated": "2024-06-19T13:34:04Z"
+  },
+  {
+    "repo": "WFAudit",
+    "name": "WFAudit",
+    "url": "https://github.com/andermonreal/WFAudit",
+    "language": "JavaScript",
+    "desc_en": null,
+    "desc_es": null,
+    "stars": 0,
+    "updated": "2026-07-23T00:33:38Z"
+  },
+  {
+    "repo": "fakeWeb",
+    "name": "fakeWeb",
+    "url": "https://github.com/andermonreal/fakeWeb",
+    "language": "HTML",
+    "desc_en": null,
+    "desc_es": null,
+    "stars": 0,
+    "updated": "2026-05-13T18:52:33Z"
+  },
+  {
+    "repo": "reactNative",
+    "name": "reactNative",
+    "url": "https://github.com/andermonreal/reactNative",
+    "language": "JavaScript",
+    "desc_en": null,
+    "desc_es": null,
+    "stars": 0,
+    "updated": "2026-05-03T19:18:26Z"
+  },
+  {
+    "repo": "cineApp",
+    "name": "cineApp",
+    "url": "https://github.com/andermonreal/cineApp",
+    "language": "JavaScript",
+    "desc_en": null,
+    "desc_es": null,
+    "stars": 0,
+    "updated": "2026-03-23T22:35:32Z"
+  },
+  {
+    "repo": "OnlineShop",
+    "name": "OnlineShop",
+    "url": "https://github.com/andermonreal/OnlineShop",
+    "language": "JavaScript",
+    "desc_en": null,
+    "desc_es": null,
+    "stars": 0,
+    "updated": "2026-03-18T14:29:53Z"
+  },
+  {
+    "repo": "Despliegue_de_servicios_multimedia",
+    "name": "Despliegue_de_servicios_multimedia",
+    "url": "https://github.com/andermonreal/Despliegue_de_servicios_multimedia",
+    "language": "CSS",
+    "desc_en": null,
+    "desc_es": null,
+    "stars": 0,
+    "updated": "2026-02-17T14:01:16Z"
+  },
+  {
+    "repo": "ProjectManager2",
+    "name": "ProjectManager2",
+    "url": "https://github.com/andermonreal/ProjectManager2",
+    "language": "HTML",
+    "desc_en": "This is a boot2root challenge based on a Project Manager example.",
+    "desc_es": "This is a boot2root challenge based on a Project Manager example.",
+    "stars": 0,
+    "updated": "2026-01-21T17:34:44Z"
+  },
+  {
+    "repo": "BikeUp",
+    "name": "BikeUp",
+    "url": "https://github.com/andermonreal/BikeUp",
+    "language": "CSS",
+    "desc_en": null,
+    "desc_es": null,
+    "stars": 0,
+    "updated": "2026-01-16T12:26:43Z"
+  },
+  {
+    "repo": "GestionExamenes",
+    "name": "GestionExamenes",
+    "url": "https://github.com/andermonreal/GestionExamenes",
+    "language": "JavaScript",
+    "desc_en": null,
+    "desc_es": null,
+    "stars": 0,
+    "updated": "2024-12-13T10:50:03Z"
+  },
+  {
+    "repo": "OSO_Game",
+    "name": "OSO_Game",
+    "url": "https://github.com/andermonreal/OSO_Game",
+    "language": "Java",
+    "desc_en": null,
+    "desc_es": null,
+    "stars": 0,
+    "updated": "2024-06-19T13:15:18Z"
+  },
+  {
+    "repo": "Android_Motion_Suite_App",
+    "name": "Android_Motion_Suite_App",
+    "url": "https://github.com/andermonreal/Android_Motion_Suite_App",
+    "language": "Java",
+    "desc_en": null,
+    "desc_es": null,
+    "stars": 0,
+    "updated": "2024-06-19T12:57:50Z"
+  }
+]

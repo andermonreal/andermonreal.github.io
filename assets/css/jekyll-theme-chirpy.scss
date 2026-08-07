@@ -648,3 +648,112 @@ html[data-mode="light"] {
     }
   }
 }
+
+/* -------------------------------------------------------------------------
+   Projects page (/projects/, /es/projects/). A responsive grid of cards, one
+   per entry in _data/projects.yml. Theme-variable driven so it works in both
+   colour schemes; visually consistent with the machine cards.
+   ------------------------------------------------------------------------- */
+.projects-lede {
+  margin: 0 0 1.75rem;
+  color: var(--text-muted-color);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.1rem;
+}
+
+.project-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 1.35rem;
+  background: var(--card-bg);
+  border: 1px solid var(--main-border-color);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    border-color: var(--link-color);
+    box-shadow:
+      0 10px 24px -8px rgb(0 0 0 / 35%),
+      0 4px 8px -6px rgb(0 0 0 / 25%);
+  }
+
+  .project-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .project-name {
+    margin: 0;
+    color: var(--heading-color);
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  /* Small language / stack chip. */
+  .project-lang {
+    padding: 0.1rem 0.55rem;
+    border: 1px solid var(--main-border-color);
+    border-radius: 2rem;
+    background: var(--main-bg);
+    color: var(--text-muted-color);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .project-desc {
+    flex-grow: 1; /* push the button to the bottom, so cards align */
+    margin: 0 0 1.1rem;
+    color: var(--text-muted-color);
+    font-size: 0.88rem;
+    line-height: 1.55;
+  }
+
+  /* "View on GitHub" button. */
+  .project-link {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    gap: 0.45em;
+    padding: 0.45rem 0.9rem;
+    border: 1px solid var(--main-border-color);
+    border-radius: 8px;
+    color: var(--text-color);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease;
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--link-color);
+      background: var(--link-color);
+      color: #fff;
+      outline: none;
+    }
+  }
+}
+
+.projects-empty {
+  color: var(--text-muted-color);
+  font-style: italic;
+}
