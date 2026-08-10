@@ -1,12 +1,97 @@
 ---
-layout: page
-# Root landing page (`/`). It is deliberately named `home` and chained to the
-# theme's `page` layout so the built-in "Home" sidebar item keeps its active
-# highlight — that check is `page.layout == 'home'`. The actual content, a short
-# About / intro, lives in the root `index.md` (EN) and `index.es.md` (ES).
+layout: default
+# Root landing page (`/` and, via polyglot, `/es/`). A hero presentation that
+# introduces Ander and leads into the writeups and projects.
 #
-# (The machine finder that used to live here now has its own `machines` layout
-# and is served at /machines/.)
+# It is named `home` (and index.* set `layout: home`) so the sidebar's built-in
+# "Home" item keeps its active highlight — that check is `page.layout == 'home'`.
+# Copy is bilingual through `site.active_lang`; styling lives in the "Landing
+# page" section of assets/css/jekyll-theme-chirpy.scss.
+#
+# The avatar is a CSS background (not an <img>) on purpose: on the home layout
+# Chirpy's `refactor-content` would otherwise wrap it in a `.preview-img`.
 ---
 
-{{ content }}
+{% assign is_es = false %}
+{% if site.active_lang == 'es' %}{% assign is_es = true %}{% endif %}
+
+<div class="landing">
+  <section class="landing-hero">
+    <span
+      class="landing-avatar"
+      style="background-image: url('{{ site.avatar | relative_url }}');"
+      role="img"
+      aria-label="{{ site.social.name }}"
+    ></span>
+
+    <p class="landing-eyebrow">
+      {% if is_es %}Ingeniero Informático · Máster en Ciberseguridad{% else %}Computer Engineer · MSc in Cybersecurity{% endif %}
+    </p>
+
+    <h1 class="landing-name">{{ site.social.name }}</h1>
+
+    <p class="landing-tagline">
+      {% if is_es %}
+        Centrado en <strong>seguridad ofensiva</strong>: comprometo máquinas y documento exactamente cómo.
+      {% else %}
+        Focused on <strong>offensive security</strong>: I break into machines and document exactly how.
+      {% endif %}
+    </p>
+
+    <p class="landing-status">
+      <span class="status-dot" aria-hidden="true"></span>
+      {% if is_es %}Disponible para oportunidades en pentesting y seguridad ofensiva{% else %}Open to opportunities in penetration testing &amp; offensive security{% endif %}
+    </p>
+
+    <div class="landing-cta">
+      <a class="landing-btn landing-btn--primary" href="{{ '/machines/' | relative_url }}">
+        <i class="fas fa-terminal" aria-hidden="true"></i>
+        {% if is_es %}Ver los writeups{% else %}Read the writeups{% endif %}
+      </a>
+      <a class="landing-btn landing-btn--ghost" href="{{ '/projects/' | relative_url }}">
+        <i class="fas fa-diagram-project" aria-hidden="true"></i>
+        {% if is_es %}Ver proyectos{% else %}See the projects{% endif %}
+      </a>
+    </div>
+
+    <div class="landing-contact">
+      <a href="mailto:amonreaya@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+      <a href="https://github.com/andermonreal" target="_blank" rel="noopener" aria-label="GitHub"><i class="fab fa-github"></i></a>
+      <a href="https://www.linkedin.com/in/ander-monreal-ayanz-485794291" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+    </div>
+  </section>
+
+  <section class="landing-about">
+    {% if is_es %}
+      <p>Hola, soy <strong>Ander</strong> — profesional de la ciberseguridad centrado en la seguridad ofensiva. Soy Ingeniero Informático y tengo un Máster en Ciberseguridad, y dedico mi tiempo a convertir esa base en habilidad práctica frente a un teclado.</p>
+      <p>Esta web es donde documento ese trabajo: <strong>writeups</strong> detallados de las máquinas de HackTheBox y retos CTF que resuelvo —del reconocimiento al root, con el razonamiento detrás de cada paso— y los <strong>proyectos</strong> y herramientas que construyo por el camino.</p>
+    {% else %}
+      <p>Hi, I'm <strong>Ander</strong> — a cybersecurity professional focused on offensive security. I hold a degree in Computer Engineering and a Master's in Cybersecurity, and I spend my time turning that foundation into hands-on skill in front of a keyboard.</p>
+      <p>This site is where I document that work: detailed <strong>writeups</strong> of the HackTheBox machines and CTF challenges I solve — full recon-to-root, with the reasoning behind every step — and the <strong>projects</strong> and tools I build along the way.</p>
+    {% endif %}
+  </section>
+
+  <section class="landing-cards" aria-label="{% if is_es %}Explora{% else %}Explore{% endif %}">
+    <a class="landing-card" href="{{ '/machines/' | relative_url }}">
+      <span class="landing-card-icon"><i class="fas fa-server" aria-hidden="true"></i></span>
+      <span class="landing-card-text">
+        <span class="landing-card-title">{% if is_es %}Writeups{% else %}Writeups{% endif %}</span>
+        <span class="landing-card-desc">{% if is_es %}Del reconocimiento al root, explicado. Máquinas de HackTheBox y CTFs, paso a paso.{% else %}Recon to root, explained. HackTheBox machines &amp; CTFs, step by step.{% endif %}</span>
+      </span>
+      <i class="fas fa-arrow-right landing-card-arrow" aria-hidden="true"></i>
+    </a>
+
+    <a class="landing-card" href="{{ '/projects/' | relative_url }}">
+      <span class="landing-card-icon"><i class="fas fa-diagram-project" aria-hidden="true"></i></span>
+      <span class="landing-card-text">
+        <span class="landing-card-title">{% if is_es %}Proyectos{% else %}Projects{% endif %}</span>
+        <span class="landing-card-desc">{% if is_es %}Herramientas, retos y trabajos que he construido.{% else %}Tools, challenges and course work I've built.{% endif %}</span>
+      </span>
+      <i class="fas fa-arrow-right landing-card-arrow" aria-hidden="true"></i>
+    </a>
+  </section>
+
+  <p class="landing-disclaimer">
+    {% if is_es %}Todo el contenido tiene fines educativos y se comparte solo tras retirarse o resolverse públicamente la máquina o el reto, en entornos de laboratorio autorizados.{% else %}All content is for educational purposes and shared only after the related machine or challenge is retired or publicly solved, in authorized lab environments.{% endif %}
+  </p>
+</div>
