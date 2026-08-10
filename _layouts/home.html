@@ -61,6 +61,10 @@ layout: default
     </div>
   </section>
 
+  <section class="landing-spotlight" aria-label="{% if is_es %}Proyecto destacado{% else %}Featured project{% endif %}">
+    {% include spotlight-card.html %}
+  </section>
+
   <section class="landing-about">
     {% if is_es %}
       <p>Hola, soy <strong>Ander</strong> — profesional de la ciberseguridad centrado en la seguridad ofensiva. Soy Ingeniero Informático y tengo un Máster en Ciberseguridad, y dedico mi tiempo a convertir esa base en habilidad práctica frente a un teclado.</p>

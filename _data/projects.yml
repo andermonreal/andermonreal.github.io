@@ -25,36 +25,72 @@ exclude_archived: true
 # recently pushed first), so nothing ever disappears — add its name here when
 # you want to place it.
 order:
+  - WFAudit
+  - LAN-Scanner
   - ProjectManager
+  - ProjectManager2
   - minishell
+  - fakeWeb
+  - cineApp
+  - OnlineShop
+  - BikeUp
   - Trabajo-algoritmia
   - Onitama_BOT
   - Problema_del_viajante
   - 4_in_row
-  - WFAudit
-  - fakeWeb
-  - reactNative
-  - cineApp
-  - OnlineShop
   - Despliegue_de_servicios_multimedia
-  - ProjectManager2
-  - BikeUp
   - GestionExamenes
   - OSO_Game
+  - reactNative
   - Android_Motion_Suite_App
 
 # Per-repo overrides, keyed by the exact GitHub repo name. Any field set here
 # wins over GitHub's data. Repos not listed here still appear, using GitHub's
 # own name / description / language. Fields: name, url, language, desc_en, desc_es.
 overrides:
+  WFAudit:
+    desc_en: "A comprehensive Wi-Fi and network auditing toolkit bundling many modules: WPA/WPA2 and enterprise cracking, PMKID capture, evil-twin and MITM attacks, full Nmap reconnaissance (open ports, versions and services) and custom wordlist generation from seed words."
+    desc_es: "Un kit completo de auditoría Wi-Fi y de redes que reúne múltiples módulos: crackeo de WPA/WPA2 y enterprise, captura de PMKID, ataques evil-twin y MITM, reconocimiento completo con Nmap (puertos abiertos, versiones y servicios) y generación de diccionarios personalizados a partir de palabras semilla."
+
+  LAN-Scanner:
+    name: "LAN Scanner"
+    desc_en: "A mobile network-scanning app that discovers hosts along with their open ports, versions and services, renders the scan as an interactive graph map, and exports a shareable report."
+    desc_es: "Aplicación móvil de escaneo de redes que descubre los hosts junto a sus puertos, versiones y servicios, representa el escaneo como un mapa en grafo interactivo y exporta un informe para compartir."
+
   ProjectManager:
     name: "Project Manager"
-    desc_en: "A boot2root CTF challenge built around a deliberately vulnerable Project Manager web app."
-    desc_es: "Un reto CTF boot2root construido sobre una aplicación web de gestión de proyectos deliberadamente vulnerable."
+    desc_en: "An easy boot-to-root CTF challenge centred on a basic stack buffer overflow."
+    desc_es: "Un reto CTF boot-to-root fácil centrado en un buffer overflow de pila básico."
+
+  ProjectManager2:
+    name: "Project Manager 2"
+    language: "Python"
+    desc_en: "A more elaborate boot-to-root CTF challenge that exploits a known CVE in an outdated Django 4.2 install."
+    desc_es: "Un reto CTF boot-to-root más elaborado que explota una CVE conocida en una versión desactualizada de Django 4.2."
 
   minishell:
-    desc_en: "A minimal Unix shell written in C: parsing, pipes, redirections and built-in commands."
-    desc_es: "Una shell de Unix mínima escrita en C: parseo, tuberías, redirecciones y comandos internos."
+    desc_en: "A Unix shell written in C that emulates a Debian shell — command parsing, pipes, forks, redirections and built-ins."
+    desc_es: "Una shell de Unix escrita en C que emula la shell de Debian: parseo de comandos, pipes, forks, redirecciones y comandos internos."
+
+  fakeWeb:
+    name: "FakeWeb"
+    desc_en: "A social-engineering (phishing) demo framework with an admin panel. It clones any target page to capture submissions and logs every entry at /admin/logs for review."
+    desc_es: "Un framework de demostración de ingeniería social (phishing) con panel de administración. Clona cualquier página objetivo para capturar los envíos y registra cada entrada en /admin/logs para su revisión."
+
+  cineApp:
+    name: "CineApp"
+    desc_en: "A movie-catalogue web app with user authentication, comments and a per-user favourites list. Includes a live deployment."
+    desc_es: "Aplicación web de catálogo de películas con autenticación de usuarios, comentarios y lista de favoritos por usuario. Incluye un despliegue en vivo."
+
+  OnlineShop:
+    name: "Online Shop"
+    desc_en: "An e-commerce web app: browse the catalogue, manage a shopping cart and check out once signed in, with an admin panel to manage products."
+    desc_es: "Aplicación web de tienda online: navega el catálogo, gestiona el carrito y finaliza la compra tras iniciar sesión, con un panel de administración para gestionar los productos."
+
+  BikeUp:
+    language: "Python"
+    desc_en: "A security-focused urban bike-rental web app built with Django. Follows hexagonal architecture, DDD and secure-by-design practices, mirroring a hardened production setup that isolates each DMZ and endpoint."
+    desc_es: "Aplicación web de alquiler de bicicletas urbanas centrada en la seguridad, construida con Django. Sigue arquitectura hexagonal, DDD y buenas prácticas de diseño seguro, replicando un entorno de producción bastionado que aísla cada DMZ y endpoint."
 
   Trabajo-algoritmia:
     name: "kNN Credit Classifier"
@@ -75,3 +111,85 @@ overrides:
     name: "Connect Four"
     desc_en: "A Connect Four game implemented in C."
     desc_es: "Un juego de Cuatro en Raya implementado en C."
+
+# ---------------------------------------------------------------------------
+# Featured / spotlight project — MANUAL (not synced from GitHub).
+# Didymus is a private product, so nothing here is fetched; the copy is kept at
+# a product-pitch level on purpose (no architecture or implementation detail
+# that could be copied). Rendered as a spotlight at the top of /projects/, a
+# block on the home page, and its own page at /projects/<slug>/ (generated by
+# _plugins/projects-pages.rb).
+# ---------------------------------------------------------------------------
+spotlight:
+  slug: didymus
+  name: Didymus
+  logo: /assets/img/didymus-logo.svg   # symbol only; the name text sits beside it
+  tech: [Python, Docker]
+  collaborator: Ekaitz Arribillaga
+
+  tagline_en: "Deception-technology cyberdefense platform"
+  tagline_es: "Plataforma de ciberdefensa basada en deception"
+
+  blurb_en: "Turns a network into a trap: it lures attackers into controlled decoys, keeps the real systems untouched, and captures rich forensic telemetry on every move."
+  blurb_es: "Convierte una red en una trampa: desvía a los atacantes hacia señuelos controlados, mantiene intactos los sistemas reales y captura telemetría forense detallada de cada movimiento."
+
+  body_en: |
+    Didymus is a cyberdefense platform built on **deception technology**. It adds
+    an extra layer of defense that lures attackers into controlled decoy
+    environments — buying defenders time, keeping the real production systems
+    untouched, and producing rich forensic telemetry to understand how an attack
+    unfolds. *(Didymus is Greek for "twin".)*
+
+    At its core it orchestrates **intelligent honeypots** across two fronts:
+
+    - **Usurper** — watches over the internal, trusted network and flags intruders
+      that shouldn't be there.
+    - **Digital Twin** — mirrors the organization's external attack surface into an
+      isolated, fully controlled environment, so attackers burn their effort on
+      decoys while the Blue Team watches every move.
+
+    ### What it offers
+
+    - Realistic honeypots that impersonate common services — SSH, HTTP/S, FTP,
+      SMB, MySQL, Active Directory and more.
+    - A hierarchical alert engine that surfaces the most critical events first.
+    - Detailed, real-time forensic telemetry of everything an attacker does.
+    - Compromised-credential detection: an instant alert if a real corporate
+      password ever shows up in an attacker's hands.
+    - A web console with role-based access (operator / analyst / forensic) and
+      live monitoring dashboards.
+
+    Built in **Python** (with **Docker**), Didymus is my flagship project — in
+    active development together with **Ekaitz Arribillaga**.
+
+  body_es: |
+    Didymus es una plataforma de ciberdefensa basada en **deception technology**
+    (tecnologías de engaño). Añade una capa extra de defensa que atrae a los
+    atacantes hacia entornos señuelo controlados — ganando tiempo a los
+    defensores, manteniendo intactos los sistemas reales de producción y
+    generando telemetría forense detallada para entender cómo se desarrolla un
+    ataque. *(Didymus significa "gemelo" en griego.)*
+
+    En su núcleo orquesta **honeypots inteligentes** en dos frentes:
+
+    - **Usurper** — vigila la red interna de confianza y detecta intrusos que no
+      deberían estar ahí.
+    - **Digital Twin** — replica la superficie de ataque externa de la
+      organización en un entorno aislado y totalmente controlado, para que los
+      atacantes malgasten su esfuerzo en señuelos mientras el Blue Team observa
+      cada movimiento.
+
+    ### Qué ofrece
+
+    - Honeypots realistas que suplantan servicios comunes — SSH, HTTP/S, FTP,
+      SMB, MySQL, Active Directory y más.
+    - Un motor de alertas jerárquico que prioriza los eventos más críticos.
+    - Telemetría forense detallada y en tiempo real de todo lo que hace un
+      atacante.
+    - Detección de credenciales comprometidas: alerta inmediata si una contraseña
+      corporativa real aparece en manos de un atacante.
+    - Una consola web con control de acceso por roles (operador / analista /
+      forense) y dashboards de monitorización en vivo.
+
+    Construido en **Python** (con **Docker**), Didymus es mi proyecto estrella —
+    en desarrollo activo junto a **Ekaitz Arribillaga**.

@@ -1251,3 +1251,210 @@ body:has(.landing) {
   line-height: 1.55;
   text-align: center;
 }
+
+/* -------------------------------------------------------------------------
+   Spotlight — the manual featured project (Didymus). Shown at the top of the
+   Projects page and on the home landing; deliberately more prominent than the
+   regular project cards. Its own detail page reuses these bits too.
+   ------------------------------------------------------------------------- */
+.landing-spotlight {
+  margin-top: 2.25rem;
+}
+
+.spotlight {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+  overflow: hidden;
+  margin-bottom: 1.6rem;
+  padding: 1.75rem;
+  border: 1px solid var(--main-border-color);
+  border-radius: 16px;
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+  color: inherit;
+  text-decoration: none;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+
+  /* soft accent glow in the top-right corner */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      130% 90% at 100% 0%,
+      rgb(138 180 248 / 12%),
+      transparent 55%
+    );
+    pointer-events: none;
+  }
+
+  > * {
+    position: relative; /* sit above the glow */
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    border-color: var(--link-color);
+    box-shadow: 0 16px 38px -14px rgb(0 0 0 / 55%);
+    text-decoration: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 3px;
+  }
+
+  &:hover .spotlight-cta i {
+    transform: translateX(3px);
+  }
+}
+
+.spotlight-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.22rem 0.65rem;
+  border-radius: 2rem;
+  background: rgb(240 185 11 / 14%);
+  color: #d99e06;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.spotlight-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.2rem;
+}
+
+/* The Didymus symbol (SVG) as a theme-recoloured mask — light on dark, dark on
+   light — so the black artwork is never invisible. `--logo` is set inline. */
+.spotlight-symbol {
+  flex: 0 0 auto;
+  width: 2.4rem;
+  height: 2.6rem;
+  background-color: var(--heading-color);
+  -webkit-mask: var(--logo) center / contain no-repeat;
+  mask: var(--logo) center / contain no-repeat;
+}
+
+.spotlight-name {
+  color: var(--heading-color);
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.spotlight-tagline {
+  display: block;
+  color: var(--text-color);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.spotlight-blurb {
+  display: block;
+  max-width: 46rem;
+  color: var(--text-muted-color);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.spotlight-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.85rem;
+  margin-top: 0.35rem;
+}
+
+.spotlight-tech {
+  padding: 0.12rem 0.6rem;
+  border: 1px solid var(--main-border-color);
+  border-radius: 2rem;
+  background: var(--main-bg);
+  color: var(--text-color);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.spotlight-dev {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  color: var(--text-muted-color);
+  font-size: 0.8rem;
+
+  .status-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: #3fb950;
+    animation: landing-pulse 2s infinite;
+  }
+}
+
+.spotlight-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  margin-top: 0.55rem;
+  color: var(--link-color);
+  font-size: 0.85rem;
+  font-weight: 700;
+
+  i {
+    transition: transform 0.15s ease;
+  }
+}
+
+/* Spotlight detail page (/projects/didymus/) */
+.spotlight-page-tagline {
+  margin: 0 0 0.75rem;
+  color: var(--text-color);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.spotlight-page-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spotlight-dev .status-dot {
+    animation: none;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Footer alignment on the full-width pages. On the landing and the finder the
+   right-hand panel is hidden and the main column goes full width, but the
+   footer (`#tail-wrapper`) is still a `col-xl-9`, so it ends up narrower and
+   offset. Match the footer to the content on those pages.
+   ------------------------------------------------------------------------- */
+body:has(#home-hero) #tail-wrapper {
+  width: 100%; /* finder is full-width → footer full-width, aligned */
+}
+
+body:has(.landing) #tail-wrapper {
+  width: 100%;
+}
+
+body:has(.landing) #tail-wrapper > footer {
+  max-width: 760px; /* match the centred .landing column */
+  margin-inline: auto;
+}

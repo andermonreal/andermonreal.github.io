@@ -1,7 +1,10 @@
 # Bundler cache
 .bundle
 vendor
-Gemfile.lock
+
+# Gemfile.lock is committed on purpose: it pins jekyll-theme-chirpy (and its
+# Font Awesome version) so CI/production builds are reproducible and don't
+# silently drift to a newer theme release on every deploy.
 
 # Jekyll cache
 .jekyll-cache

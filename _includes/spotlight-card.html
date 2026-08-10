@@ -1,0 +1,54 @@
+{% comment %}
+  Reusable spotlight card for the manual featured project (Didymus). Used at the
+  top of the Projects page and on the home landing. Reads the `spotlight` block
+  of _data/projects.yml; bilingual via `site.active_lang`. The logo, when set,
+  is a CSS background (never an <img>, so Chirpy's image handling can't touch it).
+{% endcomment %}
+{% assign sp = site.data.projects.spotlight %}
+{% if sp %}
+  {% assign is_es = false %}
+  {% if site.active_lang == 'es' %}{% assign is_es = true %}{% endif %}
+
+  {% assign sp_tagline = sp.tagline_en %}
+  {% assign sp_blurb = sp.blurb_en %}
+  {% assign t_featured = 'Featured project' %}
+  {% assign t_dev = 'In development' %}
+  {% assign t_with = 'with' %}
+  {% assign t_more = 'Explore' %}
+  {% if is_es %}
+    {% assign sp_tagline = sp.tagline_es %}
+    {% assign sp_blurb = sp.blurb_es %}
+    {% assign t_featured = 'Proyecto destacado' %}
+    {% assign t_dev = 'En desarrollo' %}
+    {% assign t_with = 'con' %}
+    {% assign t_more = 'Descubrir' %}
+  {% endif %}
+
+  <a class="spotlight" href="{{ '/projects/' | append: sp.slug | append: '/' | relative_url }}">
+    <span class="spotlight-badge"><i class="fas fa-star" aria-hidden="true"></i> {{ t_featured }}</span>
+
+    <span class="spotlight-brand">
+      {% if sp.logo %}
+        <span
+          class="spotlight-symbol"
+          style="--logo: url('{{ sp.logo | relative_url }}');"
+          aria-hidden="true"
+        ></span>
+      {% endif %}
+      <span class="spotlight-name">{{ sp.name }}</span>
+    </span>
+
+    <span class="spotlight-tagline">{{ sp_tagline }}</span>
+    <span class="spotlight-blurb">{{ sp_blurb }}</span>
+
+    <span class="spotlight-meta">
+      {% for t in sp.tech %}<span class="spotlight-tech">{{ t }}</span>{% endfor %}
+      <span class="spotlight-dev">
+        <span class="status-dot" aria-hidden="true"></span>
+        {{ t_dev }}{% if sp.collaborator %} · {{ t_with }} {{ sp.collaborator }}{% endif %}
+      </span>
+    </span>
+
+    <span class="spotlight-cta">{{ t_more }} <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
+  </a>
+{% endif %}
