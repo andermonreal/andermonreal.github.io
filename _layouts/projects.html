@@ -26,23 +26,33 @@ layout: page
 {% if ordered and ordered.size > 0 %}
   <div class="projects-grid">
     {% for p in ordered %}
-      <a class="project-card" href="{{ '/projects/' | append: p.slug | append: '/' | relative_url }}">
-        <div class="project-head">
+      {% assign desc = p.desc_en %}
+      {% if site.active_lang == 'es' %}
+        {% assign desc = p.desc_es | default: p.desc_en %}
+      {% endif %}
+
+      <a
+        class="project-card"
+        href="{{ '/projects/' | append: p.slug | append: '/' | relative_url }}"
+        data-lang="{{ p.language }}"
+      >
+        <div class="project-card-body">
           <h2 class="project-name">{{ p.name }}</h2>
-          {% if p.language %}
-            <span class="project-lang">{{ p.language }}</span>
+          {% if desc %}
+            <p class="project-desc">{{ desc }}</p>
           {% endif %}
         </div>
 
-        {% assign desc = p.desc_en %}
-        {% if site.active_lang == 'es' %}
-          {% assign desc = p.desc_es | default: p.desc_en %}
-        {% endif %}
-        {% if desc %}
-          <p class="project-desc">{{ desc }}</p>
-        {% endif %}
-
-        <span class="project-cta">{{ t_cta }} &rarr;</span>
+        <div class="project-foot">
+          {% if p.language %}
+            <span class="project-lang">
+              <span class="lang-dot" aria-hidden="true"></span>{{ p.language }}
+            </span>
+          {% else %}
+            <span></span>
+          {% endif %}
+          <span class="project-cta">{{ t_cta }} <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
+        </div>
       </a>
     {% endfor %}
   </div>
