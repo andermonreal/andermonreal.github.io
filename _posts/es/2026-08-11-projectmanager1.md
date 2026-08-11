@@ -4,7 +4,7 @@ date: 2026-08-11
 categories: [Custom, Easy]
 tags: [linux, apache, php, information disclosure, sensitive data exposure, sha1, hashcat, credential reuse, LFI, php filter, command injection, RCE, reverse shell, SUID, buffer overflow, gets, sudo, tar wildcard, gtfobins, docker]
 image:
-  path: /assets/img/Custom/ProjectManager1/banner.png
+  path: /assets/img/Custom/ProjectManager1/banner.jpeg
   alt: ProjectManager1 writeup
 ---
 
