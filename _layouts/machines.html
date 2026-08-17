@@ -36,6 +36,21 @@ layout: default
      (a post tagged `linux` or `windows`); tag your writeups accordingly. -->
 {% assign os_levels = 'linux,windows' | split: ',' %}
 
+<!-- Platforms are the non-difficulty categories (HackTheBox, Custom, …). The
+     list is built from the posts, so a new platform (e.g. TryHackMe) shows up
+     automatically the first time a writeup uses it as a category. -->
+{% assign platforms = '' | split: '' %}
+{% for p_item in posts %}
+  {% for category in p_item.categories %}
+    {% unless difficulty_levels contains category %}
+      {% unless platforms contains category %}
+        {% assign platforms = platforms | push: category %}
+      {% endunless %}
+    {% endunless %}
+  {% endfor %}
+{% endfor %}
+{% assign platforms = platforms | sort %}
+
 <!-- Language-aware UI strings. Uses jekyll-polyglot's `site.active_lang` when
      present; falls back to English otherwise. (Difficulty names stay in
      English on purpose — they are HackTheBox's own labels.) -->
@@ -46,6 +61,7 @@ layout: default
 {% assign t_clear = 'Clear search' %}
 {% assign t_difficulty = 'Difficulty' %}
 {% assign t_os = 'System' %}
+{% assign t_platform = 'Platform' %}
 {% assign t_all = 'All' %}
 {% assign t_count = 'Showing :shown of :total' %}
 {% assign t_empty = 'No writeup matches your search.' %}
@@ -60,6 +76,7 @@ layout: default
   {% assign t_clear = 'Limpiar búsqueda' %}
   {% assign t_difficulty = 'Dificultad' %}
   {% assign t_os = 'Sistema' %}
+  {% assign t_platform = 'Plataforma' %}
   {% assign t_all = 'Todas' %}
   {% assign t_count = 'Mostrando :shown de :total' %}
   {% assign t_empty = 'Ningún writeup coincide con tu búsqueda.' %}
@@ -87,6 +104,30 @@ layout: default
     <button type="button" id="machine-search-clear" class="finder-clear" aria-label="{{ t_clear }}" hidden>
       <i class="fas fa-xmark" aria-hidden="true"></i>
     </button>
+  </div>
+
+  <div class="finder-filters" role="group" aria-label="{{ t_platform }}">
+    <span class="finder-filters-label" aria-hidden="true">{{ t_platform }}</span>
+
+    <button type="button" class="chip is-active" data-platform="all" aria-pressed="true">
+      {{ t_all }}<span class="chip-count">{{ total }}</span>
+    </button>
+
+    <!-- A platform only gets a chip once at least one writeup uses it. -->
+    {% for platform in platforms %}
+      {% assign platform_posts = posts | where_exp: 'p', 'p.categories contains platform' %}
+      {% assign platform_count = platform_posts | size %}
+      {% if platform_count > 0 %}
+        <button
+          type="button"
+          class="chip chip-platform-{{ platform | slugify }}"
+          data-platform="{{ platform | downcase }}"
+          aria-pressed="false"
+        >
+          {{ platform }}<span class="chip-count">{{ platform_count }}</span>
+        </button>
+      {% endif %}
+    {% endfor %}
   </div>
 
   <div class="finder-filters" role="group" aria-label="{{ t_difficulty }}">
@@ -165,6 +206,9 @@ layout: default
       {% endif %}
     {% endfor %}
 
+    <!-- The platform is the post's first non-difficulty category. -->
+    {% assign post_platform = platform_categories | first %}
+
     {% capture summary %}{% include post-summary.html %}{% endcapture %}
 
     <!-- What the finder matches against. Protected writeups contribute their
@@ -180,6 +224,7 @@ layout: default
       href="{{ post.url | relative_url }}"
       data-difficulty="{{ post_difficulty | downcase }}"
       data-os="{{ post_os }}"
+      data-platform="{{ post_platform | downcase }}"
       data-search="{{ haystack | normalize_whitespace | strip | downcase | escape }}"
     >
       {% if post.image %}
@@ -281,6 +326,7 @@ layout: default
     const cards = Array.from(list.querySelectorAll('.machine-card'));
     const diffChips = Array.from(document.querySelectorAll('#home-hero .chip[data-difficulty]'));
     const osChips = Array.from(document.querySelectorAll('#home-hero .chip[data-os]'));
+    const platformChips = Array.from(document.querySelectorAll('#home-hero .chip[data-platform]'));
     const clearButton = document.getElementById('machine-search-clear');
     const emptyState = document.getElementById('machine-empty');
     const resetButton = document.getElementById('machine-reset');
@@ -288,6 +334,7 @@ layout: default
 
     let difficulty = 'all';
     let os = 'all';
+    let platform = 'all';
 
     function syncUrl() {
       const params = new URLSearchParams(window.location.search);
@@ -311,6 +358,12 @@ layout: default
         params.set('os', os);
       }
 
+      if (platform === 'all') {
+        params.delete('p');
+      } else {
+        params.set('p', platform);
+      }
+
       const search = params.toString();
 
       history.replaceState(
@@ -328,6 +381,7 @@ layout: default
         const matches =
           (difficulty === 'all' || card.dataset.difficulty === difficulty) &&
           (os === 'all' || card.dataset.os === os) &&
+          (platform === 'all' || card.dataset.platform === platform) &&
           terms.every((term) => card.dataset.search.includes(term));
 
         card.hidden = !matches;
@@ -372,12 +426,28 @@ layout: default
       apply(sync);
     }
 
+    function selectPlatform(value, sync) {
+      platform = value;
+
+      platformChips.forEach((chip) => {
+        const active = chip.dataset.platform === value;
+        chip.classList.toggle('is-active', active);
+        chip.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+
+      apply(sync);
+    }
+
     diffChips.forEach((chip) => {
       chip.addEventListener('click', () => selectDifficulty(chip.dataset.difficulty));
     });
 
     osChips.forEach((chip) => {
       chip.addEventListener('click', () => selectOs(chip.dataset.os));
+    });
+
+    platformChips.forEach((chip) => {
+      chip.addEventListener('click', () => selectPlatform(chip.dataset.platform));
     });
 
     input.addEventListener('input', () => apply());
@@ -399,6 +469,7 @@ layout: default
       input.value = '';
       selectDifficulty('all');
       selectOs('all');
+      selectPlatform('all');
       input.focus();
     });
 
@@ -423,7 +494,8 @@ layout: default
     const params = new URLSearchParams(window.location.search);
     const query = params.get('q');
     const level = params.get('d');
-    const platform = params.get('os');
+    const osParam = params.get('os');
+    const platformParam = params.get('p');
 
     if (query) {
       input.value = query;
@@ -433,8 +505,12 @@ layout: default
       selectDifficulty(level, false);
     }
 
-    if (platform && osChips.some((chip) => chip.dataset.os === platform)) {
-      selectOs(platform, false);
+    if (osParam && osChips.some((chip) => chip.dataset.os === osParam)) {
+      selectOs(osParam, false);
+    }
+
+    if (platformParam && platformChips.some((chip) => chip.dataset.platform === platformParam)) {
+      selectPlatform(platformParam, false);
     }
 
     apply(false);
