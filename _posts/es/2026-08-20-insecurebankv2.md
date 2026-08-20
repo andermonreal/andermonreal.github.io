@@ -8,7 +8,7 @@ image:
   alt: InsecureBankv2 writeup
 ---
 
-InsecureBankv2 es una aplicación bancaria Android deliberadamente vulnerable que concentra casi todas las malas configuraciones móviles en un solo APK: componentes exportados que saltan el login, credenciales almacenadas bajo una clave AES hardcodeada, `allowBackup` y `debuggable` activados, logging y HTTP en claro, un WebView inyectable y un cambio de contraseña por manipulación de parámetros. Más que una única cadena hasta root, esto es un catálogo de fallos independientes del lado cliente y de configuración, cada uno documentado con su mecanismo, su explotación y su corrección.
+InsecureBankv2 es una aplicación bancaria Android deliberadamente vulnerable que concentra casi todas las malas configuraciones móviles en un solo APK: componentes exportados que saltan el login, credenciales almacenadas bajo una clave AES hardcodeada, `allowBackup` y `debuggable` activados, logging y HTTP en claro, un WebView inyectable y un cambio de contraseña por manipulación de parámetros. Más que una única cadena hasta root, esto es un catálogo de fallos independientes del lado cliente y de configuración, cada uno documentado con su mecanismo, su explotación.
 
 | Campo      | Detalles                      |
 |------------|-------------------------------|
@@ -148,7 +148,6 @@ Aquí `am` es el Activity Manager del dispositivo y `start -n <package>/<compone
 
 ![Actividad PostLogin alcanzada directamente, mostrando Transfer, View Statement y Change Password](/assets/img/Mobile/InsecureBankv2/cap4.png)
 
-**Corrección**: marca como `android:exported="false"` las actividades que solo deban ser alcanzables internamente, y nunca dependas del orden de las actividades como frontera de autenticación. La autorización debe imponerla la propia actividad (una comprobación de sesión en `onCreate`), no la suposición de que el usuario "tuvo que" venir de la pantalla de login.
 
 ## Content Provider Exportado
 
@@ -168,7 +167,6 @@ public class TrackUserContentProvider extends ContentProvider {
 
 Como el provider está exportado sin declarar permiso de lectura, cualquier app del dispositivo puede consultarlo mediante su URI `content://` y extraer la lista de usuarios que se han logueado — nombres de usuario que nunca deberían haber salido del sandbox de la app. La misma tabla `names` reaparece más adelante, extraída a través de otros dos fallos independientes (backup y `run-as`), lo cual es un tema recurrente en esta app: un único dato sensible, varias puertas sin proteger hacia él.
 
-**Corrección**: no exportes content providers salvo que compartir entre apps sea un requisito real. Cuando lo sea, protege lecturas y escrituras tras un permiso a nivel de firma y valida el paquete que llama.
 
 ## Patcheo del APK — Botón Oculto "Create User"
 
@@ -269,7 +267,6 @@ protected void createUser() {
 
 Así que esto no es una escalada de privilegios — es una demostración de que **los flags del lado cliente no son una frontera de seguridad**. Cualquier decisión que el cliente tome basándose en un valor que él mismo distribuye (feature gating, toggles de "admin", comprobaciones de licencia) puede invertirse reempaquetando. La lección generaliza mucho más allá de este stub.
 
-**Corrección**: nunca condiciones comportamiento relevante para la seguridad a recursos del lado cliente o a estado provisto por el cliente. Las decisiones de autorización pertenecen al servidor, que el cliente no puede reescribir.
 
 ## Backdoor de Login de Desarrollador
 
@@ -298,7 +295,6 @@ El endpoint `/devlogin` acepta al usuario `devadmin` con **cualquier contraseña
 
 Este es un backdoor de desarrollador clásico: un atajo dejado para pruebas que nunca se eliminó. La lógica de enrutamiento reside enteramente en el lado cliente en el código decompilado, así que incluso sin saber que el endpoint existía, leer `DoLogin.java` lo revela.
 
-**Corrección**: elimina las rutas de autenticación de desarrollo/pruebas antes del release, y nunca distribuyas un endpoint que salte la verificación de credenciales. Los backdoors invariablemente sobreviven al sprint en el que se añadieron.
 
 ## Almacenamiento Inseguro de Credenciales
 
@@ -418,7 +414,6 @@ ander@monre:~/mobileHack/InsecureBankV2$ frida -U -n InsecureBankv2 -l decrypt.j
 
 Los dos métodos llegan al mismo resultado desde direcciones opuestas: uno reimplementa el cipher offline, el otro toma prestada la rutina de descifrado de la propia app en tiempo de ejecución. El enfoque de Frida es el más general — funciona incluso cuando la clave *no* es trivialmente legible, porque nunca necesitas conocerla.
 
-**Corrección**: nunca hardcodees claves ni uses IVs estáticos. El material sensible debe almacenarse usando el Android Keystore (respaldado por hardware donde esté disponible), con claves generadas por dispositivo y nunca embebidas en el APK. Las contraseñas en particular no deberían almacenarse de forma recuperable en absoluto.
 
 ## Backup de la Aplicación Habilitado
 
@@ -458,7 +453,6 @@ El backup contiene tanto `mySharedPreferences.xml` (el usuario en Base64 y la co
 
 Una nota de realismo que merece la pena registrar: en **Android 12+ (API 31)**, `adb backup` ignora los datos de la app por defecto incluso con `allowBackup=true`, así que este ataque solo funciona en el objetivo más antiguo de Android 11 usado aquí. El flag sigue siendo un finding válido (defensa en profundidad, MASVS-STORAGE), pero su explotabilidad real depende de la versión del SO del objetivo — un buen ejemplo de capacidad frente a explotabilidad práctica.
 
-**Corrección**: pon `android:allowBackup="false"`. Para datos que sí deban respaldarse en la nube, usa reglas `fullBackupContent` para excluir ficheros sensibles, y nunca almacenes credenciales en claro ni bajo una clave recuperable.
 
 ## Modo Debug Habilitado
 
@@ -503,7 +497,6 @@ en_US
 
 `run-as` (vía debuggable), `adb backup` (vía allowBackup) y el content provider convergen todos en este mismo dato — tres malas configuraciones independientes, un único conjunto de secretos. Esa redundancia es la verdadera lección: una app móvil fortificada contra un camino pero no contra los otros no está fortificada en absoluto.
 
-**Corrección**: pon `android:debuggable="false"` (o simplemente omítelo y compila siempre en modo release). Un check de CI que rechace cualquier build con `debuggable=true` en el manifest atrapa esto antes de que se distribuya.
 
 ## Bypass de Detección de Root con Frida
 
@@ -579,7 +572,6 @@ Tras loguearme con el hook cargado, la app ahora reporta "Device not Rooted!!":
 
 El punto más amplio: **la detección de root del lado cliente siempre puede neutralizarse en un dispositivo que el atacante controla.** Sube ligeramente el listón pero nunca es un control de seguridad — el código que la impone corre en el mismo proceso que el atacante está instrumentando.
 
-**Corrección**: trata la detección de root como un badén, no como una defensa. Las comprobaciones críticas para la seguridad (integridad de transacciones, protección de claves) deben imponerse en el lado servidor o en hardware (Keystore, attestation), donde un hook en tiempo de ejecución no puede alcanzarlas.
 
 ## Logging Inseguro
 
@@ -602,7 +594,6 @@ ander@monre:~/mobileHack/InsecureBankV2$ pidcat com.android.insecurebankv2
 
 Tu intuición sobre quién puede ver esto importa aquí. Desde **Android 4.1**, una app de terceros ya no puede leer los logs de otra app sin permiso a nivel de sistema — así que el ataque de "cualquier app lee el log" que existía antes de Jelly Bean ha desaparecido. Pero el dato sensible sigue expuesto a: cualquiera con acceso físico y depuración USB (como se ha mostrado), apps corriendo con root, y dispositivos antiguos o con aislamiento débil donde la separación de logs es imperfecta. La severidad depende del contexto del dispositivo, pero escribir secretos en el log es un fallo de diseño en sí mismo — **CWE-532: Insertion of Sensitive Information into Log File**.
 
-**Corrección**: nunca registres credenciales ni datos sensibles. Elimina el logging de depuración de las builds de release — envuelve las llamadas a `Log` en `if (BuildConfig.DEBUG)` o deja que R8/ProGuard las eliminen en tiempo de compilación.
 
 ## WebView Inseguro y Almacenamiento Externo
 
@@ -638,7 +629,6 @@ Pulsar "View Statement" ahora carga mi fichero y ejecuta el script:
 
 El `adb push` aquí solo simula al atacante real: una segunda app maliciosa en el dispositivo con permiso de escritura en almacenamiento externo. Sobrescribe el fichero del extracto, y la próxima vez que la víctima abra su extracto, el JavaScript del atacante corre **dentro del contexto del WebView de la app bancaria** — donde, según la configuración del WebView (`setAllowFileAccess`, cualquier bridge `addJavascriptInterface`), puede alcanzar los ficheros privados de la app o los métodos Java expuestos. Se comporta como un XSS almacenado, pero la causa raíz es la carga insegura de contenido, no una inyección del lado servidor.
 
-**Corrección**: nunca cargues contenido ejecutable desde almacenamiento externo. Empaqueta las plantillas de extractos dentro del almacenamiento privado de la app, deshabilita el JavaScript en el WebView salvo que sea estrictamente necesario (`setJavaScriptEnabled(false)`), y nunca expongas bridges nativos a contenido no confiable.
 
 ## Exposición del Portapapeles / Pasteboard
 
@@ -684,7 +674,6 @@ Java.perform(function () {
 
 El encuadre de capacidad frente a explotabilidad captura esto con claridad: la vulnerabilidad original del portapapeles (cualquier app lee los datos copiados) era real y seria, Android 10+ restringió las lecturas a la app con foco de modo que la vía `service call` ahora lanza `SecurityException`, y sigue siendo explotable solo en dispositivos antiguos o desde la propia app / un método de entrada malicioso.
 
-**Corrección**: no coloques datos sensibles en el portapapeles. Si copiar/pegar un número de cuenta es realmente necesario, marca el `ClipData` como sensible (`ClipDescription.EXTRA_IS_SENSITIVE`) y límpialo tras un breve timeout en lugar de depender del usuario.
 
 ## Conexiones HTTP Inseguras
 
@@ -716,7 +705,6 @@ username=jack&password=Jack%40123%24
 
 Las credenciales (`jack` / `Jack@123$`, URL-encoded) viajan en claro. Cualquier atacante en la misma red — un punto de acceso rogue, un router comprometido, ARP spoofing en una Wi-Fi pública — las lee sin tocar el dispositivo. Esto funciona limpiamente aquí precisamente porque el tráfico no está cifrado; si la app hubiera usado HTTPS, la interceptación requeriría además instalar el certificado CA de Burp en el dispositivo y, en una app fortificada, derrotar el certificate pinning.
 
-**Corrección**: usa HTTPS para todo el tráfico, imponlo con una network security config que prohíba el texto claro (`cleartextTrafficPermitted="false"`), e implementa certificate pinning para los endpoints sensibles.
 
 ## Manipulación de Parámetros y Enumeración de Usuarios
 
@@ -726,7 +714,6 @@ La funcionalidad de Change Password envía al servidor el nombre de usuario obje
 
 La misma petición alimenta un ataque de enumeración de usuarios. Enviada al Intruder de Burp con el nombre de usuario como posición de payload Sniper y un diccionario de nombres de usuario candidatos, las respuestas difieren según si la cuenta existe: un nombre de usuario válido (como `jack`) devuelve una respuesta de éxito, mientras que uno inexistente (como `admin`) devuelve un error. El estado o la longitud de la respuesta se convierten en un oráculo fiable de qué nombres de usuario son reales — una lista que un atacante luego alimenta a ataques de contraseña contra los endpoints que *sí* verifican credenciales.
 
-**Corrección**: deriva el usuario objetivo de la sesión autenticada en el lado servidor, nunca de un parámetro de la petición. Devuelve respuestas uniformes independientemente de si una cuenta existe, para que el endpoint no filtre nada sobre los nombres de usuario válidos.
 
 ## Conclusiones Clave
 

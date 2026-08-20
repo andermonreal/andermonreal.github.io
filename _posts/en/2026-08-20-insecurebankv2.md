@@ -8,7 +8,7 @@ image:
   alt: InsecureBankv2 writeup
 ---
 
-InsecureBankv2 is a deliberately vulnerable Android banking app that packs almost every mobile misconfiguration into one APK: exported components that bypass login, credentials stored under a hardcoded AES key, `allowBackup` and `debuggable` left on, cleartext logging and HTTP, an injectable WebView, and a parameter-tampering password change. Rather than a single chain to root, this is a catalogue of independent client-side and configuration flaws, each documented with its mechanism, exploitation, and fix.
+InsecureBankv2 is a deliberately vulnerable Android banking app that packs almost every mobile misconfiguration into one APK: exported components that bypass login, credentials stored under a hardcoded AES key, `allowBackup` and `debuggable` left on, cleartext logging and HTTP, an injectable WebView, and a parameter-tampering password change. Rather than a single chain to root, this is a catalogue of independent client-side and configuration flaws, each documented with its mechanism, exploitation.
 
 | Field      | Details                       |
 |------------|-------------------------------|
@@ -148,7 +148,6 @@ Here `am` is the device's Activity Manager and `start -n <package>/<component>` 
 
 ![PostLogin activity reached directly, showing Transfer, View Statement and Change Password](/assets/img/Mobile/InsecureBankv2/cap4.png)
 
-**Fix**: mark activities that should only be reachable internally as `android:exported="false"`, and never rely on activity ordering as an authentication boundary. Authorisation must be enforced by the activity itself (a session check in `onCreate`), not by the assumption that the user "must have" come from the login screen.
 
 ## Exported Content Provider
 
@@ -168,7 +167,6 @@ public class TrackUserContentProvider extends ContentProvider {
 
 Because the provider is exported with no read permission declared, any app on the device can query it via its `content://` URI and pull the list of users that have logged in — usernames that should never have left the app's sandbox. The same `names` table resurfaces later, extracted through two other independent flaws (backup and `run-as`), which is a recurring theme in this app: one piece of sensitive data, several unguarded doors to it.
 
-**Fix**: don't export content providers unless cross-app sharing is a genuine requirement. When it is, gate reads and writes behind a signature-level permission and validate the calling package.
 
 ## Patching the APK — Hidden "Create User" Button
 
@@ -269,7 +267,6 @@ protected void createUser() {
 
 So this isn't a privilege escalation — it's a demonstration that **client-side flags are not a security boundary**. Any decision the client makes based on a value it ships (feature gating, "admin" toggles, license checks) can be inverted by repackaging. The lesson generalises far beyond this stub.
 
-**Fix**: never gate security-relevant behaviour on client-side resources or client-provided state. Authorisation decisions belong on the server, which the client cannot rewrite.
 
 ## Developer Backdoor Login
 
@@ -298,7 +295,6 @@ The `/devlogin` endpoint accepts the `devadmin` user with **any password**. Logg
 
 This is a classic developer backdoor: a shortcut left in for testing that never got removed. The routing logic sits entirely client-side in the decompiled code, so even without knowing the endpoint existed, reading `DoLogin.java` reveals it.
 
-**Fix**: remove developer/test authentication paths before release, and never ship an endpoint that skips credential verification. Backdoors invariably outlive the sprint they were added in.
 
 ## Insecure Credential Storage
 
@@ -418,7 +414,6 @@ ander@monre:~/mobileHack/InsecureBankV2$ frida -U -n InsecureBankv2 -l decrypt.j
 
 The two methods reach the same result from opposite directions: one reimplements the cipher offline, the other borrows the app's own decryption routine at runtime. Frida's approach is the more general one — it works even when the key *isn't* trivially readable, because you never need to know it.
 
-**Fix**: never hardcode keys or use static IVs. Sensitive material should be stored using the Android Keystore (hardware-backed where available), with keys generated per-device and never embedded in the APK. Passwords in particular should not be stored recoverably at all.
 
 ## Application Backup Enabled
 
@@ -458,7 +453,6 @@ The backup contains both `mySharedPreferences.xml` (the Base64 username and AES 
 
 A realism note worth recording: on **Android 12+ (API 31)**, `adb backup` ignores app data by default even when `allowBackup=true`, so this attack only works on the older Android 11 target here. The flag is still a valid finding (defence-in-depth, MASVS-STORAGE), but its real-world exploitability depends on the target's OS version — a good example of capability versus practical exploitability.
 
-**Fix**: set `android:allowBackup="false"`. For data that must be backed up to the cloud, use `fullBackupContent` rules to exclude sensitive files, and never store credentials in cleartext or under a recoverable key.
 
 ## Debug Mode Enabled
 
@@ -503,7 +497,6 @@ en_US
 
 `run-as` (via debuggable), `adb backup` (via allowBackup), and the content provider all converge on this same data — three independent misconfigurations, one set of secrets. That redundancy is the real lesson: a mobile app hardened against one path but not the others is not hardened at all.
 
-**Fix**: set `android:debuggable="false"` (or simply omit it and always build in release mode). A CI check that rejects any build with `debuggable=true` in the manifest catches this before it ships.
 
 ## Root Detection Bypass with Frida
 
@@ -579,7 +572,6 @@ After logging in with the hook loaded, the app now reports "Device not Rooted!!"
 
 The broader point: **client-side root detection can always be neutralised on a device the attacker controls.** It raises the bar slightly but is never a security control — the code enforcing it runs in the same process the attacker is instrumenting.
 
-**Fix**: treat root detection as a speed bump, not a defence. Security-critical checks (transaction integrity, key protection) must be enforced server-side or in hardware (Keystore, attestation), where a runtime hook can't reach them.
 
 ## Insecure Logging
 
@@ -602,7 +594,6 @@ ander@monre:~/mobileHack/InsecureBankV2$ pidcat com.android.insecurebankv2
 
 Your intuition about who can see this matters here. Since **Android 4.1**, a third-party app can no longer read another app's logs without system-level permission — so the "any app reads the log" attack that existed pre-Jelly Bean is gone. But the sensitive data is still exposed to: anyone with physical access and USB debugging (as shown), apps running with root, and older or weakly-isolated devices where log separation is imperfect. The severity depends on the device context, but writing secrets to the log is a design flaw in itself — **CWE-532: Insertion of Sensitive Information into Log File**.
 
-**Fix**: never log credentials or sensitive data. Strip debug logging from release builds — wrap `Log` calls in `if (BuildConfig.DEBUG)` or let R8/ProGuard remove them at compile time.
 
 ## Insecure WebView & External Storage
 
@@ -638,7 +629,6 @@ Tapping "View Statement" now loads my file and executes the script:
 
 The `adb push` here just simulates the real attacker: a second, malicious app on the device with external-storage write permission. It overwrites the statement file, and the next time the victim opens their statement, the attacker's JavaScript runs **inside the banking app's WebView context** — where, depending on the WebView's configuration (`setAllowFileAccess`, any `addJavascriptInterface` bridges), it can reach the app's private files or exposed Java methods. It behaves like stored XSS, but the root cause is insecure content loading, not a server-side injection.
 
-**Fix**: never load executable content from external storage. Bundle statement templates inside the app's private storage, disable JavaScript in the WebView unless strictly required (`setJavaScriptEnabled(false)`), and never expose native bridges to untrusted content.
 
 ## Clipboard / Pasteboard Exposure
 
@@ -684,7 +674,6 @@ Java.perform(function () {
 
 The capability-versus-exploitability framing captures this cleanly: the original clipboard vulnerability (any app reads copied data) was real and serious, Android 10+ restricted reads to the focused app so the `service call` route now raises `SecurityException`, and it remains exploitable only on older devices or from the app itself / a malicious input method.
 
-**Fix**: don't place sensitive data on the clipboard. If copy/paste of an account number is genuinely needed, mark the `ClipData` sensitive (`ClipDescription.EXTRA_IS_SENSITIVE`) and clear it after a short timeout rather than relying on the user.
 
 ## Insecure HTTP Connections
 
@@ -716,7 +705,6 @@ username=jack&password=Jack%40123%24
 
 The credentials (`jack` / `Jack@123$`, URL-encoded) travel in the clear. Any attacker on the same network — a rogue access point, a compromised router, ARP spoofing on public Wi-Fi — reads them without touching the device. This works cleanly here precisely because the traffic is unencrypted; had the app used HTTPS, interception would additionally require installing Burp's CA certificate on the device and, in a hardened app, defeating certificate pinning.
 
-**Fix**: use HTTPS for all traffic, enforce it with a network security config that forbids cleartext (`cleartextTrafficPermitted="false"`), and implement certificate pinning for sensitive endpoints.
 
 ## Parameter Manipulation & User Enumeration
 
@@ -726,7 +714,6 @@ The Change Password feature submits the target username and the new password to 
 
 The same request feeds a user-enumeration attack. Sent to Burp Intruder with the username as a Sniper payload position and a wordlist of candidate usernames, the responses differ by whether the account exists: a valid username (like `jack`) returns a success response, while a non-existent one (like `admin`) returns an error. Response status or length becomes a reliable oracle for which usernames are real — a list an attacker then feeds into password attacks against the endpoints that *do* verify credentials.
 
-**Fix**: derive the target user from the authenticated session server-side, never from a request parameter. Return uniform responses regardless of whether an account exists, so the endpoint leaks nothing about valid usernames.
 
 ## Key Takeaways
 
