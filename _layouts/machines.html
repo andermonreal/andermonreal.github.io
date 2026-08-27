@@ -86,8 +86,12 @@ layout: default
 {% endif %}
 
 <section id="home-hero" aria-labelledby="home-heading">
-  <h1 id="home-heading" class="finder-title">{{ t_heading }}</h1>
-  <p class="finder-lede">{{ t_lede }}</p>
+  <div class="finder-head">
+    <h1 id="home-heading" class="finder-title">{{ t_heading }}</h1>
+    <p id="machine-count" class="machine-count" aria-live="polite" data-template="{{ t_count }}">
+      {{- t_count | replace: ':shown', total | replace: ':total', total -}}
+    </p>
+  </div>
 
   <div class="finder-search" role="search">
     <i class="fas fa-search" aria-hidden="true"></i>
@@ -179,10 +183,6 @@ layout: default
     {% endfor %}
   </div>
 </section>
-
-<p id="machine-count" class="machine-count" aria-live="polite" data-template="{{ t_count }}">
-  {{- t_count | replace: ':shown', total | replace: ':total', total -}}
-</p>
 
 <div id="post-list" class="flex-grow-1 px-xl-1">
   {% for post in posts %}

@@ -1,7 +1,7 @@
 ---
 title: "InsecureBankv2"
 date: 2026-08-20
-categories: [Mobile, Android]
+categories: [Mobile, Easy]
 tags: [android, mobile, insecurebankv2, adb, frida, mobsf, drozer, apktool, burp-suite, exported-activity, content-provider, insecure-storage, aes, hardcoded-key, allowbackup, debuggable, insecure-logging, webview, clipboard, cleartext-http, user-enumeration, CWE-532]
 image:
   path: /assets/img/Mobile/InsecureBankv2/banner.png
