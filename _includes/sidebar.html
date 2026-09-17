@@ -56,10 +56,22 @@
           (e.g. /es/posts/foo/). Strip it to get the language-agnostic path,
           then re-add each target language's prefix to build the switch links.
         {%- endcomment -%}
+        {%- comment -%}
+          Strip the active language's leading prefix ONLY when it is genuinely at
+          the START of the URL. A naive `remove_first: "/es"` also matches "/es"
+          inside a path segment (e.g. /tags/esm-sh/ -> /tagsm-sh/), which mangles
+          the language-switch link for any tag/category slug that begins with the
+          language code (esm-sh, escalation, ...). Archive pages render with an
+          unprefixed page.url, which is exactly when the naive version misfires.
+        {%- endcomment -%}
         {%- assign base_url = page.url -%}
         {%- unless site.active_lang == site.default_lang -%}
-          {%- assign _active_prefix = '/' | append: site.active_lang -%}
-          {%- assign base_url = page.url | remove_first: _active_prefix -%}
+          {%- assign _active_prefix = '/' | append: site.active_lang | append: '/' -%}
+          {%- assign _prefix_len = _active_prefix | size -%}
+          {%- assign _url_head = page.url | slice: 0, _prefix_len -%}
+          {%- if _url_head == _active_prefix -%}
+            {%- assign base_url = page.url | remove_first: _active_prefix | prepend: '/' -%}
+          {%- endif -%}
         {%- endunless -%}
         <div class="lang-switch" role="group" aria-label="Language">
           {% for lang in site.languages %}
