@@ -31,7 +31,7 @@ A world-readable `users.json` leaked SHA1 password hashes that cracked against `
 
 ## Deployment
 
-This is a self-made, publicly available Docker box; the target is a container published on an internal bridge network. It clones and boots from GitHub, which is worth noting because the container hostname in the shell prompts below is an ephemeral Docker ID (I redeployed a couple of times during testing, so the prompts have been normalised to a single identifier for readability):
+This is a self-made, publicly available Docker box; the target is a container published on an internal bridge network. The full build lives on GitHub at [andermonreal/ProjectManager](https://github.com/andermonreal/ProjectManager), and it clones and boots from there — worth noting because the container hostname in the shell prompts below is an ephemeral Docker ID (I redeployed a couple of times during testing, so the prompts have been normalised to a single identifier for readability):
 
 ```bash
 git clone https://github.com/andermonreal/ProjectManager.git

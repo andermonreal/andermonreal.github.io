@@ -31,6 +31,22 @@ El FTP anónimo filtra el stack de la aplicación (Django 4.2), vulnerable a **C
 | ssh         | Port forwarding local al servicio interno y pivote mediante `su`         |
 | strings     | Inspección estática del binario SUID                                     |
 
+## Despliegue
+
+ProjectManager2 es una máquina boot-to-root personalizada y autoalojada. El proyecto completo está en GitHub, en [andermonreal/ProjectManager2](https://github.com/andermonreal/ProjectManager2), y se distribuye como una imagen Docker autocontenida, así que se puede levantar en local y atacar exactamente igual que un objetivo real.
+
+El único requisito es **Docker** con el plugin `buildx` (incluido en cualquier instalación moderna de Docker). Dos scripts gestionan todo el ciclo de vida:
+
+```bash
+./start.sh        # construye la imagen y arranca la máquina
+./stop.sh         # detiene y elimina el contenedor (+ su red)
+./stop.sh --rmi   # además borra la imagen
+```
+
+El contenedor arranca aislado en su propia red (`pm2-net`) con una IP fija y **sin publicar puertos al host**: se accede directamente por la IP del contenedor (la imprime `start.sh`, `172.30.0.10` por defecto), de modo que se comporta como una máquina real en la red y no como un conjunto de reenvíos de puertos a `localhost`. Sustituyendo `<TARGET>` por esa IP, los servicios expuestos son la aplicación web en `http://<TARGET>/`, FTP anónimo en `ftp://<TARGET>/` y SSH en `ssh <usuario>@<TARGET>`.
+
+La red se puede ajustar con las variables de entorno `NETWORK` (`pm2-net`), `SUBNET` (`172.30.0.0/24`) e `IP` (`172.30.0.10`), y una instancia en marcha se puede inspeccionar con `docker logs -f projectmanager2` o `docker exec -it projectmanager2 bash`.
+
 ## Reconocimiento y Enumeración
 
 El objetivo de esta fase fue enumerar los servicios expuestos e identificar el stack de la aplicación que merecía la pena atacar.

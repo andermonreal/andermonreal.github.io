@@ -31,6 +31,22 @@ Anonymous FTP leaks the application stack (Django 4.2), which is vulnerable to *
 | ssh       | Local port forwarding to the internal service and `su`-based pivot       |
 | strings   | Static inspection of the SUID binary                                     |
 
+## Deployment
+
+ProjectManager2 is a custom, self-hosted boot-to-root machine. The full build lives on GitHub at [andermonreal/ProjectManager2](https://github.com/andermonreal/ProjectManager2) and ships as a self-contained Docker image, so it can be spun up locally and attacked exactly like a real target.
+
+The only requirement is **Docker** with the `buildx` plugin (bundled with any modern Docker install). Two helper scripts handle the whole lifecycle:
+
+```bash
+./start.sh        # construye la imagen y arranca la máquina
+./stop.sh         # detiene y elimina el contenedor (+ su red)
+./stop.sh --rmi   # además borra la imagen
+```
+
+The container comes up isolated on its own network (`pm2-net`) with a fixed IP and **no ports published to the host**: it is reached directly on the container's IP (printed by `start.sh`, `172.30.0.10` by default), so it behaves like a real machine on the wire rather than a set of `localhost` port forwards. Substituting `<TARGET>` for that IP, the exposed services are the web app at `http://<TARGET>/`, anonymous FTP at `ftp://<TARGET>/`, and SSH at `ssh <user>@<TARGET>`.
+
+The network can be tuned through the `NETWORK` (`pm2-net`), `SUBNET` (`172.30.0.0/24`) and `IP` (`172.30.0.10`) environment variables, and a running instance can be inspected with `docker logs -f projectmanager2` or `docker exec -it projectmanager2 bash`.
+
 ## Reconnaissance & Enumeration
 
 The objective of this phase was to enumerate the exposed services and identify the application stack worth attacking.

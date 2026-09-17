@@ -31,7 +31,7 @@ Un `users.json` legible por cualquiera filtró hashes SHA1 que cayeron contra `r
 
 ## Despliegue
 
-Es una máquina Docker hecha por mí y de acceso público; el objetivo es un contenedor publicado en una red bridge interna. Se clona y arranca desde GitHub, algo que conviene tener en cuenta porque el hostname del contenedor que aparece en los prompts de más abajo es un ID de Docker efímero (redesplegué el contenedor un par de veces durante las pruebas, así que los prompts se han normalizado a un único identificador por legibilidad):
+Es una máquina Docker hecha por mí y de acceso público; el objetivo es un contenedor publicado en una red bridge interna. El proyecto completo está en GitHub, en [andermonreal/ProjectManager](https://github.com/andermonreal/ProjectManager), y se clona y arranca desde ahí — algo que conviene tener en cuenta porque el hostname del contenedor que aparece en los prompts de más abajo es un ID de Docker efímero (redesplegué el contenedor un par de veces durante las pruebas, así que los prompts se han normalizado a un único identificador por legibilidad):
 
 ```bash
 git clone https://github.com/andermonreal/ProjectManager.git
