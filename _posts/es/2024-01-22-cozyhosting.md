@@ -4,7 +4,8 @@ date: 2024-01-22
 categories: [HackTheBox, Easy]
 tags: [linux, spring-boot, command injection, postgresql, john the ripper]
 image:
-  path: /assets/img/HTB/CozyHosting/banner.png
+  path: /assets/img/HTB/CozyHosting/banner.webp
+  lqip: "data:image/webp;base64,UklGRugCAABXRUJQVlA4WAoAAAAQAAAAHwAAHwAAQUxQSEQBAAABkGJrezJGb/KVmdGxIlXXhVRW1XUXaJkVw6juYlgW1DAzT+B7B/8mO4iICcA/jQCtEzv3Xn3//urezkQrIAZFLTC49JQFny4OAraAoHz2OxlDVFJjiOT3mXLIfwS9N0mvLKievNkL+Ydg5Bmd8prq+GwEAsCi5wU9E3q+6IGFkYr79Ezqeb9CjGCBjokdFyBm0AVNpcENGmzSM7nnJtreUtMp37ZNMjJj5OShhhxBD8+pOZTnn5j5k+bSfF9yfbmi5lBe3dCQI+iNKcYckVPdH6nplB+7sUufznMXZjgGTaUhDhvBKn0qz1WIsbVXDGkCr2qtgcXQR4YUgR+HYAEIxj/QX8/zwzgEf5dg9IIatIgG5cUoSvBvQcMGyRj1L42R5EYDBP+3wNj+Bxb8sD8GWBQ1AvRMnz34Sf58cDbdA4jBPwFWUDggfgEAADAIAJ0BKiAAIAA+3VqnTailI6I36AEQG4lsAJ0yhHmFoDbV8/NZJK/BWue7OglXgDKclakfuoTP4hycYmoG3jpBDqrKLJlrTBSAAPrZhzrPtUl7NVmzIG38eiHVn9qu/M1GuuuPvPLUHzHP8DyjQNHP2hrh85M56vzzUHDsD/7Ix3xELXs1FsHacgbuD4MVblMccFoJtElZ/2txpVZeBP3NYHb/7loe/d8hpZUn/9+s/j/iVA7XaPNdPDn7/67V+wBPjEzRK9d8Bkg7ZAB9HNzI2YyK5VeF4MeOwh5Aq6D7At5XppqxXuoaXFtRlqflz9TPFs1248f1cverNKpo8QDUCOtWKFDZf/tMN2nF489HsGDAOWXma/PcRgrByJSc5QPhr+MPrsXF5G5MooaivI23gwdlExI/9EkGPc+m+X9VlQm0kg0uvDvyeG3FKoVT4brFWYGTNeb5B9hm/yd3g0r2IWFw+vSEml+soFENHVuZI/FFhmB5ttBQTEYAAAA="
   alt: CozyHosting writeup
 ---
 

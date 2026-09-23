@@ -4,7 +4,8 @@ date: 2026-06-27
 categories: [HackTheBox, Easy]
 tags: [linux, nginx, javascript deobfuscation, dean edwards packer, rot13, base64, API enumeration, mass assignment, command injection, credential reuse, CVE, CVE-2023-0386, OverlayFS, FUSE, kernel exploit]
 image:
-  path: /assets/img/HTB/TwoMillion/banner.png
+  path: /assets/img/HTB/TwoMillion/banner.webp
+  lqip: "data:image/webp;base64,UklGRrACAABXRUJQVlA4WAoAAAAQAAAAHwAAHwAAQUxQSPoAAAABgFtbe9vm+/GjErWAwwDZ7jQRPY/kXqHV0TbO9gw5dAL4fwUT/g0igoHbRoqSZT58hLRCInBcb1/+zP5etvUxEGXQAFwv3zng+/Ia0D5QTOeJbLK1WG7INJ8iDsSzOzIZB7RE3p0hoiVi9sE9R93zY4aItnzyycQCEz9PoCI6eWJmkZlPlQbFolsuKy4Q5TxnK8VyPhes27w82+Dgm1aO8fugZkOHDeudZQ/Zdm80D8a3fzr9Ny/mx1/xD/EvdON+Lv7nio3vvVjD/15F3PreSw1aPZa/14+V+r6LjxMECFzflQIiEj3fJeD6rhU9oGX/hYABJBT9V9ACVlA4IJABAABQBwCdASogACAAA4BaJbACnNJXIBhf9kmWYI0h6CMA7S+154VsgKIAzX1Q6TRCDy1VS8J3T9Wpurn3lEZmNJljLNQAAP731wBtiFENM+YT9yBKiEWaBikJFew++TO85U8E9wVLUS8lWUfltNockBLlHylOc8FzJiqIZtYZqQntEU9pbP0tPWQuud+OWvoZp1WHUpt6fP3xeFsMmpNwtpwZk/hNw9slk/NHCCi6fdnUlnHQ51gr/jN8ZgLM7tmk4gII+AsuRvL/UPqL7cqnqJN7DowjoRtSc+WH4C8uBggXNvzSNIX8vqX3hE2eKg5FIxgmYybZp6lrKxyDoTQtBdb6ljmFkAY2rRJL4qYuMEF9iH5RLzFouNwy59SM1ia9RwkvBI/BoBiZiP+z97HhGUYGPYorcI5EtsFIl0yZce3JWBptK6EiWlIbPBdGdhq7Pr5o5bWOJKp+YCOtPCxeJELPLP8633+5u0+dINVqLNokb8Kbbmh5lkc1w9+iPdTLgMr+oFRapIvYWbl7gzHH0MwA"
   alt: TwoMillion writeup
 ---
 

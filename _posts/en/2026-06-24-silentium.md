@@ -4,7 +4,8 @@ date: 2026-06-24
 categories: [HackTheBox, Easy]
 tags: [linux, fuzzing, flowise, CVE, CVE-2025-58434, CVE-2025-59528, container escape, scripting, ssh port forward, gogs, symlink, sudoers]
 image:
-  path: /assets/img/HTB/Silentium/banner.png
+  path: /assets/img/HTB/Silentium/banner.webp
+  lqip: "data:image/webp;base64,UklGRqICAABXRUJQVlA4WAoAAAAQAAAAHwAAHwAAQUxQSOoAAAABgFtre7Pmlb4OFgh2n0PHQrAPDMChddgmhxly6ND3v6+j0OcJIoKB20aKmmXegz4Cv0gGbE5Obt/J99uTySZgCTUycLh4UIWHxSGQKzL0Z0XqnJJE76Qy68MqcfdcKlQFFul8F/Ynjh+0otbAlR7Gv0LG9qOKGih63EJGst6VXE24rnqWDPPf5bbiHJZ23dkquu8mLH/y9myJwYvYLuplMFWnAJ2mZ/SInGf3YkTU/YeCfDAqxhWvxIfEF4q/l/h7jX8X4e/qH77L+HeNjK3QfxH+r8L/Zfi/rvvC0TpfOPrrC02+clz1FQBWUDggkgEAADAIAJ0BKiAAIAADgFolsAJ0yhHpugzkoYDbZ89h6GL1pswRoGCst/lt/Tet+UGfmAFaHXJF2UDulOSGcQEC93S/3waVCfdhd8IAAP0gVszmCUuph7m7KYeDX/lx2upPPdNiMwJI7uOgI4v/HQR0UaqvTt21vQ9F46/DVserbR3aYPHyPfGNKHtusSv8szdcdHNlAZFqqNT23Cb87mQuQvxV7nAHO64QIu/17Dh9DL6kwDwOl9M1BlhB/tuNp8+XjIWzjwwNZgnR9fRVsLkoSaPlkobn3QNeSGKmT1SwMHKJ+hqm3/+FRHvZyM+I8YQhCyeDY/iOjI8X08Fmmd7bTrwFqiyycKAX15FzXcFGeueWerWl3u146cllun0uLDlAhW6Is4S8WDwkTyqO6wplBQYTrF9JGjT5iMcjhTyxXXUHnYponIR02KYgYmdI1i8k7AfMaWCR4kbQ3fqIHKBPOab+xc0lErSosd1+jiYsBXw85tJmdyDCmyHOvNj60jvQ6bj0MpwpexpFcp5Fj9obvqYAAA=="
   alt: Silentium writeup
 protected: true
 ---

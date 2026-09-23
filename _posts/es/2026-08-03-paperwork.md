@@ -4,7 +4,8 @@ date: 2026-08-03
 categories: [HackTheBox, Easy]
 tags: [linux, nginx, lpd protocol, rfc 1179, printer service exploitation, python source disclosure, command injection subprocess shell, jetdirect, pjl protocol, printer path traversal, authorized_keys injection, unix domain socket, scm_rights, privileged file descriptor leak, cmsg ancillary data]
 image:
-  path: /assets/img/HTB/Paperwork/banner.png
+  path: /assets/img/HTB/Paperwork/banner.webp
+  lqip: "data:image/webp;base64,UklGRmACAABXRUJQVlA4WAoAAAAQAAAAHwAAHwAAQUxQSNkAAAABgBzJtqvmvH93kIALAOR3RPTzgQAo1hTZyEsxeLN75h7Zp3eIICIYuG2kKFnmw0fgl8GAab+9fXd/v932U8ACanbA2fqBFR/WZ0BXwTBcJrJk/8FzIdNyCKvEw3MyOSt6Is8PYX/i4pGR/xr5uPgVOsyemNhg4tMMHYINrn5iW7gaWDCsfmJrWMHCYc7eiud8GLD5yduzDUYv9HacL6OehYKF/c6zQvbdPV3Bef9B0Q9XcR29og/RF9Kfi/5c9fdCfq/28F7q77X8Xcjflfxdyt/1fv4L8n8FAFZQOCBgAQAAMAYAnQEqIAAgAAOAWiWwAnTKDGD2AxeiySZ8Eztb1tAB5gBNVEQadxagBFJCDj6RVI1vhQC/7YcAAAD9ITBcgBzJXVaujFw9cqI3f1PYn83kQ7sxRdDGhiiFCLr5lN2jGv/55Ha3yzzvEU0NnrVPc2TqNG1tqyZUV6hxtQP3RExzVozcH5b/2dAPxl/sS3tcbT57QIM7v7Y3DEXT36wBOydNdJrx/zB7C/HxQFP0hHU//FyWkr983G3rHtJeHZ11bPWdme8HhcNDRWV9in/KI6UuBiaCwZIvWpV1iFFyCBAVj7guqwZwOTFZuO0vU5q8UpozHoXUny4opMz89sCCkpNNCe2Ckpmzt0n/eFN0ihZ9HFLdEIyKmYLkDOpEEF1wa4+arhAARnF500HtuXAo9fgG+AW6ovQMYfALSrbd4mpcZnlQMrHJRWuFrO/rWUfTkQW9XKc98Rb1WFMacgAAAA=="
   alt: Paperwork writeup
 protected: true
 ---

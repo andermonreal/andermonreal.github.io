@@ -4,7 +4,8 @@ date: 2026-07-13
 categories: [HackTheBox, Medium]
 tags: [linux, nginx, mlflow, CVE-2024-37054, pickle deserialization, RCE, default credentials, subdomain enumeration, self-registration, python pth, site addsitedir, sudo NOPASSWD, writable plugin directory]
 image:
-  path: /assets/img/HTB/SmartHire/banner.png
+  path: /assets/img/HTB/SmartHire/banner.webp
+  lqip: "data:image/webp;base64,UklGRg4DAABXRUJQVlA4WAoAAAAQAAAAHwAAHwAAQUxQSE4BAAABkKPtv2k7v7X+u7u2YttWmXQZwC3T3qR1ukzBtlk5Y7Bt21j/9f+F+641g4iYAPzTCdC369CNj2afbh6e3w8Qh7IC1Gx+z5IftrYDvkSBxi03SI32l0Uln62sgPynwLS7ZDSWNCXPDYb8o8DcbwyR3bSffDEeAkAwO1CZMPDVEHh4DPpgkUmV16u983VnqUwcuBWCQT8iU8d4pcpjxWezVNSwEYNJY3Lj554LTZlR2XWMeezwfVoO462vzPyZuc2yfcz1+Toth/H2XtMcakfnMWbhguZPtHTGr32w5HtMpz+3Ab00WqoYHzY6kd0MqQJ3O/Gu/gE1jfJ2jfPwmPiVmkL5dgQ8AMGcbwzWrZ98MwWCvwvMekaalTGSl4dD8O8Cvc88JzUaSYsaybCuGoL/C1zvwz9Z8nHnMMCjrAcwdvmpB9+oby9s7WwAxOGfVlA4IJoBAABQCACdASogACAAPtVao02oJSMiN+gBABqJbACdMoR1ZxhhVaarvHHkAYAI0gQMSS6wrpsfk8fTMxd9H5hBVlFp0sv9HXOMiNeolIAA/sP5udSzZuW01aw/Ao4h4hxjavrvFXIkXI99UHPvMr9LeKFYs2Vf4HjS1gib8WTljxqB8JrxniwlNPVIcP6J4a7sLdMazE7zA1/ugWX/mILzf4nY/8ld3qf9oL0T4//lTyUWqO/2wPf5sRz6FJCul+vV5enj//mlP8/aPRdZbvYfeR3cJSX0JvIzNZ8oFUh9sk8MaGFASuPeSP8UIuPaoOp3Oy0XZE077mC/PUJP7taIa3n6UPExkf7Oy9wO8OdBCv1TEJ4DAsvDGDEb7J9hB+GBGam3l6fp1gGRE9FyiWK+5AwBaozl3xARWW5rfnGufvseJu29eWQSJ72OAHq29/DOTgcBO9AXz6yzUVCmUZ1gZfmlDQ08dXq2NKbqd9na7trFSN/5CxRUwh7wuFgHT0s4LO9u9Ge/66HLkONHoDU/4w18gtejd623SUAAAA=="
   alt: SmartHire writeup
 protected: true
 ---

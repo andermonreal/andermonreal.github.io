@@ -4,7 +4,8 @@ date: 2026-06-18
 categories: [HackTheBox, Medium]
 tags: [linux, ssh, JWT, scripting, CA private key, CVE, CVE-2026-29000]
 image:
-  path: /assets/img/HTB/Principal/banner.png
+  path: /assets/img/HTB/Principal/banner.webp
+  lqip: "data:image/webp;base64,UklGRg4DAABXRUJQVlA4WAoAAAAQAAAAHwAAHwAAQUxQSFEBAAABkGzbtmk7c59173svtm3brKalmOorpm7jA/INtm3+hG3bzl5rzfC8vf8gIiYA/wwF0GfOwZuf3D/fPjx/ACABZQVos/kDS37Y3guQEoL2W2+Tav6Xm5Ev1rZC9T8VTLtHmrOkK3lpJGr/UcGs74zGBnrk62moBSCYqVQmVL4dE6ooMOijG5Mqb3eqStH6PJWJI/dU6zDkhzG12c2ujbD6i3sqatwuQ0hncufX4ctdmdG49BSzqJ+4T8/hvPuVmb8wt3u2j7m+XKPncN7d7ZpD/dhsWhYubP+Jns75rQ9WfLd0+nML0F3NU5k9ahtEdjKmitwZpAitH1DTKG+1DAUE475SUyjfDkUBQDDjG6M3KPLNRAj+rmD6M9K9jJO8PBSCf1fQ49wLUs1JuqmRcU1zCP4vCD0O/mTJx/WDgAJlCwCjVp158JX29sKm+jaABPwTAFZQOCCWAQAAUAkAnQEqIAAgAD7RUqBNqCSjIjfoAQAaCWwAnTKEfJ6DOBG6/0A6cXoAc71piHoAdKrXM6VdBKbjU/u3DtjopH8ec5j5NhIVAzfqwHxJWHIs7QAA/dHoRull32yq/ueFtUf4fT769Gw0xFW/f708YHZM6dZHryEVE1loBhdGK0P8WQPxMUR2DbnYfi7mJvozp60zmuqJ+DJEjelU2elwsE8DThZlE9eVAxIs33dCR5aHTRQv9cWCpF6CX5Ix6UGUyX8gsxnYYG9RsT86Xv2d+4DkJ7JPbBvZNwTd/d+4ts/EyJwnej3Q9Qs7IWqalrgctTOE2S1j57u/mglvikBlPbqAn/pVhiN5MAOq7hG8X8CtP73aHuLIpqnUNnArJqQ+Zf/8q+xZJf1+v+Dfrnb/Ix/7q6lyLCFf/xUZ3Pao+4+pg1+v+W3VLaP57UkgKMAOgCAGs0yidqrOm2pnl6oxg+yxajLGaODguVl+k2n1uxZY9b2C8Ig6r+AuO78ZhcL/WW9XIJv0nj46pFVH5pm6DGX30TRsAA=="
   alt: Principal writeup
 ---
 

@@ -4,7 +4,8 @@ date: 2026-06-18
 categories: [HackTheBox, Easy]
 tags: [linux, FreePBX, SQLi, file upload, incron, CVE, CVE-2025-57819, CVE-2025-61678]
 image:
-  path: /assets/img/HTB/Connected/banner.png
+  path: /assets/img/HTB/Connected/banner.webp
+  lqip: "data:image/webp;base64,UklGRoACAABXRUJQVlA4WAoAAAAQAAAAHwAAHwAAQUxQSOUAAAABgBvbtqvmvHczaMBIuTcZDUE/UABDzNCNvFSDNxnv/ntkH++ogohQ4LaN0uyY8RH4RTJgd7K6fY94v11NdgFLqJGB08UDKzwsToFckaE/K2TnQZLhHVlmfVjFHZ6TJVghCnl+CPvjxg/cBLcQGz6Mf1nG/iMLGyh83ENGst4VnU04r3qWDPPf8bboHJYO3aNV4X6YsPwJ24MlBi+MdgVfBlN2FOg4XYcr8ljfMxQF7z8o8hGqQpee0KvoHennop+rfi/ke/UP91K/18jYk96F/K7kdym/6/q/cLbtXzj7+y/I/woAAFZQOCB0AQAAEAgAnQEqIAAgAD7RVqNNqCSjIjfoAQAaCWwAnTKDIKZzLJZs0STPYDKfpq438hV8wBmHFQjIgTzhKaX+QXmBYpuWECsD1eiEAAD+nqx9A73O6Cr8mvedefEm+1OcEVM94h8Ztsu6ex9lHlZutHEsvla8t9PlMeiOBrIVm5+WssuvdsxTpX10B0SFtY1O9y9frX+wC/unMS1uNnpD8vua5BpL/U/0XEmfX9xzWv8f8IqEBcJYdvk+fVcm4rLGRE0EcG0Pp+LeOhvdjcxHoY66pwPB3SdHtO9Ss+Oxrmmp3dvZKTAF3rjq7dKiV+z6qHry4eErSCXPvHzosDhuTdSPqSK1f+rBO9E+aMnSgnBJ61s1LJAh/cvYwEcEIPmFoKCSIHhVA2RGJ/REBs9EKOjgfJjSJloIH6NPJorqr7hhx41dWRgLqiZOPVFbRnTrKplOmgEgiqk/dCkh5/ptpkcLpbfFiLwa1GrbFdiPN3eYAUcMWAAA"
   alt: Connected writeup
 protected: true
 ---

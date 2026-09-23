@@ -4,7 +4,8 @@ date: 2026-08-20
 categories: [Mobile, Easy]
 tags: [android, mobile, insecurebankv2, adb, frida, mobsf, drozer, apktool, burp-suite, exported-activity, content-provider, insecure-storage, aes, hardcoded-key, allowbackup, debuggable, insecure-logging, webview, clipboard, cleartext-http, user-enumeration, CWE-532]
 image:
-  path: /assets/img/Mobile/InsecureBankv2/banner.png
+  path: /assets/img/Mobile/InsecureBankv2/banner.webp
+  lqip: "data:image/webp;base64,UklGRkICAABXRUJQVlA4WAoAAAAQAAAAHwAAGQAAQUxQSBQBAAABkGVtmyFJf0S0bdu27e4t9Da4Dxt7sG3e9ZVtW5nRCA0WEBEM3LZtJPXudHv9AiQSBAYY1CUYwAGA4D+onP7Lav/fUKzcXvrjQ23AbyhUXh+l+qf+QeljbaAksKDoj0zU/QYSRH4/X4KoDwJWhEsG+JJEkx9CzLeup+9MySMHyO+M4HJNBX0nEBC7ijyXdfnQaBUm/FWhjH7Kl4deCAsuFEp1GZ90HAjwQIIKMwiLiFNhGv4r4pU2i4lSYUIEQaXy767RfUuEOAyhjX4o/NdYRPjfFnb3qeky37UuYBcYJ+1SNTuNEWKW6aNrG0cX1/cvb6yPt1ene+uLHSaC3YBNrWwd3DwZPZztbMyNQCQmoCRzJABWUDggCAEAANAFAJ0BKiAAGgA+7WKpTamlpCIwGAwBMB2JQBibgQI9T3XMrz1c4kHk9nbrzQFis/hVYq6Dv4AA/t6UX2Jlq4jOjGw7aIey3c7WpXaXvWnmAp9Gutxy41mx/CwRIqaBY0zbp7Yl3GP0fsI+w9XrJtsIB4w7iPonWgP1aSv0cTLc3tbe91tYTpY6zUPUkWao9uzTnoKVe8y8w+pWlf+W898ei3c7R8IqF304t8QlsvHwSwWmgEXIMRJyKv/d4K8xD2BjjxeDn+AoIS+ormp2J28t1+ohEX9LwMF2Ou5dJwLF2FN4LMauC8bew/FKOgxllmm1oZvzWgOBhswB0rCG+P/0J06A8QAAAA=="
   alt: InsecureBankv2 writeup
 ---
 
