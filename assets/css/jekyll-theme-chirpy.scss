@@ -61,8 +61,9 @@ html {
 }
 
 /* -------------------------------------------------------------------------
-   1. Home — the "machine finder" (search + difficulty filter) and the grid of
-   writeups below it. Markup: _layouts/home.html.
+   1. Machines — the overview dashboard, the finder (search + platform,
+   difficulty and system filters) and the list of writeups below it.
+   Markup: _layouts/machines.html.
    ------------------------------------------------------------------------- */
 
 /* The home page is a full-width, search-first index. The right-hand panel and
@@ -85,38 +86,96 @@ body:has(#home-hero) {
   }
 }
 
+/* The finder panel — the same card language as the dashboard tiles above. A
+   size container, so its filter groups reflow by the width they really get. */
 #home-hero {
+  container-type: inline-size;
   margin-top: 1.25rem;
   margin-bottom: 1.25rem;
-  padding: 1rem 1.15rem 1.1rem;
+  padding: 1.05rem 1.2rem 1.15rem;
   border: 1px solid var(--main-border-color);
   border-radius: 14px;
-  background: var(--card-bg);
+  background:
+    radial-gradient(90% 150% at 100% 0%, color-mix(in srgb, var(--link-color) 7%, transparent), transparent 55%),
+    var(--card-bg);
+  box-shadow: var(--card-shadow);
 
-  /* Title + live result count share one compact row. */
+  /* Title + result count (+ "reset filters" while anything is on). */
   .finder-head {
     display: flex;
     flex-wrap: wrap;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
-    gap: 0.25rem 1rem;
-    margin-bottom: 0.75rem;
+    gap: 0.5rem 1rem;
+    margin-bottom: 0.8rem;
   }
 
   .finder-title {
     margin: 0;
-    font-size: 1.35rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    color: var(--heading-color);
+    font-size: 1.45rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
   }
 }
 
-/* The search box itself — the largest, first thing on the page. */
+.finder-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* "Showing 7 of 30" — also the live region announcing filter results. */
+.machine-count {
+  margin: 0;
+  padding: 0.2rem 0.7rem;
+  border: 1px solid var(--main-border-color);
+  border-radius: 2rem;
+  background: var(--main-bg);
+  color: var(--text-muted-color);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.finder-clear-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.2rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--link-color) 45%, transparent);
+  border-radius: 2rem;
+  background: color-mix(in srgb, var(--link-color) 10%, transparent);
+  color: var(--link-color);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &[hidden] {
+    display: none;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--link-color) 18%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 2px;
+  }
+}
+
+/* The search box: a tall "command bar" with an accent icon, a "/" keycap and
+   a glowing focus ring. */
 .finder-search {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.5rem 0.85rem;
+  gap: 0.7rem;
+  height: 2.9rem;
+  padding: 0 0.55rem 0 0.95rem;
   border: 1px solid var(--search-border-color);
   border-radius: 12px;
   background: var(--main-bg);
@@ -124,25 +183,31 @@ body:has(#home-hero) {
     border-color 0.18s ease,
     box-shadow 0.18s ease;
 
+  &:hover {
+    border-color: color-mix(in srgb, var(--link-color) 35%, var(--search-border-color));
+  }
+
   &:focus-within {
-    border-color: var(--input-focus-border-color);
-    box-shadow: 0 0 0 3px rgb(138 180 248 / 25%); /* accent glow */
+    border-color: var(--link-color);
+    box-shadow:
+      0 0 0 4px color-mix(in srgb, var(--link-color) 16%, transparent),
+      0 10px 28px -14px color-mix(in srgb, var(--link-color) 60%, transparent);
   }
 
   > i {
-    color: var(--search-icon-color);
-    font-size: 1rem;
+    color: var(--link-color);
+    font-size: 0.95rem;
   }
 }
 
 .finder-input {
   flex: 1 1 auto;
   min-width: 0;
-  padding: 0.1rem 0;
+  padding: 0;
   border: 0;
   background: transparent;
-  color: var(--text-color);
-  font-size: 0.95rem;
+  color: var(--heading-color);
+  font-size: 1rem;
   outline: none;
 
   &::placeholder {
@@ -156,18 +221,57 @@ body:has(#home-hero) {
   }
 }
 
-.finder-clear {
+/* The "/" keycap: only while the box is empty and unfocused, and only where
+   there is a keyboard to press it on. */
+.finder-kbd {
+  display: inline-flex;
   flex: 0 0 auto;
-  padding: 0.2rem 0.35rem;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.55rem;
+  height: 1.55rem;
+  padding: 0 0.4rem;
+  border: 1px solid var(--main-border-color);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: var(--card-bg);
+  box-shadow: none;
+  color: var(--text-muted-color);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+
+  .finder-input:not(:placeholder-shown) ~ &,
+  .finder-search:focus-within & {
+    display: none;
+  }
+
+  @media (hover: none) {
+    display: none;
+  }
+}
+
+.finder-clear {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
   border: 0;
   border-radius: 50%;
-  background: none;
+  background: color-mix(in srgb, var(--text-color) 9%, transparent);
   color: var(--text-muted-color);
-  line-height: 1;
   cursor: pointer;
 
+  &[hidden] {
+    display: none;
+  }
+
   &:hover {
-    color: var(--text-color);
+    background: color-mix(in srgb, var(--text-color) 15%, transparent);
+    color: var(--heading-color);
   }
 
   &:focus-visible {
@@ -176,87 +280,142 @@ body:has(#home-hero) {
   }
 }
 
-.finder-filters {
+/* Filter groups flow side by side and wrap: each is a label + a segmented
+   tray of chips. */
+.finder-groups {
   display: flex;
   flex-wrap: wrap;
+  gap: 0.65rem 1.6rem;
+  margin-top: 0.9rem;
+}
+
+.finder-filters {
+  display: flex;
   align-items: center;
-  gap: 0.4rem 0.5rem;
-  margin-top: 0.55rem;
+  gap: 0.6rem;
+  min-width: 0;
+  max-width: 100%;
+}
 
-  /* Fixed-width label so the three chip rows line up in a neat column. */
-  .finder-filters-label {
-    min-width: 5.5rem;
-    margin-right: 0.15rem;
-    color: var(--text-muted-color);
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
+.finder-filters-label {
+  flex: 0 0 auto;
+  color: var(--text-muted-color);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 
-    @media (max-width: 430px) {
-      min-width: 0; /* let it flow on narrow phones */
-    }
+/* The tray. On a narrow screen it scrolls sideways instead of wrapping into a
+   pile of rows. */
+.seg {
+  display: flex;
+  gap: 2px;
+  min-width: 0;
+  padding: 3px;
+  overflow-x: auto;
+  border: 1px solid var(--main-border-color);
+  border-radius: 11px;
+  background: var(--main-bg);
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 
-/* A difficulty filter button: outlined when off, filled with its own colour
-   when on — the same colours as the badges on the cards below. */
+/* A filter chip: a quiet segment when off; when on, a raised accent-tinted
+   one — or, for a difficulty, filled with its colour (loop below). */
 .chip {
   display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.22rem 0.65rem;
-  border: 1px solid var(--main-border-color);
-  border-radius: 2rem;
+  gap: 0.4rem;
+  padding: 0.3rem 0.7rem;
+  border: 0;
+  border-radius: 8px;
   background: transparent;
   color: var(--text-color);
   font-size: 0.8rem;
   font-weight: 600;
-  line-height: 1.5;
+  line-height: 1.45;
+  white-space: nowrap;
   cursor: pointer;
   transition:
     background-color 0.18s ease,
-    border-color 0.18s ease,
+    box-shadow 0.18s ease,
     color 0.18s ease;
 
   &:hover {
-    border-color: var(--link-color);
+    background: color-mix(in srgb, var(--text-color) 8%, transparent);
+    color: var(--heading-color);
   }
 
+  /* Inset, so the tray's scroll clipping can't cut the ring off. */
   &:focus-visible {
     outline: 2px solid var(--link-color);
-    outline-offset: 2px;
+    outline-offset: -2px;
+  }
+
+  > i {
+    font-size: 0.95em;
   }
 
   .chip-count {
-    min-width: 1.4rem;
-    padding: 0 0.3rem;
-    border-radius: 1rem;
-    background: var(--main-bg);
     color: var(--text-muted-color);
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 700;
-    text-align: center;
+    font-variant-numeric: tabular-nums;
   }
 
   &.is-active {
-    border-color: transparent;
-    background: var(--link-color); /* the "All" chip */
-    color: #fff;
+    background: color-mix(in srgb, var(--link-color) 16%, var(--card-bg));
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--link-color) 50%, transparent),
+      0 2px 8px -3px rgb(0 0 0 / 35%);
+    color: var(--heading-color);
 
-    /* Tinted from the chip's own text colour, so it works on the gold chip
-       (dark ink) as well as on the white-text ones. */
     .chip-count {
-      background: color-mix(in srgb, currentColor 22%, transparent);
       color: inherit;
+      opacity: 0.75;
     }
   }
 }
 
+/* Colour key in front of each difficulty. */
+.chip-key {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 2px;
+  background: var(--diff, var(--text-muted-color));
+}
+
+/* A narrow panel: one group per row, labels in a column. */
+@container (max-width: 700px) {
+  .finder-groups {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .finder-filters-label {
+    min-width: 5.2rem;
+  }
+}
+
 @each $level in $difficulty-levels {
+  .chip-#{$level} {
+    --diff: var(--diff-#{$level});
+  }
+
   .chip-#{$level}.is-active {
     background: var(--diff-#{$level});
+    box-shadow: 0 4px 14px -5px var(--diff-#{$level});
     color: var(--diff-#{$level}-ink);
+
+    .chip-key {
+      background: currentColor;
+      opacity: 0.7;
+    }
   }
 
   #post-list .difficulty-#{$level},
@@ -265,8 +424,14 @@ body:has(#home-hero) {
     color: var(--diff-#{$level}-ink);
   }
 
-  /* Dashboard rows paint their bar and key in their level's colour; the
-     landing's latest-writeup cards ring the avatar in it. */
+  /* Machine rows ring their avatar and tint their edge in their level's
+     colour; the dashboard rows paint their bar and key in it; the landing's
+     latest-writeup cards ring the avatar in it. */
+  .machine-card.diff-#{$level} {
+    --diff: var(--diff-#{$level});
+    --diff-ink: var(--diff-#{$level}-ink);
+  }
+
   .machine-stats .diff-#{$level} {
     --row-color: var(--diff-#{$level});
   }
@@ -274,16 +439,6 @@ body:has(#home-hero) {
   .recent-card.diff-#{$level} {
     --ring: var(--diff-#{$level});
   }
-}
-
-/* "Showing 7 of 15" — also the live region announcing filter results. Now sits
-   inline with the finder title. */
-.machine-count {
-  flex: 0 0 auto;
-  margin: 0;
-  color: var(--text-muted-color);
-  font-size: 0.8rem;
-  white-space: nowrap;
 }
 
 /* --- Overview dashboard (top of Machines) ------------------------------- */
@@ -767,27 +922,56 @@ body:has(#home-hero) {
   }
 }
 
+/* Nothing matched: a dashed placeholder with a way back. */
 .machine-empty {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
-  margin-top: 2rem;
+  gap: 0.7rem;
+  margin-top: 0.5rem;
+  padding: 2.5rem 1.5rem;
+  border: 1px dashed var(--main-border-color);
+  border-radius: 16px;
   color: var(--text-muted-color);
+  text-align: center;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.machine-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--link-color) 12%, transparent);
+  color: var(--link-color);
+  font-size: 1.3rem;
+}
+
+.machine-empty-text {
+  margin: 0;
+  font-size: 0.95rem;
 }
 
 .finder-reset {
-  padding: 0.25rem 0.75rem;
-  border: 1px solid var(--main-border-color);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.35rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--link-color) 45%, transparent);
   border-radius: 2rem;
-  background: transparent;
+  background: color-mix(in srgb, var(--link-color) 10%, transparent);
   color: var(--link-color);
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
 
   &:hover {
-    border-color: var(--link-color);
+    background: color-mix(in srgb, var(--link-color) 18%, transparent);
   }
 
   &:focus-visible {
@@ -797,32 +981,76 @@ body:has(#home-hero) {
 }
 
 /* --- The writeup list ---------------------------------------------------- */
+/* One full-width row per machine — a list, by design. Each row shows its
+   artwork twice: as the round avatar and, blurred, as an ambient glow behind
+   it. The difficulty colour rings the avatar and runs down the row's edge.
+   A size container, so the rows adapt to the column they get. */
 #post-list {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
-  margin-top: 0; /* the count line above already spaces the list */
+  gap: 0.85rem;
+  margin-top: 0;
 }
 
-/* Each machine is a full-width list row: round avatar · info · chevron. The
-   whole row is a single link, which is exactly why the thumbnail is a CSS
-   background and not an <img>: an <img> here gets wrapped in Chirpy's lightbox
-   <a>, nesting an anchor inside this link and breaking the layout. */
+/* The whole row is a single link, which is exactly why the thumbnail is a CSS
+   background and not an <img>: an <img> here gets wrapped in Chirpy's
+   lightbox <a>, nesting an anchor inside this link and breaking the layout. */
 .machine-card {
+  --diff: var(--main-border-color); /* no difficulty: neutral ring and edge */
+  --diff-ink: var(--heading-color);
+
+  position: relative;
+  isolation: isolate; /* keeps the glow beneath the content */
   display: flex;
   align-items: center;
-  gap: 1.1rem;
-  padding: 0.95rem 1.15rem;
+  gap: 1.3rem;
+  overflow: hidden;
+  padding: 1.1rem 1.25rem 1.1rem 1.45rem;
   border: 1px solid var(--main-border-color);
-  border-radius: 14px;
+  border-radius: 16px;
   background: var(--card-bg);
   box-shadow: var(--card-shadow);
   color: inherit;
   text-decoration: none;
   transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
-    border-color 0.18s ease;
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+
+  /* Rows (re)entering the list fade up, staggered by their position among
+     the results (`--i`, set by the finder script). */
+  animation: card-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+  animation-delay: calc(min(var(--i, 0), 10) * 45ms);
+
+  /* Ambient glow: the machine's own artwork, blurred. */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -2.5rem;
+    z-index: -1;
+    width: 13rem;
+    height: 13rem;
+    border-radius: 50%;
+    background: var(--thumb) center / cover no-repeat;
+    filter: blur(42px) saturate(1.5);
+    opacity: 0.22;
+    transform: translateY(-50%);
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+  }
+
+  /* Difficulty edge. */
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3px;
+    background: var(--diff);
+  }
 
   /* Hidden by the finder. Explicit because some themes' base styles would beat
      the `hidden` attribute otherwise. */
@@ -831,10 +1059,14 @@ body:has(#home-hero) {
   }
 
   &:hover {
-    transform: translateY(-2px);
-    border-color: var(--link-color);
-    box-shadow: 0 12px 28px -12px rgb(0 0 0 / 50%);
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--diff) 55%, var(--main-border-color));
+    box-shadow: 0 18px 40px -22px color-mix(in srgb, var(--diff) 80%, #000);
     text-decoration: none;
+  }
+
+  &:hover::before {
+    opacity: 0.4;
   }
 
   &:focus-visible {
@@ -842,36 +1074,49 @@ body:has(#home-hero) {
     outline-offset: 3px;
   }
 
+  &:hover .machine-thumb {
+    transform: scale(1.06) rotate(-4deg);
+  }
+
   &:hover .machine-arrow {
-    color: var(--link-color);
+    border-color: transparent;
+    background: var(--diff);
+    color: var(--diff-ink);
     transform: translateX(3px);
   }
 }
 
-/* Round HackTheBox avatar. The artwork is a circle on a transparent square, so
-   `cover` crops exactly to it. */
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* Round machine avatar, ringed in its difficulty colour. The artwork is a
+   circle on a transparent square, so `cover` crops exactly to it. */
 .machine-thumb {
   flex: 0 0 auto;
-  width: 4rem;
-  height: 4rem;
+  width: 5rem;
+  height: 5rem;
   border-radius: 50%;
   background-color: var(--main-bg);
+  background-image: var(--thumb);
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  box-shadow: 0 0 0 1px var(--main-border-color); /* subtle ring */
-
-  @media (min-width: 768px) {
-    width: 4.5rem;
-    height: 4.5rem;
-  }
+  box-shadow:
+    0 0 0 2px var(--card-bg),
+    0 0 0 4px var(--diff),
+    0 10px 24px -8px rgb(0 0 0 / 55%);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .machine-body {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.4rem;
   min-width: 0;
 }
 
@@ -884,11 +1129,12 @@ body:has(#home-hero) {
 }
 
 .machine-title {
-  margin: 0;
+  margin: 0 0.2rem 0 0;
   color: var(--heading-color);
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-size: 1.3rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
 }
 
 .machine-excerpt {
@@ -896,14 +1142,68 @@ body:has(#home-hero) {
   margin: 0;
   overflow: hidden;
   color: var(--text-muted-color);
-  font-size: 0.86rem;
-  line-height: 1.5;
+  font-size: 0.87rem;
+  line-height: 1.55;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 
   &.is-protected {
     font-style: italic;
   }
+}
+
+/* Footer: technique tags on the left, platform + date on the right. */
+.machine-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem 1rem;
+  margin-top: 0.15rem;
+}
+
+.machine-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.tag-pill {
+  max-width: 15rem;
+  overflow: hidden;
+  padding: 0.08rem 0.5rem;
+  border: 1px solid var(--main-border-color);
+  border-radius: 6px;
+  background: var(--main-bg);
+  color: var(--text-muted-color);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  /* CVE ids — the headline of a writeup — in the accent. */
+  &.is-cve {
+    border-color: color-mix(in srgb, var(--link-color) 40%, transparent);
+    background: color-mix(in srgb, var(--link-color) 11%, transparent);
+    color: var(--link-color);
+  }
+}
+
+.tag-more {
+  color: var(--text-muted-color);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+/* Search-term highlight (set by the finder script). */
+.machine-card mark {
+  padding: 0 0.1em;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--link-color) 30%, transparent);
+  color: var(--heading-color);
 }
 
 .machine-meta {
@@ -920,18 +1220,56 @@ body:has(#home-hero) {
   }
 }
 
-/* Chevron affordance on the right of each row. */
+/* Round arrow button on the right; it fills with the difficulty colour on
+   hover. */
 .machine-arrow {
+  display: inline-flex;
   flex: 0 0 auto;
-  align-self: center;
+  align-items: center;
+  justify-content: center;
+  width: 2.3rem;
+  height: 2.3rem;
+  border: 1px solid var(--main-border-color);
+  border-radius: 50%;
   color: var(--text-muted-color);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   transition:
-    transform 0.18s ease,
-    color 0.18s ease;
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
 
-  @media (max-width: 480px) {
-    display: none; /* just wasted space on phones */
+/* A narrow list (phones): smaller avatar, avatar on top-left, no arrow. */
+@container (max-width: 560px) {
+  .machine-card {
+    align-items: flex-start;
+    gap: 0.95rem;
+    padding: 1rem 1rem 1rem 1.15rem;
+  }
+
+  .machine-thumb {
+    width: 3.4rem;
+    height: 3.4rem;
+  }
+
+  .machine-title {
+    font-size: 1.15rem;
+  }
+
+  .machine-arrow {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .machine-card {
+    animation: none;
+  }
+
+  .machine-card:hover,
+  .machine-card:hover .machine-thumb {
+    transform: none;
   }
 }
 
@@ -965,8 +1303,8 @@ body:has(#home-hero) {
   text-transform: uppercase;
 }
 
-/* OS pill (Linux / Windows). Neutral pill like "Protected", but the brand
-   icon carries the colour so it reads at a glance on both card themes. */
+/* OS pill (Linux / Windows / Android). Neutral pill like "Protected", but the
+   brand icon carries the colour so it reads at a glance on both themes. */
 #post-list .os-badge,
 .recent-card .os-badge {
   display: inline-flex;

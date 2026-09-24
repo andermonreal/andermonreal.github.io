@@ -65,6 +65,8 @@ layout: default
 {% assign t_count = 'Showing :shown of :total' %}
 {% assign t_empty = 'No writeup matches your search.' %}
 {% assign t_reset = 'Reset filters' %}
+{% assign t_kbd = 'Press / to search' %}
+{% assign t_more_tags = 'more tags' %}
 {% assign protected_label = 'Protected' %}
 {% assign protected_note = 'Password-protected — open it and enter the password to read the full writeup.' %}
 
@@ -91,6 +93,8 @@ layout: default
   {% assign t_count = 'Mostrando :shown de :total' %}
   {% assign t_empty = 'Ningún writeup coincide con tu búsqueda.' %}
   {% assign t_reset = 'Quitar filtros' %}
+  {% assign t_kbd = 'Pulsa / para buscar' %}
+  {% assign t_more_tags = 'etiquetas más' %}
   {% assign protected_label = 'Protegido' %}
   {% assign protected_note = 'Protegido con contraseña — ábrelo e introduce la contraseña para leer el writeup completo.' %}
 {% endif %}
@@ -308,12 +312,22 @@ layout: default
   </section>
 {% endif %}
 
+<!-- The finder: a search bar plus three segmented filter groups (platform,
+     difficulty, system). The chips keep their data-* attributes — the script
+     at the bottom drives them and the dashboard rows above mirror them. -->
 <section id="home-hero" aria-labelledby="home-heading">
   <div class="finder-head">
     <h1 id="home-heading" class="finder-title">{{ t_heading }}</h1>
-    <p id="machine-count" class="machine-count" aria-live="polite" data-template="{{ t_count }}">
-      {{- t_count | replace: ':shown', total | replace: ':total', total -}}
-    </p>
+
+    <div class="finder-status">
+      <button type="button" id="finder-clear-all" class="finder-clear-all" hidden>
+        <i class="fas fa-xmark" aria-hidden="true"></i>
+        {{ t_reset }}
+      </button>
+      <p id="machine-count" class="machine-count" aria-live="polite" data-template="{{ t_count }}">
+        {{- t_count | replace: ':shown', total | replace: ':total', total -}}
+      </p>
+    </div>
   </div>
 
   <div class="finder-search" role="search">
@@ -328,89 +342,97 @@ layout: default
       autocomplete="off"
       spellcheck="false"
     >
+    <!-- Keyboard hint for the "/" shortcut; hides while typing (CSS). -->
+    <kbd class="finder-kbd" title="{{ t_kbd }}" aria-hidden="true">/</kbd>
     <button type="button" id="machine-search-clear" class="finder-clear" aria-label="{{ t_clear }}" hidden>
       <i class="fas fa-xmark" aria-hidden="true"></i>
     </button>
   </div>
 
-  <div class="finder-filters" role="group" aria-label="{{ t_platform }}">
-    <span class="finder-filters-label" aria-hidden="true">{{ t_platform }}</span>
-
-    <button type="button" class="chip is-active" data-platform="all" aria-pressed="true">
-      {{ t_all }}<span class="chip-count">{{ total }}</span>
-    </button>
-
-    <!-- A platform only gets a chip once at least one writeup uses it. -->
-    {% for platform in platforms %}
-      {% assign platform_posts = posts | where_exp: 'p', 'p.categories contains platform' %}
-      {% assign platform_count = platform_posts | size %}
-      {% if platform_count > 0 %}
-        <button
-          type="button"
-          class="chip chip-platform-{{ platform | slugify }}"
-          data-platform="{{ platform | downcase }}"
-          aria-pressed="false"
-        >
-          {{ platform }}<span class="chip-count">{{ platform_count }}</span>
+  <div class="finder-groups">
+    <div class="finder-filters" role="group" aria-label="{{ t_platform }}">
+      <span class="finder-filters-label" aria-hidden="true">{{ t_platform }}</span>
+      <div class="seg">
+        <button type="button" class="chip is-active" data-platform="all" aria-pressed="true">
+          {{ t_all }}<span class="chip-count">{{ total }}</span>
         </button>
-      {% endif %}
-    {% endfor %}
-  </div>
 
-  <div class="finder-filters" role="group" aria-label="{{ t_difficulty }}">
-    <span class="finder-filters-label" aria-hidden="true">{{ t_difficulty }}</span>
+        <!-- A platform only gets a chip once at least one writeup uses it. -->
+        {% for platform in platforms %}
+          {% assign platform_posts = posts | where_exp: 'p', 'p.categories contains platform' %}
+          {% assign platform_count = platform_posts | size %}
+          {% if platform_count > 0 %}
+            <button
+              type="button"
+              class="chip chip-platform-{{ platform | slugify }}"
+              data-platform="{{ platform | downcase }}"
+              aria-pressed="false"
+            >
+              {{ platform }}<span class="chip-count">{{ platform_count }}</span>
+            </button>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
 
-    <button type="button" class="chip is-active" data-difficulty="all" aria-pressed="true">
-      {{ t_all }}<span class="chip-count">{{ total }}</span>
-    </button>
-
-    <!-- A difficulty only gets a chip once at least one writeup uses it. -->
-    {% for level in difficulty_levels %}
-      {% assign level_posts = posts | where_exp: 'p', 'p.categories contains level' %}
-      {% assign level_count = level_posts | size %}
-      {% if level_count > 0 %}
-        <button
-          type="button"
-          class="chip chip-{{ level | downcase }}"
-          data-difficulty="{{ level | downcase }}"
-          aria-pressed="false"
-        >
-          {{ level }}<span class="chip-count">{{ level_count }}</span>
+    <div class="finder-filters" role="group" aria-label="{{ t_difficulty }}">
+      <span class="finder-filters-label" aria-hidden="true">{{ t_difficulty }}</span>
+      <div class="seg">
+        <button type="button" class="chip is-active" data-difficulty="all" aria-pressed="true">
+          {{ t_all }}<span class="chip-count">{{ total }}</span>
         </button>
-      {% endif %}
-    {% endfor %}
-  </div>
 
-  <div class="finder-filters" role="group" aria-label="{{ t_os }}">
-    <span class="finder-filters-label" aria-hidden="true">{{ t_os }}</span>
+        <!-- A difficulty only gets a chip once at least one writeup uses it. -->
+        {% for level in difficulty_levels %}
+          {% assign level_posts = posts | where_exp: 'p', 'p.categories contains level' %}
+          {% assign level_count = level_posts | size %}
+          {% if level_count > 0 %}
+            <button
+              type="button"
+              class="chip chip-{{ level | downcase }}"
+              data-difficulty="{{ level | downcase }}"
+              aria-pressed="false"
+            >
+              <i class="chip-key" aria-hidden="true"></i>
+              {{ level }}<span class="chip-count">{{ level_count }}</span>
+            </button>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
 
-    <button type="button" class="chip is-active" data-os="all" aria-pressed="true">
-      {{ t_all }}<span class="chip-count">{{ total }}</span>
-    </button>
-
-    <!-- An OS only gets a chip once at least one writeup is tagged with it. -->
-    {% for os in os_levels %}
-      {% assign os_posts = posts | where_exp: 'p', 'p.tags contains os' %}
-      {% assign os_count = os_posts | size %}
-      {% if os_count > 0 %}
-        <button
-          type="button"
-          class="chip chip-os-{{ os }}"
-          data-os="{{ os }}"
-          aria-pressed="false"
-        >
-          <i class="fab fa-{{ os }}" aria-hidden="true"></i>
-          {{ os | capitalize }}<span class="chip-count">{{ os_count }}</span>
+    <div class="finder-filters" role="group" aria-label="{{ t_os }}">
+      <span class="finder-filters-label" aria-hidden="true">{{ t_os }}</span>
+      <div class="seg">
+        <button type="button" class="chip is-active" data-os="all" aria-pressed="true">
+          {{ t_all }}<span class="chip-count">{{ total }}</span>
         </button>
-      {% endif %}
-    {% endfor %}
+
+        <!-- An OS only gets a chip once at least one writeup is tagged with it. -->
+        {% for os in os_levels %}
+          {% assign os_posts = posts | where_exp: 'p', 'p.tags contains os' %}
+          {% assign os_count = os_posts | size %}
+          {% if os_count > 0 %}
+            <button
+              type="button"
+              class="chip chip-os-{{ os }}"
+              data-os="{{ os }}"
+              aria-pressed="false"
+            >
+              <i class="fab fa-{{ os }} brand-{{ os }}" aria-hidden="true"></i>
+              {{ os | capitalize }}<span class="chip-count">{{ os_count }}</span>
+            </button>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
   </div>
 </section>
 
 <div id="post-list" class="flex-grow-1 px-xl-1">
   {% for post in posts %}
     <!-- Detect the post's difficulty from its categories (order-independent);
-         everything else (the platform) stays in the card's meta line. -->
+         everything else (the platform) goes to the card's footer. -->
     {% assign post_difficulty = '' %}
     {% assign platform_categories = '' | split: '' %}
     {% for category in post.categories %}
@@ -421,7 +443,7 @@ layout: default
       {% endif %}
     {% endfor %}
 
-    <!-- The machine's OS, read from its tags (linux / windows). -->
+    <!-- The machine's OS, read from its tags (linux / windows / android). -->
     {% assign post_os = '' %}
     {% for os_name in os_levels %}
       {% if post.tags contains os_name %}
@@ -442,61 +464,102 @@ layout: default
       {%- unless post.protected %} {{ summary }}{% endunless -%}
     {% endcapture %}
 
+    <!-- Card tags: CVE ids first, then the technique tags (OS tags, the
+         generic `CVE` / `mobile` ones and the machine's own name left out).
+         Three are shown and the rest counted. Tags are public anyway (tag
+         pages, the finder), so protected writeups show them too. -->
+    {% assign card_cves = '' | split: '' %}
+    {% assign card_rest = '' | split: '' %}
+    {% assign title_l = post.title | downcase %}
+    {% for tag in post.tags %}
+      {% assign tag_l = tag | downcase %}
+      {% assign tag_head = tag_l | slice: 0, 4 %}
+      {% if tag_head == 'cve-' %}
+        {% assign card_cves = card_cves | push: tag %}
+      {% elsif tag_l != 'cve' and tag_l != 'mobile' and tag_l != title_l %}
+        {% unless os_levels contains tag_l %}
+          {% assign card_rest = card_rest | push: tag %}
+        {% endunless %}
+      {% endif %}
+    {% endfor %}
+    {% assign card_tags = card_cves | concat: card_rest %}
+    {% assign card_more = card_tags.size | minus: 3 %}
+
+    <!-- Thumbnail as a CSS background (the `--thumb` custom property, which
+         also feeds the blurred glow behind it) rather than an <img>, on
+         purpose: `refactor-content.html` only rewrites <img> tags, so this
+         avoids it wrapping the image in a lightbox <a> — which nested an
+         anchor inside this card link and broke the whole layout. -->
+    {% include post-thumb.html post=post %}
+
     <a
-      class="machine-card"
+      class="machine-card{% if post_difficulty != '' %} diff-{{ post_difficulty | downcase }}{% endif %}"
       href="{{ post.url | relative_url }}"
       data-difficulty="{{ post_difficulty | downcase }}"
       data-os="{{ post_os }}"
       data-platform="{{ post_platform | downcase }}"
       data-search="{{ haystack | normalize_whitespace | strip | downcase | escape }}"
+      {% if thumb_src != '' %}style="--thumb: url('{{ thumb_src }}');"{% endif %}
     >
-      <!-- Thumbnail as a CSS background rather than an <img>, on purpose:
-           `refactor-content.html` only rewrites <img> tags, so this avoids it
-           wrapping the image in a lightbox <a> — which nested an anchor inside
-           this card link and broke the whole layout. -->
-      {% include post-thumb.html post=post %}
       {% if thumb_src != '' %}
-        <span class="machine-thumb" style="background-image: url('{{ thumb_src }}');" aria-hidden="true"></span>
+        <span class="machine-thumb" aria-hidden="true"></span>
       {% endif %}
 
       <div class="machine-body">
-          <div class="machine-head">
-            <h2 class="machine-title">{{ post.title }}</h2>
+        <div class="machine-head">
+          <h2 class="machine-title">{{ post.title }}</h2>
 
-            {% if post_difficulty != '' %}
-              <span class="difficulty-badge difficulty-{{ post_difficulty | downcase }}">{{ post_difficulty }}</span>
-            {% endif %}
+          {% if post_difficulty != '' %}
+            <span class="difficulty-badge difficulty-{{ post_difficulty | downcase }}">{{ post_difficulty }}</span>
+          {% endif %}
 
-            {% if post_os != '' %}
-              <span class="os-badge os-{{ post_os }}">
-                <i class="fab fa-{{ post_os }}" aria-hidden="true"></i>
-                {{ post_os | capitalize }}
+          {% if post_os != '' %}
+            <span class="os-badge os-{{ post_os }}">
+              <i class="fab fa-{{ post_os }}" aria-hidden="true"></i>
+              {{ post_os | capitalize }}
+            </span>
+          {% endif %}
+
+          {% if post.protected %}
+            <span class="protected-badge"><i class="fas fa-lock" aria-hidden="true"></i> {{ protected_label }}</span>
+          {% endif %}
+        </div>
+
+        {% if post.protected %}
+          <p class="machine-excerpt is-protected">{{ protected_note }}</p>
+        {% else %}
+          <p class="machine-excerpt">{{ summary }}</p>
+        {% endif %}
+
+        <div class="machine-foot">
+          {% if card_tags.size > 0 %}
+            <span class="machine-tags">
+              {% for tag in card_tags limit: 3 %}
+                {% assign tag_head = tag | downcase | slice: 0, 4 %}
+                {% if tag_head == 'cve-' %}
+                  <span class="tag-pill is-cve">{{ tag | upcase }}</span>
+                {% else %}
+                  <span class="tag-pill">{{ tag }}</span>
+                {% endif %}
+              {% endfor %}
+              {% if card_more > 0 %}
+                <span class="tag-more">+{{ card_more }}<span class="visually-hidden"> {{ t_more_tags }}</span></span>
+              {% endif %}
+            </span>
+          {% endif %}
+
+          <span class="machine-meta">
+            {% if platform_categories.size > 0 %}
+              <span class="meta-item">
+                <i class="fas fa-layer-group fa-fw" aria-hidden="true"></i>
+                {{ platform_categories | join: ', ' }}
               </span>
             {% endif %}
 
-            {% if post.protected %}
-              <span class="protected-badge"><i class="fas fa-lock" aria-hidden="true"></i> {{ protected_label }}</span>
-            {% endif %}
-          </div>
-
-          {% if post.protected %}
-            <p class="machine-excerpt is-protected">{{ protected_note }}</p>
-          {% else %}
-            <p class="machine-excerpt">{{ summary }}</p>
-          {% endif %}
-
-          <div class="machine-meta">
             <span class="meta-item">
               <i class="far fa-calendar fa-fw" aria-hidden="true"></i>
               {% include datetime.html date=post.date lang=lang %}
             </span>
-
-            {% if platform_categories.size > 0 %}
-              <span class="meta-item">
-                <i class="far fa-folder-open fa-fw" aria-hidden="true"></i>
-                {{ platform_categories | join: ', ' }}
-              </span>
-            {% endif %}
 
             {% if post.pin %}
               <span class="meta-item pin">
@@ -504,21 +567,26 @@ layout: default
                 {{ site.data.locales[lang].post.pin_prompt }}
               </span>
             {% endif %}
-          </div>
-          <!-- .machine-meta -->
+          </span>
         </div>
-        <!-- .machine-body -->
+        <!-- .machine-foot -->
+      </div>
+      <!-- .machine-body -->
 
-        <span class="machine-arrow" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>
-      </a>
+      <span class="machine-arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
+    </a>
   {% endfor %}
 </div>
 <!-- #post-list -->
 
-<p id="machine-empty" class="machine-empty" hidden>
-  <span>{{ t_empty }}</span>
-  <button type="button" id="machine-reset" class="finder-reset">{{ t_reset }}</button>
-</p>
+<div id="machine-empty" class="machine-empty" hidden>
+  <span class="machine-empty-icon" aria-hidden="true"><i class="fas fa-ghost"></i></span>
+  <p class="machine-empty-text">{{ t_empty }}</p>
+  <button type="button" id="machine-reset" class="finder-reset">
+    <i class="fas fa-rotate-left" aria-hidden="true"></i>
+    {{ t_reset }}
+  </button>
+</div>
 
 <script>
   /* The machine finder: filters the cards above by free text (title, tags,
@@ -539,6 +607,7 @@ layout: default
     const osChips = Array.from(document.querySelectorAll('#home-hero .chip[data-os]'));
     const platformChips = Array.from(document.querySelectorAll('#home-hero .chip[data-platform]'));
     const clearButton = document.getElementById('machine-search-clear');
+    const clearAllButton = document.getElementById('finder-clear-all');
     const emptyState = document.getElementById('machine-empty');
     const resetButton = document.getElementById('machine-reset');
     const countTemplate = counter.dataset.template;
@@ -548,6 +617,40 @@ layout: default
     let difficulty = 'all';
     let os = 'all';
     let platform = 'all';
+
+    /* Search-term highlighting, so it is clear why a card matched. The text a
+       match can show up in (title, excerpt, visible tags) is kept here and
+       rebuilt with <mark>s around the terms — always from that plain text,
+       escaped, never from the page's HTML. */
+    const markable = cards.map((card) =>
+      Array.from(card.querySelectorAll('.machine-title, .machine-excerpt, .tag-pill'))
+    );
+    const originals = new Map();
+
+    markable.flat().forEach((el) => originals.set(el, el.textContent));
+
+    const escapeHtml = (text) =>
+      text.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+    const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    function highlight(elements, pattern) {
+      elements.forEach((el) => {
+        const text = originals.get(el);
+
+        if (!pattern) {
+          if (el.childElementCount) {
+            el.textContent = text; /* drop the old marks */
+          }
+          return;
+        }
+
+        /* split() with a capturing pattern puts the matches at odd indexes. */
+        el.innerHTML = text
+          .split(pattern)
+          .map((part, k) => (k % 2 ? `<mark>${escapeHtml(part)}</mark>` : escapeHtml(part)))
+          .join('');
+      });
+    }
 
     /* Mirror a filter onto the dashboard: the selected row lights up and its
        siblings dim, so the overview and the finder always tell one story.
@@ -604,9 +707,12 @@ layout: default
 
     function apply(sync) {
       const terms = input.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      /* Longest first, so "sqli" wins over "sql" inside the same word. */
+      const alternatives = [...terms].sort((a, b) => b.length - a.length).map(escapeRegExp);
+      const pattern = terms.length ? new RegExp(`(${alternatives.join('|')})`, 'gi') : null;
       let shown = 0;
 
-      cards.forEach((card) => {
+      cards.forEach((card, index) => {
         const matches =
           (difficulty === 'all' || card.dataset.difficulty === difficulty) &&
           (os === 'all' || card.dataset.os === os) &&
@@ -616,6 +722,10 @@ layout: default
         card.hidden = !matches;
 
         if (matches) {
+          /* Position among the results: staggers the entrance animation of
+             cards that (re)appear, in the order they are shown. */
+          card.style.setProperty('--i', shown);
+          highlight(markable[index], pattern);
           shown += 1;
         }
       });
@@ -625,6 +735,8 @@ layout: default
         .replace(':total', cards.length);
       emptyState.hidden = shown > 0;
       clearButton.hidden = input.value === '';
+      clearAllButton.hidden =
+        input.value.trim() === '' && difficulty === 'all' && os === 'all' && platform === 'all';
 
       if (sync !== false) {
         syncUrl();
@@ -719,13 +831,19 @@ layout: default
       apply();
     });
 
-    resetButton.addEventListener('click', () => {
+    /* Both "reset" buttons (the header one and the empty state's) clear the
+       search and every filter, then hand focus back to the search box — the
+       header button hides itself, so focus must not be left on it. */
+    function resetAll() {
       input.value = '';
-      selectDifficulty('all');
-      selectOs('all');
+      selectDifficulty('all', false);
+      selectOs('all', false);
       selectPlatform('all');
       input.focus();
-    });
+    }
+
+    resetButton.addEventListener('click', resetAll);
+    clearAllButton.addEventListener('click', resetAll);
 
     /* "/" jumps to the finder, as long as the visitor isn't already typing. */
     document.addEventListener('keydown', (event) => {
