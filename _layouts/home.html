@@ -3,9 +3,10 @@ layout: default
 # Root landing page (`/` and, via polyglot, `/es/`) — the first thing a visitor
 # sees, built to pull them in and point them straight at the work:
 #
-#   1. Hero — who, what and the call to action, beside a terminal that "types"
-#      a short intro. The terminal is decorative (aria-hidden); everything it
-#      says is also on the page as real content.
+#   1. Hero — who, what, certifications (_data/certs.yml) and the call to
+#      action, beside an interactive terminal (assets/js/terminal.js) that
+#      types a short intro and then takes commands; its data is the
+#      <template id="term-data"> at the end of this file.
 #   2. Numbers — writeups, CVEs, techniques and platforms, from the shared
 #      writeup-stats include (the same figures as the Machines dashboard).
 #   3. Latest writeups — the three newest machines.
@@ -30,6 +31,13 @@ layout: default
 
 {% assign recent = site.posts | where_exp: 'item', 'item.hidden != true' %}
 {% assign email = site.social.email %}
+{% if is_es %}
+  {% assign mon_short = 'ene,feb,mar,abr,may,jun,jul,ago,sept,oct,nov,dic' | split: ',' %}
+  {% assign mon_long = 'enero,febrero,marzo,abril,mayo,junio,julio,agosto,septiembre,octubre,noviembre,diciembre' | split: ',' %}
+{% else %}
+  {% assign mon_short = 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec' | split: ',' %}
+  {% assign mon_long = 'January,February,March,April,May,June,July,August,September,October,November,December' | split: ',' %}
+{% endif %}
 {% assign linkedin = 'https://www.linkedin.com/in/ander-monreal-ayanz-485794291' %}
 {% assign htb_profile = 'https://app.hackthebox.com/users/1723818' %}
 
@@ -65,6 +73,29 @@ layout: default
         {% if is_es %}Ingeniero Informático · Máster en Ciberseguridad{% else %}Computer Engineer · MSc in Cybersecurity{% endif %}
       </p>
 
+      <!-- Certifications, from _data/certs.yml: dashed while in progress,
+           solid once passed. -->
+      {% if site.data.certs.size > 0 %}
+        <ul class="landing-certs" aria-label="{% if is_es %}Certificaciones{% else %}Certifications{% endif %}">
+          {% for c in site.data.certs %}
+            {% assign c_parts = c.date | split: '-' %}
+            {% assign c_m = c_parts[1] | plus: 0 | minus: 1 %}
+            {% assign c_when = mon_short[c_m] | append: ' ' | append: c_parts[0] %}
+            <li class="cert-chip{% if c.status == 'done' %} is-done{% endif %}" title="{{ c.name }} · {{ c.full }} ({{ c.issuer }})">
+              {% if c.status == 'done' %}
+                <i class="fas fa-certificate" aria-hidden="true"></i>
+                {% if c.url %}<a href="{{ c.url }}" target="_blank" rel="noopener"><strong>{{ c.name }}</strong></a>{% else %}<strong>{{ c.name }}</strong>{% endif %}
+                <span class="cert-note">· {% if is_es %}certificado{% else %}certified{% endif %} {{ c_when }}</span>
+              {% else %}
+                <i class="fas fa-hourglass-half" aria-hidden="true"></i>
+                <strong>{{ c.name }}</strong>
+                <span class="cert-note">· {% if is_es %}en preparación · examen {{ c_when }}{% else %}in progress · exam {{ c_when }}{% endif %}</span>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
       <p class="landing-tagline">
         {% if is_es %}
           Centrado en <strong>seguridad ofensiva</strong>: comprometo máquinas y documento exactamente cómo.
@@ -92,36 +123,84 @@ layout: default
       </div>
     </div>
 
-    <!-- The terminal types itself out (script below); without JS or with
-         reduced motion it is simply shown in full. -->
-    <div class="terminal" aria-hidden="true">
-      <div class="terminal-bar">
+    <!-- The terminal (assets/js/terminal.js): it types a short intro, then
+         takes commands. Without JS it is just the intro and a blinking cursor;
+         the live prompt and the command chips only appear when the script
+         can drive them. The intro is decorative (aria-hidden); what it says is
+         on the page as real content too. -->
+    <div class="terminal" data-term>
+      <div class="terminal-bar" aria-hidden="true">
         <span class="terminal-dots"><i></i><i></i><i></i></span>
         <span class="terminal-title">ander@kali: ~</span>
       </div>
       <div class="terminal-body">
-        <p class="t-line t-cmd"><span class="t-ps1"><b>ander@kali</b>:<em>~</em>$</span> <span class="t-typed">whoami</span></p>
-        <p class="t-line t-out">ander · {% if is_es %}seguridad ofensiva{% else %}offensive security{% endif %}</p>
+        <div class="t-intro" aria-hidden="true">
+          <p class="t-line t-cmd"><span class="t-ps1"><b>ander@kali</b>:<em>~</em>$</span> <span class="t-typed">whoami</span></p>
+          <p class="t-line t-out">ander · {% if is_es %}seguridad ofensiva{% else %}offensive security{% endif %}</p>
 
-        <p class="t-line t-cmd"><span class="t-ps1"><b>ander@kali</b>:<em>~</em>$</span> <span class="t-typed">cat focus.txt</span></p>
-        <p class="t-line t-out">{% if is_es %}explotación web · escalada de privilegios · CVEs · AD · contenedores{% else %}web exploitation · privilege escalation · CVEs · AD · containers{% endif %}</p>
+          <p class="t-line t-cmd"><span class="t-ps1"><b>ander@kali</b>:<em>~</em>$</span> <span class="t-typed">cat focus.txt</span></p>
+          <p class="t-line t-out">{% if is_es %}explotación web · escalada de privilegios · CVEs · AD · contenedores{% else %}web exploitation · privilege escalation · CVEs · AD · containers{% endif %}</p>
 
-        <p class="t-line t-cmd"><span class="t-ps1"><b>ander@kali</b>:<em>~</em>$</span> <span class="t-typed">ls -t writeups/ | head -3</span></p>
-        <p class="t-line t-out t-ls">
-          {%- for p in recent limit: 3 -%}
-            <span>{{ p.title | slugify }}/</span>
-          {%- endfor -%}
-        </p>
+          <p class="t-line t-cmd"><span class="t-ps1"><b>ander@kali</b>:<em>~</em>$</span> <span class="t-typed">ls -t writeups/ | head -3</span></p>
+          <p class="t-line t-out t-ls">
+            {%- for p in recent limit: 3 -%}
+              <span>{{ p.title | slugify }}/</span>
+            {%- endfor -%}
+          </p>
+        </div>
 
-        <p class="t-line t-cmd t-prompt-end"><span class="t-ps1"><b>ander@kali</b>:<em>~</em>$</span> <span class="t-cursor"></span></p>
+        <div class="t-log" role="log" aria-label="{% if is_es %}Salida de la terminal{% else %}Terminal output{% endif %}"></div>
+
+        <form class="t-line t-cmd t-prompt" action="#" hidden>
+          <label for="term-input"><span class="t-ps1" aria-hidden="true"><b>ander@kali</b>:<em>~</em>$</span><span class="visually-hidden">{% if is_es %}Terminal: escribe un comando, por ejemplo help{% else %}Terminal: type a command, for example help{% endif %}</span></label>
+          <input
+            id="term-input"
+            class="t-input"
+            type="text"
+            autocomplete="off"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
+            enterkeyhint="send"
+            placeholder="{% if is_es %}escribe help y pulsa Enter{% else %}type help and press Enter{% endif %}"
+          >
+        </form>
+
+        <p class="t-line t-cmd t-prompt-end" aria-hidden="true"><span class="t-ps1"><b>ander@kali</b>:<em>~</em>$</span> <span class="t-cursor"></span></p>
+      </div>
+
+      <div class="t-suggest" role="group" aria-label="{% if is_es %}Prueba un comando{% else %}Try a command{% endif %}" hidden>
+        <span class="t-suggest-label" aria-hidden="true">{% if is_es %}prueba:{% else %}try:{% endif %}</span>
+        {% assign term_chips = 'help,whoami,ls machines,neofetch,contact' | split: ',' %}
+        {% for chip in term_chips %}
+          <button type="button" data-cmd="{{ chip }}">{{ chip }}</button>
+        {% endfor %}
       </div>
     </div>
     <script>
-      /* Hide the lines before first paint, so the typing never flashes the
-         finished text. The typing itself runs from the script at the bottom. */
-      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        document.currentScript.previousElementSibling.classList.add('is-typing');
-      }
+      /* Before first paint: swap the static prompt for the live one and show
+         the chips (so nothing moves once the script takes over), and hide the
+         intro lines until they are typed. If terminal.js never arrives, put
+         the static terminal back after a few seconds. */
+      (function (term) {
+        term.querySelector('.t-prompt').hidden = false;
+        term.querySelector('.t-prompt-end').hidden = true;
+        term.querySelector('.t-suggest').hidden = false;
+        term.classList.add('is-live');
+
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          term.classList.add('is-typing');
+        }
+
+        window.setTimeout(function () {
+          if (!term.hasAttribute('data-booted')) {
+            term.classList.remove('is-live', 'is-typing');
+            term.querySelector('.t-prompt').hidden = true;
+            term.querySelector('.t-prompt-end').hidden = false;
+            term.querySelector('.t-suggest').hidden = true;
+          }
+        }, 6000);
+      })(document.currentScript.previousElementSibling);
     </script>
   </section>
 
@@ -246,6 +325,19 @@ layout: default
           <p>Hi, I'm <strong>Ander</strong> — a cybersecurity professional focused on offensive security. I hold a degree in Computer Engineering and a Master's in Cybersecurity, and I spend my time turning that foundation into hands-on skill in front of a keyboard.</p>
           <p>This site is where I document that work: detailed <strong>writeups</strong> of the HackTheBox machines and CTF challenges I solve — full recon-to-root, with the reasoning behind every step — and the <strong>projects</strong> and tools I build along the way.</p>
         {% endif %}
+
+        <!-- Certifications in progress, from _data/certs.yml. -->
+        {% for c in site.data.certs %}
+          {% if c.status != 'done' %}
+            {% assign c_parts = c.date | split: '-' %}
+            {% assign c_m = c_parts[1] | plus: 0 | minus: 1 %}
+            {% if is_es %}
+              <p>Ahora mismo preparo el <strong>{{ c.name }}</strong> ({{ c.full }}, de {{ c.issuer }}): me examino en {{ mon_long[c_m] }} de {{ c_parts[0] }}.</p>
+            {% else %}
+              <p>Right now I'm preparing for the <strong>{{ c.name }}</strong> ({{ c.full }}, by {{ c.issuer }}), with the exam in {{ mon_long[c_m] }} {{ c_parts[0] }}.</p>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
       </div>
 
       <div class="landing-topics">
@@ -288,57 +380,84 @@ layout: default
   </p>
 </div>
 
+<!-- What the terminal knows (read by assets/js/terminal.js): pages, every
+     writeup, the projects, the certifications and the contact links. They are
+     real links so that polyglot rewrites them for /es/. A protected writeup
+     gets no summary here: this page is not encrypted. -->
+<template id="term-data">
+  <a data-kind="page" data-name="machines" href="{{ '/machines/' | relative_url }}"></a>
+  <a data-kind="page" data-name="cves" href="{{ '/cves/' | relative_url }}"></a>
+  <a data-kind="page" data-name="projects" href="{{ '/projects/' | relative_url }}"></a>
+  <a data-kind="page" data-name="archive" href="{{ '/archives/' | relative_url }}"></a>
+
+  {% for p in ws_posts %}
+    {% include machine-meta.html post=p %}
+    {% assign p_cves = '' %}
+    {% for p_tag in p.tags %}
+      {% assign p_t = p_tag | downcase %}
+      {% assign p_head = p_t | slice: 0, 4 %}
+      {% if p_head == 'cve-' and p_t.size > 4 %}
+        {% assign p_cves = p_cves | append: ' ' | append: p_t | upcase %}
+      {% endif %}
+    {% endfor %}
+    {% assign p_summary = '' %}
+    {% unless p.protected %}
+      {% assign post = p %}
+      {% capture p_summary %}{% include post-summary.html max_length=420 %}{% endcapture %}
+    {% endunless %}
+    <a
+      data-kind="machine"
+      data-slug="{{ p.slug }}"
+      data-title="{{ p.title | escape }}"
+      data-diff="{{ mm_diff }}"
+      data-os="{{ mm_os }}"
+      data-platform="{{ mm_platform }}"
+      data-date="{{ p.date | date: '%Y-%m-%d' }}"
+      data-cves="{{ p_cves | strip }}"
+      {% if p.protected %}data-locked{% else %}data-summary="{{ p_summary | strip | escape }}"{% endif %}
+      href="{{ p.url | relative_url }}"
+    ></a>
+  {% endfor %}
+
+  {% for pr in site.data.projects_generated %}
+    <a data-kind="project" data-slug="{{ pr.slug }}" data-title="{{ pr.name | escape }}" href="{{ '/projects/' | append: pr.slug | append: '/' | relative_url }}"></a>
+  {% endfor %}
+
+  {% for c in site.data.certs %}
+    {% assign c_parts = c.date | split: '-' %}
+    {% assign c_m = c_parts[1] | plus: 0 | minus: 1 %}
+    <span
+      data-kind="cert"
+      data-name="{{ c.name | escape }}"
+      data-full="{{ c.full | escape }}"
+      data-issuer="{{ c.issuer | escape }}"
+      data-status="{{ c.status }}"
+      data-when="{{ mon_short[c_m] }} {{ c_parts[0] }}"
+    ></span>
+  {% endfor %}
+
+  <a data-kind="contact" data-name="email" href="mailto:{{ email }}">{{ email }}</a>
+  <a data-kind="contact" data-name="linkedin" href="{{ linkedin }}">{{ linkedin | remove_first: 'https://www.' }}</a>
+  <a data-kind="contact" data-name="github" href="https://github.com/andermonreal">github.com/andermonreal</a>
+  <a data-kind="contact" data-name="htb" href="{{ htb_profile }}">app.hackthebox.com/users/1723818</a>
+
+  <pre data-kind="logo">
+     _    __  __
+    / \  |  \/  |
+   / _ \ | |\/| |
+  / ___ \| |  | |
+ /_/   \_\_|  |_|</pre>
+</template>
+
+<script defer src="{{ '/assets/js/terminal.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
+
 <script>
-  /* Landing motion, all of it skipped under prefers-reduced-motion:
-       * the terminal types its commands, then prints each output line;
-       * the numbers count up the first time they scroll into view.
-     The final text is in the HTML from the start, so nothing depends on it. */
+  /* The numbers count up the first time they scroll into view (skipped under
+     prefers-reduced-motion). The final figures are in the HTML from the
+     start, so nothing depends on it. The terminal has its own script. */
   (function () {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return;
-    }
-
-    const term = document.querySelector('.terminal.is-typing');
-
-    if (term) {
-      const lines = Array.from(term.querySelectorAll('.t-line'));
-      let i = 0;
-
-      const next = () => {
-        if (i >= lines.length) {
-          term.classList.remove('is-typing');
-          return;
-        }
-
-        const line = lines[i++];
-        const typed = line.querySelector('.t-typed');
-        line.classList.add('is-shown');
-
-        if (!typed) {
-          setTimeout(next, line.classList.contains('t-out') ? 120 : 0);
-          return;
-        }
-
-        const text = typed.textContent;
-        let k = 0;
-        typed.textContent = '';
-        line.classList.add('is-current');
-
-        const tick = () => {
-          typed.textContent = text.slice(0, ++k);
-
-          if (k < text.length) {
-            setTimeout(tick, 35 + Math.random() * 45);
-          } else {
-            line.classList.remove('is-current');
-            setTimeout(next, 280);
-          }
-        };
-
-        setTimeout(tick, 420);
-      };
-
-      setTimeout(next, 350);
     }
 
     const counters = document.querySelectorAll('.landing-stats [data-count]');

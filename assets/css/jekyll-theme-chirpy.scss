@@ -1527,6 +1527,34 @@ html[data-mode="light"] {
   }
 }
 
+/* Code-comment tokens: the theme's light grey (#68717a) is 4.21:1 on the beige
+   code background — darken it to clear 4.5:1 (matches the theme's own selector
+   list). */
+@mixin beige-light-comment {
+  .highlight {
+    .c,
+    .ch,
+    .cd,
+    .cm,
+    .cp,
+    .cpf,
+    .c1,
+    .cs {
+      color: #586069;
+    }
+  }
+}
+
+html[data-mode="light"] {
+  @include beige-light-comment;
+}
+
+@media (prefers-color-scheme: light) {
+  html:not([data-mode]) {
+    @include beige-light-comment;
+  }
+}
+
 /* =========================================================================
    5. Language switcher — a compact segmented "pill" toggle on its own row at
    the bottom of the sidebar, above the social icons. Rendered by the
@@ -2528,6 +2556,315 @@ html {
   }
 }
 
+/* --- The live terminal (assets/js/terminal.js) ---------------------------
+   `is-live` is set before first paint when JS runs: the window gets a fixed
+   height (so the hero never shifts as output arrives) and scrolls inside. */
+.terminal [hidden] {
+  display: none !important;
+}
+
+.terminal.is-live .terminal-body {
+  height: 20rem;
+  max-height: 62vh;
+  overflow-y: auto;
+  scrollbar-color: #30363d transparent;
+  scrollbar-width: thin;
+}
+
+.terminal.is-live:has(.t-input:focus) {
+  box-shadow:
+    0 0 0 2px rgb(159 239 0 / 65%),
+    0 28px 60px -24px rgb(0 0 0 / 60%),
+    0 0 90px -30px rgb(159 239 0 / 60%);
+}
+
+.t-log .t-cmd {
+  margin-top: 0.55rem;
+}
+
+.t-prompt {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6ch;
+
+  label {
+    flex: none;
+    margin: 0;
+    cursor: text;
+  }
+}
+
+.t-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #e6edf3;
+  font: inherit;
+  caret-color: #9fef00;
+  outline: none; /* the whole window lights up instead (above) */
+
+  &::placeholder {
+    color: #8b949e;
+    opacity: 1;
+  }
+}
+
+/* Phones zoom into any input under 16px on focus. */
+@media (pointer: coarse) {
+  .t-input {
+    font-size: 16px;
+  }
+}
+
+/* Output colours: all at least 5.5:1 on the window. */
+.t-hi {
+  color: #e6edf3;
+}
+
+.t-dim {
+  color: #8b949e;
+}
+
+.t-ok {
+  color: #9fef00;
+}
+
+.t-err {
+  color: #ff7b72;
+}
+
+.t-warn {
+  color: #e3b341;
+}
+
+.t-dir {
+  color: #58a6ff;
+  font-weight: 700;
+}
+
+.t-easy {
+  color: #3fb950;
+}
+
+.t-medium {
+  color: #d29922;
+}
+
+.t-hard {
+  color: #f85149;
+}
+
+.t-insane {
+  color: #bc8cff;
+}
+
+.t-b {
+  font-weight: 700;
+}
+
+.t-indent {
+  padding-left: 4ch;
+}
+
+.t-lock {
+  margin-left: 0.15em;
+  color: #8b949e;
+  font-size: 0.85em;
+}
+
+.t-log a {
+  color: #58a6ff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+
+  &:hover {
+    color: #79c0ff;
+  }
+}
+
+/* `ls` in columns, `help` / `contact` as two columns, `ls -l` as a table. */
+.t-grid {
+  display: grid;
+  column-gap: 2ch;
+
+  > * {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+.t-cols {
+  grid-template-columns: repeat(auto-fill, minmax(17ch, 1fr));
+}
+
+.t-cols-wide {
+  grid-template-columns: repeat(auto-fill, minmax(24ch, 1fr));
+}
+
+.t-kv {
+  grid-template-columns: max-content minmax(0, 1fr);
+}
+
+.t-cols-3 {
+  grid-template-columns: repeat(3, minmax(0, max-content));
+}
+
+.t-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, max-content));
+}
+
+/* `neofetch`: the logo beside the facts (above them on a narrow window). */
+.t-fetch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.35rem 1.6rem;
+  margin: 0.3rem 0;
+}
+
+.terminal .t-logo {
+  flex: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #9fef00;
+  font: inherit;
+  line-height: 1.3;
+  white-space: pre;
+}
+
+.t-fetch-info {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+
+.t-swatches {
+  display: flex;
+  margin-top: 0.45rem;
+
+  span {
+    width: 2ch;
+    height: 1em;
+  }
+}
+
+/* Command chips under the window: for touch screens, and the curious. */
+.t-suggest {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 0.9rem 0.7rem;
+  border-top: 1px solid rgb(255 255 255 / 6%);
+  background: #10151c;
+
+  button {
+    padding: 0.1rem 0.55rem;
+    border: 1px solid rgb(255 255 255 / 12%);
+    border-radius: 6px;
+    background: #161b22;
+    color: #c9d1d9;
+    font: inherit;
+    font-size: 0.74rem;
+    line-height: 1.6;
+    cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      color 0.15s ease;
+
+    &:hover {
+      border-color: rgb(159 239 0 / 55%);
+      color: #e6edf3;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #9fef00;
+      outline-offset: 2px;
+    }
+  }
+}
+
+.t-suggest-label {
+  color: #8b949e;
+  font-size: 0.72rem;
+}
+
+/* The flag is in: a ring ripples out of the window, twice. */
+.terminal.is-pwned {
+  animation: t-pwned 1.4s ease-out 2;
+}
+
+@keyframes t-pwned {
+  0% {
+    outline: 2px solid rgb(159 239 0 / 90%);
+    outline-offset: 0;
+  }
+
+  100% {
+    outline: 2px solid rgb(159 239 0 / 0%);
+    outline-offset: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .terminal.is-pwned {
+    animation: none;
+  }
+}
+
+/* --- Certifications under the credentials line --------------------------
+   Dashed while in progress, solid once passed (_data/certs.yml). */
+.landing-certs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: -0.35rem 0 1.35rem;
+  padding: 0;
+  list-style: none;
+}
+
+.cert-chip {
+  --cert: var(--diff-medium);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.28rem 0.8rem;
+  border: 1px dashed color-mix(in srgb, var(--cert) 65%, var(--main-border-color));
+  border-radius: 2rem;
+  background: color-mix(in srgb, var(--cert) 8%, var(--card-bg));
+  color: var(--text-color);
+  font-family: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas,
+    monospace;
+  font-size: 0.78rem;
+
+  i {
+    color: var(--cert);
+  }
+
+  strong {
+    color: var(--heading-color);
+    font-weight: 800;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  .cert-note {
+    color: var(--text-muted-color);
+  }
+
+  &.is-done {
+    --cert: #3fb950;
+
+    border-style: solid;
+  }
+}
+
 /* --- 2. Numbers ---------------------------------------------------------- */
 .landing-stats {
   display: grid;
@@ -3397,6 +3734,159 @@ body:has(.wu-post) {
       font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
       font-size: 0.88rem;
     }
+  }
+}
+
+/* --- Attack path (_includes/attack-path.html) ---------------------------
+   The route through the box under the spec sheet: Recon → Initial access →
+   User → Root, each node in its phase colour with the account reached and the
+   headline CVE. Scrolls sideways on a narrow screen rather than wrapping, so
+   the chain stays readable as a line. */
+.attack-path {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.85rem 1.25rem;
+  border-top: 1px solid var(--main-border-color);
+  background: color-mix(in srgb, var(--main-bg) 55%, var(--card-bg));
+}
+
+.ap-label {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-muted-color);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  i {
+    color: var(--hero-accent);
+  }
+}
+
+.ap-steps {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap; /* wraps to a second row on a narrow card — never scrolls */
+  align-items: center;
+  gap: 0.5rem 0.55rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0.15rem 0.1rem;
+  list-style: none;
+}
+
+.ap-step {
+  --ap: var(--text-muted-color);
+
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--ap) 40%, var(--main-border-color));
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--ap) 8%, var(--card-bg));
+
+  /* The connector between nodes. */
+  &:not(:first-child)::before {
+    content: '';
+    flex: none;
+    width: 0.85rem;
+    height: 0.85rem;
+    margin: 0 0.5rem 0 -0.35rem;
+    background: var(--text-muted-color);
+    -webkit-mask: var(--ap-arrow) center / contain no-repeat;
+    mask: var(--ap-arrow) center / contain no-repeat;
+  }
+
+  --ap-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M13.2 5.4 11.8 6.8 16 11H4v2h12l-4.2 4.2 1.4 1.4L20 12z'/%3E%3C/svg%3E");
+}
+
+.ap-recon {
+  --ap: var(--text-muted-color);
+}
+
+.ap-foothold {
+  --ap: var(--hero-accent);
+}
+
+.ap-user {
+  --ap: var(--link-color);
+}
+
+.ap-root {
+  --ap: var(--diff-hard);
+}
+
+.ap-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  flex: none;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--ap) 20%, transparent);
+  color: var(--ap);
+  font-size: 0.8rem;
+}
+
+.ap-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  line-height: 1.2;
+}
+
+.ap-phase {
+  color: var(--text-muted-color);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.ap-acct {
+  color: var(--heading-color);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.ap-cve {
+  align-self: flex-start;
+  margin-top: 0.05rem;
+  color: color-mix(in srgb, var(--diff-hard) 82%, var(--heading-color));
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-decoration: none;
+
+  &:hover {
+    color: var(--diff-hard);
+    text-decoration: underline;
+  }
+}
+
+/* When a node carries only a phase (no account) — e.g. plain "Recon" — give
+   the label a touch more weight against the icon. */
+.ap-step:not(:has(.ap-acct)):not(:has(.ap-cve)) .ap-phase {
+  font-size: 0.72rem;
+}
+
+/* On a narrow screen (no sidebar, card near full-width) the label sits above
+   the chain, so the nodes get the full width instead of being squeezed into a
+   column beside it. */
+@media (max-width: 620px) {
+  .attack-path {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
   }
 }
 
@@ -5329,6 +5819,17 @@ body:has(.landing) #tail-wrapper > footer {
       white-space: normal;
       overflow-wrap: anywhere;
     }
+  }
+
+  /* The attack-path strip: wrap onto the page instead of scrolling, and keep
+     the whole route together. */
+  .attack-path {
+    break-inside: avoid;
+  }
+
+  .ap-steps {
+    flex-wrap: wrap;
+    overflow: visible !important;
   }
 
   ::-webkit-scrollbar {

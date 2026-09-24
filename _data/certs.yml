@@ -1,0 +1,17 @@
+# Certifications, shown on the home page: as chips under the credentials line
+# in the hero, and by `certs` / `neofetch` in its terminal.
+#
+#   name    the short name on the chip
+#   full    the full title
+#   issuer  who awards it
+#   status  in-progress | done
+#   date    YYYY-MM: the exam date while in progress, the date obtained once done
+#   url     optional: the credential (e.g. a Credly badge), linked once done
+#
+# When you pass, set `status: done`, the date you got it and, if you like, the
+# credential URL — the chip turns into a solid "certified" one on its own.
+- name: eJPT
+  full: Junior Penetration Tester
+  issuer: INE Security
+  status: in-progress
+  date: 2026-10

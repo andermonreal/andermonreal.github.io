@@ -1,0 +1,57 @@
+{%- comment -%}
+  The attack-path strip under a writeup's machine card: a compact chain of the
+  route through the box — Recon → Initial access → User(s) → Root — with the
+  account reached at each pivot and the headline CVE where there is one.
+
+  `page.attack_path` is built by _plugins/attack-path.rb from the post's own
+  section headings (a post can override it in front matter, or set
+  `attack_path: false` to hide the strip). Styles: the "Attack path" section of
+  assets/css/jekyll-theme-chirpy.scss.
+{%- endcomment -%}
+
+{%- assign ap = page.attack_path -%}
+{%- if ap and ap != empty -%}
+  {%- assign es = false -%}
+  {%- if site.active_lang == 'es' -%}{%- assign es = true -%}{%- endif -%}
+
+  {%- if es -%}
+    {%- assign ap_label = 'Ruta del ataque' -%}
+    {%- assign l_recon = 'Reconocimiento' -%}
+    {%- assign l_foothold = 'Acceso inicial' -%}
+    {%- assign l_user = 'Usuario' -%}
+    {%- assign l_root = 'Root' -%}
+  {%- else -%}
+    {%- assign ap_label = 'Attack path' -%}
+    {%- assign l_recon = 'Recon' -%}
+    {%- assign l_foothold = 'Initial access' -%}
+    {%- assign l_user = 'User' -%}
+    {%- assign l_root = 'Root' -%}
+  {%- endif -%}
+
+  <nav class="attack-path" aria-label="{{ ap_label }}">
+    <span class="ap-label"><i class="fas fa-route" aria-hidden="true"></i> {{ ap_label }}</span>
+    <ol class="ap-steps">
+      {%- for step in ap -%}
+        {%- case step.phase -%}
+          {%- when 'recon' -%}{%- assign ph = l_recon -%}{%- assign icon = 'fa-magnifying-glass' -%}
+          {%- when 'foothold' -%}{%- assign ph = l_foothold -%}{%- assign icon = 'fa-right-to-bracket' -%}
+          {%- when 'user' -%}{%- assign ph = l_user -%}{%- assign icon = 'fa-user' -%}
+          {%- when 'root' -%}{%- assign ph = l_root -%}{%- assign icon = 'fa-crown' -%}
+        {%- endcase -%}
+        <li class="ap-step ap-{{ step.phase }}">
+          <span class="ap-ico" aria-hidden="true"><i class="fas {{ icon }}"></i></span>
+          <span class="ap-body">
+            <span class="ap-phase">{{ ph }}</span>
+            {%- if step.account -%}
+              <span class="ap-acct">{{ step.account }}</span>
+            {%- endif -%}
+            {%- if step.cve -%}
+              {%- assign cve_slug = step.cve | downcase -%}
+              <a class="ap-cve" href="{{ '/tags/' | append: cve_slug | append: '/' | relative_url }}">{{ step.cve }}</a>
+            {%- endif -%}
+          </span>
+        </li>
+      {%- endfor -%}
+    </ol>
+  </nav>
+{%- endif -%}

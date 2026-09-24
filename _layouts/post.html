@@ -193,13 +193,17 @@ script_includes:
     {% if wu_specs != '' %}
       <div class="wu-specs">{{ wu_specs }}</div>
     {% endif %}
+
+    <!-- The route through the box (recon → root), from the post's own
+         headings. Hidden for protected writeups. -->
+    {% include attack-path.html %}
   </header>
 
   {% if enable_toc %}
     <div id="toc-bar" class="d-flex align-items-center justify-content-between invisible">
       <span class="label text-truncate">{{ page.title }}</span>
-      <button type="button" class="toc-trigger btn me-1">
-        <i class="fa-solid fa-list-ul fa-fw"></i>
+      <button type="button" class="toc-trigger btn me-1" aria-label="{{ site.data.locales[lang].panel.toc | default: 'Contents' }}">
+        <i class="fa-solid fa-list-ul fa-fw" aria-hidden="true"></i>
       </button>
     </div>
 
