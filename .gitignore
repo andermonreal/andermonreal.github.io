@@ -28,3 +28,8 @@ package-lock.json
 # Misc
 _sass/vendors
 assets/js/dist
+
+# Social-preview cards: rendered by tools/make-social-cards.py (CI runs it
+# before every build), so they never need committing.
+assets/img/og/
+_data/social_cards.json

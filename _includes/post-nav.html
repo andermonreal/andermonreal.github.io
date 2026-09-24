@@ -1,0 +1,55 @@
+<!-- Navigation buttons at the bottom of the post. -->
+<!-- Override of jekyll-theme-chirpy 7.5's post-nav.html: the older / newer
+     writeups as two cards, each with the machine's avatar (ringed in its
+     difficulty colour) and its difficulty badge. -->
+
+{% assign previous = site.data.locales[include.lang].post.button.previous %}
+{% assign next = site.data.locales[include.lang].post.button.next %}
+
+<nav class="wu-nav" aria-label="Post Navigation">
+  {% if page.previous.url %}
+    {% include machine-meta.html post=page.previous %}
+    {% include post-thumb.html post=page.previous %}
+    <a
+      href="{{ site.baseurl }}{{ page.previous.url }}"
+      class="wu-nav-card is-prev{% if mm_diff != '' %} diff-{{ mm_diff | downcase }}{% endif %}"
+      {% if thumb_src != '' %}style="--thumb: url('{{ thumb_src }}');"{% endif %}
+    >
+      <span class="wu-nav-dir"><i class="fas fa-arrow-left" aria-hidden="true"></i> {{ previous }}</span>
+      <span class="wu-nav-body">
+        {% if thumb_src != '' %}
+          <span class="wu-nav-thumb" aria-hidden="true"></span>
+        {% endif %}
+        <span class="wu-nav-title">{{ page.previous.title }}</span>
+        {% if mm_diff != '' %}
+          <span class="difficulty-badge difficulty-{{ mm_diff | downcase }}">{{ mm_diff }}</span>
+        {% endif %}
+      </span>
+    </a>
+  {% else %}
+    <span class="wu-nav-card is-empty" aria-hidden="true"></span>
+  {% endif %}
+
+  {% if page.next.url %}
+    {% include machine-meta.html post=page.next %}
+    {% include post-thumb.html post=page.next %}
+    <a
+      href="{{ site.baseurl }}{{ page.next.url }}"
+      class="wu-nav-card is-next{% if mm_diff != '' %} diff-{{ mm_diff | downcase }}{% endif %}"
+      {% if thumb_src != '' %}style="--thumb: url('{{ thumb_src }}');"{% endif %}
+    >
+      <span class="wu-nav-dir">{{ next }} <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
+      <span class="wu-nav-body">
+        {% if thumb_src != '' %}
+          <span class="wu-nav-thumb" aria-hidden="true"></span>
+        {% endif %}
+        <span class="wu-nav-title">{{ page.next.title }}</span>
+        {% if mm_diff != '' %}
+          <span class="difficulty-badge difficulty-{{ mm_diff | downcase }}">{{ mm_diff }}</span>
+        {% endif %}
+      </span>
+    </a>
+  {% else %}
+    <span class="wu-nav-card is-empty" aria-hidden="true"></span>
+  {% endif %}
+</nav>

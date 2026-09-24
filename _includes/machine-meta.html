@@ -1,0 +1,24 @@
+{% comment %}
+  Reads a writeup's difficulty, OS and platform the way the Machines finder
+  does: the difficulty is the category that is a difficulty level, the
+  platform is the first other category, and the OS is a linux / windows /
+  android tag.
+  Usage: {% include machine-meta.html post=p %}  →  mm_diff, mm_os, mm_platform
+{% endcomment %}
+{% assign mm_levels = 'Easy,Medium,Hard,Insane' | split: ',' %}
+{% assign mm_os_levels = 'linux,windows,android' | split: ',' %}
+{% assign mm_diff = '' %}
+{% assign mm_platform = '' %}
+{% for mm_cat in include.post.categories %}
+  {% if mm_levels contains mm_cat %}
+    {% assign mm_diff = mm_cat %}
+  {% elsif mm_platform == '' %}
+    {% assign mm_platform = mm_cat %}
+  {% endif %}
+{% endfor %}
+{% assign mm_os = '' %}
+{% for mm_name in mm_os_levels %}
+  {% if include.post.tags contains mm_name %}
+    {% assign mm_os = mm_name %}
+  {% endif %}
+{% endfor %}

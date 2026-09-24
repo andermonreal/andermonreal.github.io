@@ -1,49 +1,82 @@
 ---
-layout: page
+layout: default
 # One page per project (/projects/<slug>/ and /es/projects/<slug>/), created by
-# _plugins/projects-pages.rb. Renders the repo's README (fetched from GitHub at
-# build time) plus a back link, the language and a GitHub button. The project
-# data hash is passed in as `page.project`.
+# _plugins/projects-pages.rb, which passes the project hash as `page.project`.
+# A header card like the writeup pages' — the language "app icon", the name
+# fading into the language colour, the description, languages, last update
+# and the GitHub button — then the repo's README (fetched at build time) in a
+# framed card. Styles: "Projects page" section of the SCSS.
 ---
 
 {% assign p = page.project %}
+{% include project-lang.html language=p.language %}
 
 {% assign t_back = 'Back to projects' %}
 {% assign t_button = 'View on GitHub' %}
+{% assign t_updated = 'Updated' %}
+{% assign t_readme = 'README' %}
 {% assign t_noreadme = 'This project has no README yet — take a look on GitHub.' %}
+{% assign t_mon = 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec' | split: ',' %}
 {% if site.active_lang == 'es' %}
   {% assign t_back = 'Volver a proyectos' %}
   {% assign t_button = 'Ver en GitHub' %}
+  {% assign t_updated = 'Actualizado' %}
   {% assign t_noreadme = 'Este proyecto todavía no tiene README — échale un vistazo en GitHub.' %}
+  {% assign t_mon = 'ene,feb,mar,abr,may,jun,jul,ago,sep,oct,nov,dic' | split: ',' %}
 {% endif %}
-
-<p class="project-page-back">
-  <a href="{{ '/projects/' | relative_url }}">&larr; {{ t_back }}</a>
-</p>
-
-<div class="project-page-bar">
-  {% if p.language %}<span class="project-lang">{{ p.language }}</span>{% endif %}
-  <a
-    class="project-link"
-    href="{{ p.url }}"
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    <i class="fab fa-github" aria-hidden="true"></i>
-    <span>{{ t_button }}</span>
-  </a>
-</div>
 
 {% assign desc = p.desc_en %}
 {% if site.active_lang == 'es' %}
   {% assign desc = p.desc_es | default: p.desc_en %}
 {% endif %}
-{% if desc %}
-  <p class="project-page-desc">{{ desc }}</p>
-{% endif %}
 
-{% if p.readme_html %}
-  <div class="project-readme markdown-body">{{ p.readme_html }}</div>
-{% else %}
-  <p class="project-readme-empty">{{ t_noreadme }}</p>
-{% endif %}
+<article class="prj-page lang-{{ pl_key }}">
+  <p class="project-page-back">
+    <a href="{{ '/projects/' | relative_url }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> {{ t_back }}</a>
+  </p>
+
+  <header class="prj-hero">
+    <span class="project-tile prj-hero-tile" aria-hidden="true">{{ pl_ext }}</span>
+
+    <div class="prj-hero-text">
+      <p class="landing-kicker">// ~/projects/{{ p.slug }}</p>
+      <h1 class="prj-hero-title">{{ p.name }}</h1>
+      {% if desc %}
+        <p class="prj-hero-desc">{{ desc }}</p>
+      {% endif %}
+
+      <div class="prj-hero-meta">
+        {% for k in pl_keys %}
+          <span class="project-lang lang-{{ k }}">
+            <span class="lang-dot" aria-hidden="true"></span>{% include project-lang-name.html key=k %}
+          </span>
+        {% endfor %}
+        {% if p.updated %}
+          {% assign um = p.updated | date: '%m' | plus: 0 | minus: 1 %}
+          <span class="project-updated">
+            <i class="far fa-clock" aria-hidden="true"></i>
+            {{ t_updated }} {{ t_mon[um] }} {{ p.updated | date: '%Y' }}
+          </span>
+        {% endif %}
+        {% if p.stars and p.stars > 0 %}
+          <span class="project-updated"><i class="far fa-star" aria-hidden="true"></i> {{ p.stars }}</span>
+        {% endif %}
+      </div>
+
+      <div class="prj-hero-actions">
+        <a class="landing-btn landing-btn--primary" href="{{ p.url }}" target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-github" aria-hidden="true"></i>
+          {{ t_button }}
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="content prj-readme">
+    {% if p.readme_html %}
+      <div class="project-readme markdown-body">{{ p.readme_html }}</div>
+    {% else %}
+      <p class="project-readme-empty">{{ t_noreadme }}</p>
+    {% endif %}
+  </div>
+</article>

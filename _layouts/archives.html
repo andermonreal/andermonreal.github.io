@@ -1,0 +1,213 @@
+---
+layout: default
+# Override of jekyll-theme-chirpy 7.5's archives layout (the Archive tab),
+# redesigned as the site's writeup history:
+#   * a header with the headline numbers (writeups, since when, busiest month);
+#   * an activity heatmap — one cell per month and year, shaded by how many
+#     writeups it has (a validated one-hue ramp, see the SCSS), each busy cell
+#     jumping to that month below;
+#   * a timeline by year and month, every entry a compact machine row: day,
+#     avatar ringed in its difficulty colour, title, badges, platform.
+# Bilingual through `site.active_lang`. Styles: the "Archive" section of
+# assets/css/jekyll-theme-chirpy.scss.
+---
+
+{% include lang.html %}
+
+{% assign arc_posts = site.posts | where_exp: 'item', 'item.hidden != true' %}
+{% assign arc_total = arc_posts | size %}
+
+{% assign t_title = 'Archive' %}
+{% assign t_lede = 'Every writeup in the order it was published — a machine at a time.' %}
+{% assign t_writeups = 'writeups' %}
+{% assign t_since = 'Since' %}
+{% assign t_busiest = 'Busiest month' %}
+{% assign t_activity = 'Activity' %}
+{% assign t_less = 'Less' %}
+{% assign t_more = 'More' %}
+{% assign t_none = 'no writeups' %}
+{% assign t_one = '1 writeup' %}
+{% assign t_many = ':n writeups' %}
+{% assign t_protected = 'Protected' %}
+{% assign t_months = 'January,February,March,April,May,June,July,August,September,October,November,December' | split: ',' %}
+{% assign t_mon = 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec' | split: ',' %}
+
+{% if site.active_lang == 'es' %}
+  {% assign t_title = 'Archivo' %}
+  {% assign t_lede = 'Todos los writeups en el orden en que se publicaron, máquina a máquina.' %}
+  {% assign t_since = 'Desde' %}
+  {% assign t_busiest = 'Mes más activo' %}
+  {% assign t_activity = 'Actividad' %}
+  {% assign t_less = 'Menos' %}
+  {% assign t_more = 'Más' %}
+  {% assign t_none = 'sin writeups' %}
+  {% assign t_one = '1 writeup' %}
+  {% assign t_many = ':n writeups' %}
+  {% assign t_protected = 'Protegido' %}
+  {% assign t_months = 'enero,febrero,marzo,abril,mayo,junio,julio,agosto,septiembre,octubre,noviembre,diciembre' | split: ',' %}
+  {% assign t_mon = 'ene,feb,mar,abr,may,jun,jul,ago,sep,oct,nov,dic' | split: ',' %}
+{% endif %}
+
+{% if arc_total > 0 %}
+  <!-- Counts per month ("YYYY-MM") and per year, via group_by_exp. -->
+  {% assign by_month = arc_posts | group_by_exp: 'p', "p.date | date: '%Y-%m'" %}
+  {% assign by_year = arc_posts | group_by_exp: 'p', "p.date | date: '%Y'" %}
+
+  {% assign first_post = arc_posts | last %}
+  {% assign first_year = first_post.date | date: '%Y' | plus: 0 %}
+  {% assign first_m = first_post.date | date: '%m' | plus: 0 | minus: 1 %}
+  {% assign now_year = site.time | date: '%Y' | plus: 0 %}
+  {% assign now_month = site.time | date: '%m' | plus: 0 %}
+
+  {% assign busiest = by_month | first %}
+  {% for g in by_month %}
+    {% if g.size > busiest.size %}{% assign busiest = g %}{% endif %}
+  {% endfor %}
+  {% assign busiest_parts = busiest.name | split: '-' %}
+  {% assign busiest_m = busiest_parts[1] | plus: 0 | minus: 1 %}
+{% endif %}
+
+<div class="arc">
+  <header class="arc-head">
+    <div class="arc-head-text">
+      <p class="landing-kicker">// ls -lt ~/writeups</p>
+      <h1 class="arc-title">{{ t_title }}</h1>
+      <p class="arc-lede">{{ t_lede }}</p>
+    </div>
+
+    {% if arc_total > 0 %}
+      <div class="arc-kpis">
+        <div class="arc-kpi">
+          <span class="arc-kpi-num">{{ arc_total }}</span>
+          <span class="arc-kpi-label">{{ t_writeups }}</span>
+        </div>
+        <div class="arc-kpi">
+          <span class="arc-kpi-num">{{ t_mon[first_m] | capitalize }} {{ first_year }}</span>
+          <span class="arc-kpi-label">{{ t_since | downcase }}</span>
+        </div>
+        <div class="arc-kpi">
+          <span class="arc-kpi-num">{{ t_mon[busiest_m] | capitalize }} {{ busiest_parts[0] }} · {{ busiest.size }}</span>
+          <span class="arc-kpi-label">{{ t_busiest | downcase }}</span>
+        </div>
+      </div>
+    {% endif %}
+  </header>
+
+  {% if arc_total > 0 %}
+    <!-- Activity heatmap: newest year on top, a cell per month. Busy cells
+         link to their month in the timeline; months still to come are
+         outlined, not shaded, so they never read as "nothing happened". -->
+    <section class="arc-heat" aria-labelledby="arc-heat-title">
+      <div class="arc-heat-head">
+        <h2 class="arc-heat-title" id="arc-heat-title">{{ t_activity }}</h2>
+        <div class="arc-legend" aria-hidden="true">
+          <span>{{ t_less }}</span>
+          <i class="heat-0"></i><i class="heat-1"></i><i class="heat-2"></i><i class="heat-3"></i><i class="heat-4"></i>
+          <span>{{ t_more }}</span>
+        </div>
+      </div>
+
+      <div class="arc-grid" role="list">
+        <span class="arc-grid-corner" aria-hidden="true"></span>
+        {% for m in (0..11) %}
+          <span class="arc-grid-mon" aria-hidden="true">{{ t_mon[m] }}</span>
+        {% endfor %}
+        <span class="arc-grid-sum" aria-hidden="true">Σ</span>
+
+        {% for back in (0..20) %}
+          {% assign y = now_year | minus: back %}
+          {% if y < first_year %}{% break %}{% endif %}
+          {% assign y_str = y | append: '' %}
+          {% assign y_group = by_year | where: 'name', y_str | first %}
+
+          <span class="arc-grid-year" aria-hidden="true">{{ y }}</span>
+          {% for m in (1..12) %}
+            {% capture key %}{{ y }}-{% if m < 10 %}0{% endif %}{{ m }}{% endcapture %}
+            {% assign g = by_month | where: 'name', key | first %}
+            {% assign n = g.size | default: 0 %}
+            {% assign label = t_months[forloop.index0] | capitalize | append: ' ' | append: y | append: ': ' %}
+            {% if n == 0 %}
+              {% assign label = label | append: t_none %}
+            {% elsif n == 1 %}
+              {% assign label = label | append: t_one %}
+            {% else %}
+              {% assign label = label | append: t_many | replace: ':n', n %}
+            {% endif %}
+
+            {% if y == now_year and m > now_month %}
+              <span class="arc-cell is-future" role="listitem" aria-hidden="true"></span>
+            {% elsif n == 0 %}
+              <span class="arc-cell heat-0" role="listitem" title="{{ label }}" aria-label="{{ label }}"></span>
+            {% else %}
+              {% if n >= 7 %}{% assign lvl = 4 %}{% elsif n >= 4 %}{% assign lvl = 3 %}{% elsif n >= 2 %}{% assign lvl = 2 %}{% else %}{% assign lvl = 1 %}{% endif %}
+              <a class="arc-cell heat-{{ lvl }}" role="listitem" href="#m-{{ key }}" title="{{ label }}" aria-label="{{ label }}">
+                <span class="arc-cell-n" aria-hidden="true">{{ n }}</span>
+              </a>
+            {% endif %}
+          {% endfor %}
+          <span class="arc-grid-total" aria-hidden="true">{{ y_group.size | default: 0 }}</span>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- The timeline -->
+    <div class="arc-timeline">
+      {% for year in by_year %}
+        <section class="arc-year" aria-labelledby="y-{{ year.name }}">
+          <h2 class="arc-year-title" id="y-{{ year.name }}">
+            {{ year.name }}
+            <span class="arc-year-count">{% if year.size == 1 %}{{ t_one }}{% else %}{{ t_many | replace: ':n', year.size }}{% endif %}</span>
+          </h2>
+
+          {% assign months = year.items | group_by_exp: 'p', "p.date | date: '%m'" %}
+          {% for month in months %}
+            {% assign mi = month.name | plus: 0 | minus: 1 %}
+            <h3 class="arc-month" id="m-{{ year.name }}-{{ month.name }}">
+              {{ t_months[mi] }}<span class="arc-month-count">{{ month.size }}</span>
+            </h3>
+
+            <ol class="arc-list">
+              {% for p in month.items %}
+                {% include machine-meta.html post=p %}
+                {% include post-thumb.html post=p %}
+                <li class="arc-item{% if mm_diff != '' %} diff-{{ mm_diff | downcase }}{% endif %}">
+                  <a
+                    class="arc-link"
+                    href="{{ p.url | relative_url }}"
+                    {% if thumb_src != '' %}style="--thumb: url('{{ thumb_src }}');"{% endif %}
+                  >
+                    <span class="arc-day">
+                      <span class="arc-day-n">{{ p.date | date: '%d' }}</span>
+                      <span class="arc-day-m">{{ t_mon[mi] }}</span>
+                    </span>
+                    {% if thumb_src != '' %}
+                      <span class="arc-thumb" aria-hidden="true"></span>
+                    {% endif %}
+                    <span class="arc-main">
+                      <span class="arc-name">{{ p.title }}</span>
+                      <span class="arc-meta">
+                        {% if mm_diff != '' %}
+                          <span class="difficulty-badge difficulty-{{ mm_diff | downcase }}">{{ mm_diff }}</span>
+                        {% endif %}
+                        {% if mm_os != '' %}
+                          <span class="os-badge"><i class="fab fa-{{ mm_os }} brand-{{ mm_os }}" aria-hidden="true"></i> {{ mm_os | capitalize }}</span>
+                        {% endif %}
+                        {% if p.protected %}
+                          <span class="os-badge"><i class="fas fa-lock" aria-hidden="true"></i> {{ t_protected }}</span>
+                        {% endif %}
+                        {% if mm_platform != '' %}
+                          <span class="arc-platform"><i class="fas fa-layer-group" aria-hidden="true"></i> {{ mm_platform }}</span>
+                        {% endif %}
+                      </span>
+                    </span>
+                    <span class="arc-arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
+                  </a>
+                </li>
+              {% endfor %}
+            </ol>
+          {% endfor %}
+        </section>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>

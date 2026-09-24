@@ -52,12 +52,16 @@
       <i class="fas fa-bars fa-fw"></i>
     </button>
 
+    {% assign own_title_layouts = 'default,project,spotlight' | split: ',' %}
     <div id="topbar-title">
       {% if page.layout == 'home' %}
         {{- site.data.locales[include.lang].title | default: site.title -}}
       {% elsif page.collection == 'tabs' or page.layout == 'page' %}
         {%- capture tab_key -%}{{ page.url | split: '/' }}{%- endcapture -%}
         {{- site.data.locales[include.lang].tabs[tab_key] | default: page.title -}}
+      {% elsif page.title and own_title_layouts contains page.layout %}
+        {%- comment -%} The 404 (built straight on `default`) and the project / spotlight pages: their own title, not "Default" / "Project". {%- endcomment -%}
+        {{- page.title -}}
       {% else %}
         {{- site.data.locales[include.lang].layout[page.layout] | default: page.layout | capitalize -}}
       {% endif %}

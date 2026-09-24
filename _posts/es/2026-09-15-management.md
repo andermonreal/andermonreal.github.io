@@ -2,7 +2,7 @@
 title: "Management"
 date: 2026-09-15
 categories: [HackTheBox, Easy]
-tags: [linux, nginx, openam, forgerock, sso, ldap, jato, java-deserialization, cwe-502, cve-2026-33439, cve-2021-35464, pre-auth-rce, glpi, mariadb, reversible-encryption, libsodium, credential-reuse, rdiff-backup, sudo-wildcard]
+tags: [linux, nginx, openam, forgerock, sso, ldap, jato, java-deserialization, cwe-502, cve-2026-33439, cve-2021-35464, pre-auth-rce, glpi, mariadb, reversible-encryption, libsodium, credential reuse, rdiff-backup, sudo-wildcard]
 image:
   path: /assets/img/HTB/Management/banner.webp
   lqip: "data:image/webp;base64,UklGRogCAABXRUJQVlA4WAoAAAAQAAAAHwAAHwAAQUxQSNkAAAABgBzJtqvmvH93kIALAOR3RPTzgQAo1hTZyEsxeLN75h7Zp3eIICIYuG2kKFnmw0fgl8GAab+9fXd/v932U8ACanbA2fqBFR/WZ0BXwTBcJrJk/8FzIdNyCKvEw3MyOSt6Is8PYX/i4pGR/xr5uPgVOsyemNhg4tMMHYINrn5iW7gaWDCsfmJrWMHCYc7eiud8GLD5yduzDUYv9HacL6OehYKF/c6zQvbdPV3Bef9B0Q9XcR29og/RF9Kfi/5c9fdCfq/28F7q77X8Xcjflfxdyt/1fv4L8n8FAFZQOCCIAQAAsAcAnQEqIAAgAAOAWiWwAnTKEfibougRgNuhz5Nkj2YHKKsBldsAKoXQAeYAVojYB+avbrDWb7qpqiacBUL9l+OBXVRK0AD+Fe4GY5gyBRHMepMPW1+5hyyC8/D+e6tfWuBOpxyQDBGgZGySVsUXszwDp23EnU59vggeu3Tbq/26OViErV35oBwJ8uJ7/IJ2hW9LaakpEwSbzlo8kPrO1MUDrtbBuMHhFWI4HAbkDtUDnWBVQU1aOgON7vYX4+JRBv1KY5spbLmEmCLASsLrrVeDwD6UYKLEfxCw92oUGHgZWd99Gv7BTa7quYRIAvDo/jYayam/m4i5t1Vo4Dxnln5ANLr45cbVz8D92d1sMbVJd80/1WuqfWqybqbRGrDaEttc02z7pEkqHxHrz1grCR9a6lOd9LHHaXvEmhb0yrZnRJDxH5zFWH/8WTsmm0a/6/u8sIOM5svNJSxLW0rXdfawWx0921NjX28+MrrORIvZtmk8myH3EhzH2ZyuEATBe/erynFwAAA="

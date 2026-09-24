@@ -1,0 +1,15 @@
+{%- comment -%}
+  The display name for a language slug: {% include project-lang-name.html key="python" %} → Python
+{%- endcomment -%}
+{%- case include.key -%}
+  {%- when 'python' -%}Python
+  {%- when 'javascript' -%}JavaScript
+  {%- when 'typescript' -%}TypeScript
+  {%- when 'java' -%}Java
+  {%- when 'php' -%}PHP
+  {%- when 'html' -%}HTML
+  {%- when 'css' -%}CSS
+  {%- when 'c' -%}C
+  {%- when 'shell' -%}Shell
+  {%- else -%}{{ include.key | capitalize }}
+{%- endcase -%}

@@ -1,9 +1,18 @@
 <!DOCTYPE html>
-<html class="staticrypt-html" lang="en">
+<html class="staticrypt-html" lang="%%LANG%%">
     <head>
         <meta charset="utf-8" />
         <title>/*[|template_title|]*/0</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <!-- A password page is nothing to index; the writeup is, once it opens. -->
+        <meta name="robots" content="noindex" />
+        <!-- The site's own fonts (Chirpy loads these from Google Fonts too). -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&amp;family=Source+Sans+Pro:wght@400;600;700&amp;display=swap"
+        />
 
         <!-- do not cache this page -->
         <meta http-equiv="cache-control" content="max-age=0" />
@@ -13,16 +22,98 @@
         <meta http-equiv="pragma" content="no-cache" />
 
         <!--
-            Custom StatiCrypt password template, styled to match the site's dark
-            theme. The structural ids/classes (staticrypt_loading,
-            staticrypt_content, staticrypt-form, staticrypt-password,
-            staticrypt-remember, .staticrypt-toggle-password-visibility) and the
-            entire <script> block are required by StatiCrypt and must not be
-            renamed. `%%POST_IMAGE%%` is replaced per-post by the CI workflow.
+            Custom StatiCrypt password page, dressed like the site's writeup
+            header: the machine art ringed in its difficulty colour over its own
+            glow, the platform, title and badges — then why it is locked, the
+            password form and a "Request access" email button.
+
+            The structural ids/classes (staticrypt_loading, staticrypt_content,
+            staticrypt-form, staticrypt-password, staticrypt-remember,
+            staticrypt-remember-label, .staticrypt-toggle-password-visibility)
+            and the entire <script> block at the bottom are required by
+            StatiCrypt and must not be renamed.
+
+            The CI workflow fills in per post: %%LANG%% (en | es — picks the
+            [data-l] copy), %%POST_IMAGE%%, %%PLATFORM%%, %%DIFF%% and
+            %%DIFF_CLASS%%, %%OS%% and %%OS_CLASS%% ("none" hides a badge),
+            %%EMAIL%%, %%TITLE_URI%% and %%PAGE_URI%% (URL-encoded, for the
+            mail). StatiCrypt fills the /*[|template_…|]*/ strings.
         -->
+        <script>
+            /* Follow the site's light/dark toggle (Chirpy keeps it in
+               sessionStorage) before the first paint. */
+            try {
+                var mode = sessionStorage.getItem("mode");
+                if (mode) {
+                    document.documentElement.setAttribute("data-mode", mode);
+                }
+            } catch (e) {}
+        </script>
         <style>
             :root {
                 color-scheme: dark;
+                --bg: #1b1b1e;
+                --card: #1e1e1e;
+                --field: #151517;
+                --border: #2c2d2d;
+                --text: #afb0b1;
+                --heading: #e2e2e2;
+                --muted: #868686;
+                --link: #8ab4f8;
+                --accent: #9fef00;
+                --easy: #0a7e3a;
+                --medium: #bb8805;
+                --hard: #d90038;
+                --insane: #8a4af5;
+                --grid: rgb(255 255 255 / 4%);
+            }
+
+            @media (prefers-color-scheme: light) {
+                :root:not([data-mode="dark"]) {
+                    color-scheme: light;
+                    --bg: #f6efe0;
+                    --card: #fdf8ee;
+                    --field: #f6efe0;
+                    --border: #e6dcc6;
+                    --text: #3b352a;
+                    --heading: #2c2820;
+                    --muted: #7c7363;
+                    --link: #0056b2;
+                    --accent: #3f6a0a;
+                    --easy: #09672e;
+                    --medium: #b68611;
+                    --hard: #a10128;
+                    --insane: #6c1bcf;
+                    --grid: rgb(60 50 25 / 7%);
+                }
+            }
+
+            :root[data-mode="light"] {
+                color-scheme: light;
+                --bg: #f6efe0;
+                --card: #fdf8ee;
+                --field: #f6efe0;
+                --border: #e6dcc6;
+                --text: #3b352a;
+                --heading: #2c2820;
+                --muted: #7c7363;
+                --link: #0056b2;
+                --accent: #3f6a0a;
+                --easy: #09672e;
+                --medium: #b68611;
+                --hard: #a10128;
+                --insane: #6c1bcf;
+                --grid: rgb(60 50 25 / 7%);
+            }
+
+            /* Show only the copy in the page's language. */
+            html[lang="es"] [data-l="en"],
+            html:not([lang="es"]) [data-l="es"] {
+                display: none !important;
+            }
+
+            * {
+                box-sizing: border-box;
             }
 
             .staticrypt-html,
@@ -32,80 +123,239 @@
 
             .staticrypt-body {
                 margin: 0;
-                background: #1b1b1e;
-                color: #ccc;
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-                    "Source Sans Pro", Helvetica, Arial, sans-serif;
+                background: var(--bg);
+                color: var(--text);
+                font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI",
+                    Roboto, Helvetica, Arial, sans-serif;
                 -webkit-font-smoothing: antialiased;
                 -moz-osx-font-smoothing: grayscale;
             }
 
+            /* A faint blueprint grid behind everything, fading out. */
             .staticrypt-content {
                 min-height: 100%;
-                background: #1b1b1e;
+                background:
+                    linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 32px 32px,
+                    linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 32px 32px,
+                    var(--bg);
             }
 
-            .lock-wrap {
-                max-width: 720px;
+            .lock {
+                max-width: 36rem;
                 margin: 0 auto;
-                padding: 3rem 1.25rem 4rem;
+                padding: 3rem 1.1rem 4rem;
             }
 
             .lock-back {
-                display: inline-block;
-                margin-bottom: 1.5rem;
-                color: rgb(138 180 248);
-                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.4rem;
+                margin-bottom: 1.25rem;
+                color: var(--link);
                 font-size: 0.9rem;
+                font-weight: 600;
+                text-decoration: none;
+            }
+
+            .lock-back svg {
+                width: 1rem;
+                height: 1rem;
+                fill: currentColor;
             }
 
             .lock-back:hover {
                 text-decoration: underline;
             }
 
-            .lock-title {
-                margin: 0 0 1.5rem;
-                font-size: 2rem;
-                font-weight: 700;
-                letter-spacing: -0.01em;
-                color: #e8e8e8;
-            }
-
-            .lock-banner {
-                display: block;
-                width: 100%;
-                max-width: 500px;
-                margin: 0 auto 2.5rem;
-                border-radius: 12px;
-            }
-
+            /* The card, with the machine's art blurred as ambient light. */
             .lock-card {
-                max-width: 440px;
-                margin: 0 auto;
-                padding: 2rem 1.75rem;
-                text-align: center;
-                background: #1e1e1e;
-                border: 1px solid #2c2d2d;
-                border-radius: 14px;
-                box-shadow: 0 12px 32px -14px rgba(0, 0, 0, 0.7);
+                --diff: var(--link);
+
+                position: relative;
+                isolation: isolate;
+                overflow: hidden;
+                border: 1px solid var(--border);
+                border-radius: 18px;
+                background: var(--card);
+                box-shadow: 0 24px 60px -30px rgb(0 0 0 / 70%);
             }
 
-            .lock-icon {
-                width: 2.4rem;
-                height: 2.4rem;
-                margin: 0 auto 0.75rem;
-                color: #9fef00;
+            .lock-card.diff-easy {
+                --diff: var(--easy);
             }
 
-            .lock-icon svg {
-                width: 100%;
-                height: 100%;
+            .lock-card.diff-medium {
+                --diff: var(--medium);
+            }
+
+            .lock-card.diff-hard {
+                --diff: var(--hard);
+            }
+
+            .lock-card.diff-insane {
+                --diff: var(--insane);
+            }
+
+            .lock-card::before {
+                content: "";
+                position: absolute;
+                top: -8rem;
+                left: -6rem;
+                z-index: -1;
+                width: 24rem;
+                height: 24rem;
+                border-radius: 50%;
+                background: var(--art) center / cover no-repeat;
+                filter: blur(70px) saturate(1.6);
+                opacity: 0.35;
+                pointer-events: none;
+            }
+
+            .lock-card::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                right: 0;
+                left: 0;
+                height: 3px;
+                background: linear-gradient(90deg, var(--diff), transparent 80%);
+            }
+
+            .lock-hero {
+                display: flex;
+                align-items: center;
+                gap: 1.4rem;
+                padding: 1.75rem 1.6rem 1.5rem;
+            }
+
+            .lock-art {
+                flex: 0 0 auto;
+                width: 6.5rem;
+                height: 6.5rem;
+                border-radius: 50%;
+                background: var(--bg) var(--art) center / cover no-repeat;
+                box-shadow:
+                    0 0 0 3px var(--card),
+                    0 0 0 6px var(--diff),
+                    0 0 50px -8px var(--diff),
+                    0 16px 36px -16px rgb(0 0 0 / 60%);
+            }
+
+            .lock-hero-text {
+                display: flex;
+                flex-direction: column;
+                gap: 0.45rem;
+                min-width: 0;
+            }
+
+            .lock-kicker {
+                margin: 0;
+                color: var(--accent);
+                font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+                font-size: 0.78rem;
+                font-weight: 600;
+            }
+
+            .lock-title {
+                width: fit-content;
+                max-width: 100%;
+                margin: 0;
+                color: var(--heading);
+                font-family: Lato, "Source Sans Pro", -apple-system, "Segoe UI", sans-serif;
+                font-size: 2.1rem;
+                font-weight: 800;
+                line-height: 1.1;
+                letter-spacing: -0.03em;
+                overflow-wrap: anywhere;
+                background: linear-gradient(100deg, var(--heading) 45%, var(--diff) 135%);
+                -webkit-background-clip: text;
+                background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+
+            .lock-badges {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.35rem;
+            }
+
+            .lock-badges > span {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.35em;
+                padding: 0.16rem 0.6rem;
+                border: 1px solid var(--border);
+                border-radius: 2rem;
+                background: var(--bg);
+                color: var(--muted);
+                font-size: 0.68rem;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                line-height: 1.5;
+                text-transform: uppercase;
+            }
+
+            .lock-badges svg {
+                width: 0.8em;
+                height: 0.8em;
                 fill: currentColor;
             }
 
+            .lock-badges > .lock-diff {
+                border-color: transparent;
+                background: var(--diff);
+                color: #fff;
+            }
+
+            .lock-card.diff-medium .lock-diff {
+                color: #1a1a1a;
+            }
+
+            .lock-card.diff-none .lock-diff,
+            .lock-badges > .os-none {
+                display: none;
+            }
+
+            .lock-dot {
+                width: 0.55em;
+                height: 0.55em;
+                border-radius: 50%;
+                background: var(--muted);
+            }
+
+            .os-linux .lock-dot {
+                background: #e08e0b;
+            }
+
+            .os-windows .lock-dot {
+                background: #2b88d8;
+            }
+
+            .os-android .lock-dot {
+                background: #34b36f;
+            }
+
+            .lock-body {
+                padding: 1.35rem 1.6rem 1.6rem;
+                border-top: 1px solid var(--border);
+                background: color-mix(in srgb, var(--bg) 55%, var(--card));
+            }
+
+            .lock-why {
+                margin: 0 0 0.9rem;
+                color: var(--text);
+                font-size: 0.98rem;
+                line-height: 1.65;
+            }
+
+            .lock-why strong {
+                color: var(--heading);
+            }
+
             .lock-instructions {
-                margin: 0 0 1.5rem;
-                color: #9a9a9a;
+                margin: 0 0 1.1rem;
+                color: var(--muted);
+                font-size: 0.88rem;
                 line-height: 1.55;
             }
 
@@ -113,87 +363,155 @@
                 position: relative;
                 display: flex;
                 align-items: center;
-                margin: 0 0 1rem;
-                background: #161618;
-                border: 1px solid #37373a;
-                border-radius: 10px;
-                overflow: hidden;
-                transition: border-color 0.15s ease, box-shadow 0.15s ease;
+                margin: 0 0 0.8rem;
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                background: var(--field);
+                transition:
+                    border-color 0.15s ease,
+                    box-shadow 0.15s ease;
             }
 
             .staticrypt-password-container:focus-within {
-                border-color: rgb(112 114 115);
-                box-shadow: 0 0 0 3px rgb(159 239 0 / 18%);
+                border-color: var(--link);
+                box-shadow: 0 0 0 4px color-mix(in srgb, var(--link) 18%, transparent);
             }
 
             .staticrypt-password-container input[type="password"],
             .staticrypt-password-container input[type="text"] {
                 flex: 1;
                 width: 100%;
-                box-sizing: border-box;
-                background: transparent;
+                padding: 0.85rem 2.8rem 0.85rem 1rem;
                 border: 0;
                 outline: 0;
-                color: #e8e8e8;
+                background: transparent;
+                color: var(--heading);
                 font-size: 1rem;
-                padding: 0.85rem 2.6rem 0.85rem 1rem;
             }
 
             .staticrypt-password-container input::placeholder {
-                color: #6f7173;
+                color: var(--muted);
             }
 
             .staticrypt-toggle-password-visibility {
                 position: absolute;
-                right: 0.55rem;
                 top: 50%;
-                transform: translateY(-50%);
+                box-sizing: content-box; /* its padding is the click target */
+                right: 0.6rem;
                 width: 18px;
                 height: 18px;
                 padding: 6px;
                 cursor: pointer;
-                opacity: 0.5;
+                opacity: 0.55;
+                transform: translateY(-50%);
+            }
+
+            :root:not([data-mode="light"]) .staticrypt-toggle-password-visibility {
                 filter: invert(1);
             }
 
+            @media (prefers-color-scheme: light) {
+                :root:not([data-mode="dark"]) .staticrypt-toggle-password-visibility {
+                    filter: none;
+                }
+            }
+
             .staticrypt-toggle-password-visibility:hover {
-                opacity: 0.85;
+                opacity: 0.9;
             }
 
             label.staticrypt-remember {
                 display: flex;
                 align-items: center;
-                justify-content: center;
                 gap: 0.5rem;
-                margin-bottom: 1rem;
-                color: #9a9a9a;
-                font-size: 0.9rem;
+                margin-bottom: 0.8rem;
+                color: var(--muted);
+                font-size: 0.88rem;
             }
 
-            .staticrypt-remember input[type="checkbox"] {
-                transform: scale(1.2);
+            .staticrypt-decrypt-button,
+            .lock-request {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                width: 100%;
+                padding: 0.8rem 1rem;
+                border-radius: 12px;
+                font-size: 0.95rem;
+                font-weight: 700;
+                text-decoration: none;
+                cursor: pointer;
+                transition:
+                    transform 0.15s ease,
+                    box-shadow 0.15s ease,
+                    border-color 0.15s ease,
+                    color 0.15s ease;
             }
 
             .staticrypt-decrypt-button {
-                width: 100%;
                 border: 0;
-                border-radius: 10px;
-                padding: 0.85rem;
-                cursor: pointer;
-                background: #9fef00;
-                color: #10160a;
-                font-size: 0.95rem;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
-                transition: filter 0.15s ease;
+                background: #9fef00; /* HTB green, as on the landing */
+                color: #12160b;
             }
 
-            .staticrypt-decrypt-button:hover,
-            .staticrypt-decrypt-button:active,
-            .staticrypt-decrypt-button:focus {
-                filter: brightness(0.9);
-                outline: 0;
+            .staticrypt-decrypt-button:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 10px 26px -10px rgb(159 239 0 / 65%);
+            }
+
+            .staticrypt-decrypt-button:focus-visible,
+            .lock-request:focus-visible,
+            .lock-back:focus-visible {
+                outline: 2px solid var(--link);
+                outline-offset: 3px;
+            }
+
+            /* "No password?" — a hairline divider with a label. */
+            .lock-divider {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                margin: 1.2rem 0 0.9rem;
+                color: var(--muted);
+                font-size: 0.78rem;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+            }
+
+            .lock-divider::before,
+            .lock-divider::after {
+                content: "";
+                flex: 1;
+                height: 1px;
+                background: var(--border);
+            }
+
+            .lock-request {
+                border: 1px solid var(--border);
+                background: var(--card);
+                color: var(--heading);
+            }
+
+            .lock-request svg {
+                width: 1.05rem;
+                height: 1.05rem;
+                fill: currentColor;
+            }
+
+            .lock-request:hover {
+                transform: translateY(-1px);
+                border-color: var(--link);
+                color: var(--link);
+            }
+
+            .lock-note {
+                margin: 0.75rem 0 0;
+                color: var(--muted);
+                font-size: 0.82rem;
+                line-height: 1.5;
+                text-align: center;
             }
 
             .hidden {
@@ -201,18 +519,18 @@
             }
 
             .staticrypt-spinner-container {
-                height: 100%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                background: #1b1b1e;
+                height: 100%;
+                background: var(--bg);
             }
 
             .staticrypt-spinner {
                 display: inline-block;
                 width: 2rem;
                 height: 2rem;
-                border: 0.25em solid #444;
+                border: 0.25em solid var(--border);
                 border-right-color: transparent;
                 border-radius: 50%;
                 animation: spinner-border 0.75s linear infinite;
@@ -221,6 +539,22 @@
             @keyframes spinner-border {
                 100% {
                     transform: rotate(360deg);
+                }
+            }
+
+            @media (max-width: 480px) {
+                .lock {
+                    padding-top: 1.5rem;
+                }
+
+                .lock-hero {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    padding: 1.4rem 1.25rem 1.2rem;
+                }
+
+                .lock-body {
+                    padding: 1.2rem 1.25rem 1.35rem;
                 }
             }
 
@@ -239,48 +573,105 @@
         </div>
 
         <div id="staticrypt_content" class="staticrypt-content hidden">
-            <main class="lock-wrap">
-                <a class="lock-back" href="/">&larr; Back to writeups</a>
+            <main class="lock">
+                <a class="lock-back" data-l="en" href="/machines/">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.7 5.3a1 1 0 0 1 0 1.4L6.4 11H20a1 1 0 1 1 0 2H6.4l4.3 4.3a1 1 0 0 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0z" /></svg>
+                    All writeups
+                </a>
+                <a class="lock-back" data-l="es" href="/es/machines/">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.7 5.3a1 1 0 0 1 0 1.4L6.4 11H20a1 1 0 1 1 0 2H6.4l4.3 4.3a1 1 0 0 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0z" /></svg>
+                    Todos los writeups
+                </a>
 
-                <h1 class="lock-title">/*[|template_title|]*/0</h1>
+                <section class="lock-card diff-%%DIFF_CLASS%%" style="--art: url('%%POST_IMAGE%%')">
+                    <header class="lock-hero">
+                        <span class="lock-art" aria-hidden="true"></span>
 
-                <img class="lock-banner" src="%%POST_IMAGE%%" alt="/*[|template_title|]*/0 banner" />
+                        <div class="lock-hero-text">
+                            <p class="lock-kicker">// %%PLATFORM%% · writeup</p>
+                            <h1 class="lock-title">/*[|template_title|]*/0</h1>
+                            <div class="lock-badges">
+                                <span class="lock-diff">%%DIFF%%</span>
+                                <span class="lock-os os-%%OS_CLASS%%"><i class="lock-dot" aria-hidden="true"></i>%%OS%%</span>
+                                <span>
+                                    <svg viewBox="0 0 448 512" aria-hidden="true"><path d="M144 144v48h160v-48a80 80 0 1 0-160 0zM80 192v-48a144 144 0 1 1 288 0v48h16c35.3 0 64 28.7 64 64v176c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V256c0-35.3 28.7-64 64-64h16z" /></svg>
+                                    <span data-l="en">Protected</span><span data-l="es">Protegido</span>
+                                </span>
+                            </div>
+                        </div>
+                    </header>
 
-                <div class="lock-card">
-                    <div class="lock-icon" aria-hidden="true">
-                        <svg viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M144 144v48h160v-48a80 80 0 1 0-160 0zM80 192v-48a144 144 0 1 1 288 0v48h16c35.3 0 64 28.7 64 64v176c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V256c0-35.3 28.7-64 64-64h16z" />
-                        </svg>
-                    </div>
+                    <div class="lock-body">
+                        <p class="lock-why" data-l="en">
+                            This machine is still <strong>active on %%PLATFORM%%</strong>, and the
+                            platform's rules keep writeups of active boxes private. This one stays
+                            password-protected until the machine retires — then it opens up for everyone.
+                        </p>
+                        <p class="lock-why" data-l="es">
+                            Esta máquina sigue <strong>activa en %%PLATFORM%%</strong> y las normas de la
+                            plataforma no permiten publicar writeups de máquinas activas. Este queda
+                            protegido con contraseña hasta que se retire; después, abierto para todos.
+                        </p>
 
-                    <p class="lock-instructions">/*[|template_instructions|]*/0</p>
+                        <p class="lock-instructions">/*[|template_instructions|]*/0</p>
 
-                    <form id="staticrypt-form" action="#" method="post">
-                        <div class="staticrypt-password-container">
-                            <input
-                                id="staticrypt-password"
-                                type="password"
-                                name="password"
-                                placeholder="/*[|template_placeholder|]*/0"
-                                autofocus
-                            />
+                        <form id="staticrypt-form" action="#" method="post">
+                            <div class="staticrypt-password-container">
+                                <input
+                                    id="staticrypt-password"
+                                    type="password"
+                                    name="password"
+                                    placeholder="/*[|template_placeholder|]*/0"
+                                    aria-label="/*[|template_placeholder|]*/0"
+                                    autocomplete="current-password"
+                                    autofocus
+                                />
 
-                            <img
-                                class="staticrypt-toggle-password-visibility"
-                                alt="/*[|template_toggle_show|]*/0"
-                                title="/*[|template_toggle_show|]*/0"
-                                src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgNTEyIj48IS0tIUZvbnQgQXdlc29tZSBGcmVlIDYuNS4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlL2ZyZWUgQ29weXJpZ2h0IDIwMjQgRm9udGljb25zLCBJbmMuLS0+PHBhdGggZD0iTTM4LjggNS4xQzI4LjQtMy4xIDEzLjMtMS4yIDUuMSA5LjJTLTEuMiAzNC43IDkuMiA0Mi45bDU5MiA0NjRjMTAuNCA4LjIgMjUuNSA2LjMgMzMuNy00LjFzNi4zLTI1LjUtNC4xLTMzLjdMNTI1LjYgMzg2LjdjMzkuNi00MC42IDY2LjQtODYuMSA3OS45LTExOC40YzMuMy03LjkgMy4zLTE2LjcgMC0yNC42Yy0xNC45LTM1LjctNDYuMi04Ny43LTkzLTEzMS4xQzQ2NS41IDY4LjggNDAwLjggMzIgMzIwIDMyYy02OC4yIDAtMTI1IDI2LjMtMTY5LjMgNjAuOEwzOC44IDUuMXpNMjIzLjEgMTQ5LjVDMjQ4LjYgMTI2LjIgMjgyLjcgMTEyIDMyMCAxMTJjNzkuNSAwIDE0NCA2NC41IDE0NCAxNDRjMCAyNC45LTYuMyA0OC4zLTE3LjQgNjguN0w0MDggMjk0LjVjOC40LTE5LjMgMTAuNi00MS40IDQuOC02My4zYy0xMS4xLTQxLjUtNDcuOC02OS40LTg4LjYtNzEuMWMtNS44LS4yLTkuMiA2LjEtNy40IDExLjdjMi4xIDYuNCAzLjMgMTMuMiAzLjMgMjAuM2MwIDEwLjItMi40IDE5LjgtNi42IDI4LjNsLTkwLjMtNzAuOHpNMzczIDM4OS45Yy0xNi40IDYuNS0zNC4zIDEwLjEtNTMgMTAuMWMtNzkuNSAwLTE0NC02NC41LTE0NC0xNDRjMC02LjkgLjUtMTMuNiAxLjQtMjAuMkw4My4xIDE2MS41QzYwLjMgMTkxLjIgNDQgMjIwLjggMzQuNSAyNDMuN2MtMy4zIDcuOS0zLjMgMTYuNyAwIDI0LjZjMTQuOSAzNS43IDQ2LjIgODcuNyA5MyAxMzEuMUMxNzQuNSA0NDMuMiAyMzkuMiA0ODAgMzIwIDQ4MGM0Ny44IDAgODkuOS0xMi45IDEyNi4yLTMyLjVMMzczIDM4OS45eiIvPjwvc3ZnPg=="
-                            />
+                                <img
+                                    class="staticrypt-toggle-password-visibility"
+                                    alt="/*[|template_toggle_show|]*/0"
+                                    title="/*[|template_toggle_show|]*/0"
+                                    src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgNTEyIj48IS0tIUZvbnQgQXdlc29tZSBGcmVlIDYuNS4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlL2ZyZWUgQ29weXJpZ2h0IDIwMjQgRm9udGljb25zLCBJbmMuLS0+PHBhdGggZD0iTTM4LjggNS4xQzI4LjQtMy4xIDEzLjMtMS4yIDUuMSA5LjJTLTEuMiAzNC43IDkuMiA0Mi45bDU5MiA0NjRjMTAuNCA4LjIgMjUuNSA2LjMgMzMuNy00LjFzNi4zLTI1LjUtNC4xLTMzLjdMNTI1LjYgMzg2LjdjMzkuNi00MC42IDY2LjQtODYuMSA3OS45LTExOC40YzMuMy03LjkgMy4zLTE2LjcgMC0yNC42Yy0xNC45LTM1LjctNDYuMi04Ny43LTkzLTEzMS4xQzQ2NS41IDY4LjggNDAwLjggMzIgMzIwIDMyYy02OC4yIDAtMTI1IDI2LjMtMTY5LjMgNjAuOEwzOC44IDUuMXpNMjIzLjEgMTQ5LjVDMjQ4LjYgMTI2LjIgMjgyLjcgMTEyIDMyMCAxMTJjNzkuNSAwIDE0NCA2NC41IDE0NCAxNDRjMCAyNC45LTYuMyA0OC4zLTE3LjQgNjguN0w0MDggMjk0LjVjOC40LTE5LjMgMTAuNi00MS40IDQuOC02My4zYy0xMS4xLTQxLjUtNDcuOC02OS40LTg4LjYtNzEuMWMtNS44LS4yLTkuMiA2LjEtNy40IDExLjdjMi4xIDYuNCAzLjMgMTMuMiAzLjMgMjAuM2MwIDEwLjItMi40IDE5LjgtNi42IDI4LjNsLTkwLjMtNzAuOHpNMzczIDM4OS45Yy0xNi40IDYuNS0zNC4zIDEwLjEtNTMgMTAuMWMtNzkuNSAwLTE0NC02NC41LTE0NC0xNDRjMC02LjkgLjUtMTMuNiAxLjQtMjAuMkw4My4xIDE2MS41QzYwLjMgMTkxLjIgNDQgMjIwLjggMzQuNSAyNDMuN2MtMy4zIDcuOS0zLjMgMTYuNyAwIDI0LjZjMTQuOSAzNS43IDQ2LjIgODcuNyA5MyAxMzEuMUMxNzQuNSA0NDMuMiAyMzkuMiA0ODAgMzIwIDQ4MGM0Ny44IDAgODkuOS0xMi45IDEyNi4yLTMyLjVMMzczIDM4OS45eiIvPjwvc3ZnPg=="
+                                />
+                            </div>
+
+                            <label id="staticrypt-remember-label" class="staticrypt-remember hidden">
+                                <input id="staticrypt-remember" type="checkbox" name="remember" />
+                                /*[|template_remember|]*/0
+                            </label>
+
+                            <input type="submit" class="staticrypt-decrypt-button" value="/*[|template_button|]*/0" />
+                        </form>
+
+                        <div class="lock-divider">
+                            <span data-l="en">No password?</span><span data-l="es">¿Sin contraseña?</span>
                         </div>
 
-                        <label id="staticrypt-remember-label" class="staticrypt-remember hidden">
-                            <input id="staticrypt-remember" type="checkbox" name="remember" />
-                            /*[|template_remember|]*/0
-                        </label>
+                        <a
+                            class="lock-request"
+                            data-l="en"
+                            href="mailto:%%EMAIL%%?subject=Access%20request%3A%20%%TITLE_URI%%%20writeup&amp;body=Hi%20Ander%2C%0A%0AI%27d%20like%20to%20read%20your%20%%TITLE_URI%%%20writeup%20(%%PAGE_URI%%).%0A%0A"
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1 2.9V17h16V7.9l-7.4 4.9a1 1 0 0 1-1.2 0L4 7.9zM5.9 7 12 11l6.1-4H5.9z" /></svg>
+                            Request access
+                        </a>
+                        <a
+                            class="lock-request"
+                            data-l="es"
+                            href="mailto:%%EMAIL%%?subject=Solicitud%20de%20acceso%3A%20writeup%20de%20%%TITLE_URI%%&amp;body=Hola%20Ander%2C%0A%0AMe%20gustar%C3%ADa%20leer%20tu%20writeup%20de%20%%TITLE_URI%%%20(%%PAGE_URI%%).%0A%0A"
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1 2.9V17h16V7.9l-7.4 4.9a1 1 0 0 1-1.2 0L4 7.9zM5.9 7 12 11l6.1-4H5.9z" /></svg>
+                            Pedir acceso
+                        </a>
 
-                        <input type="submit" class="staticrypt-decrypt-button" value="/*[|template_button|]*/0" />
-                    </form>
-                </div>
+                        <p class="lock-note" data-l="en">
+                            Recruiters and teams welcome — I'm happy to share it or walk you through it.
+                        </p>
+                        <p class="lock-note" data-l="es">
+                            Si eres reclutador o de un equipo, encantado de compartirlo o explicártelo.
+                        </p>
+                    </div>
+                </section>
             </main>
         </div>
 

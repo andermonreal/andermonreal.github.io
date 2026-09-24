@@ -50,6 +50,13 @@ jobs:
         with:
           node-version: 20
 
+      # A tool-cache Python, so `pip install pillow` works (the runner's system
+      # Python refuses pip installs, PEP 668).
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       # Sync the Projects page with GitHub before building. Uses the automatic
       # GITHUB_TOKEN only to raise the API rate limit; on any error the script
       # keeps the committed _data/projects_generated.json as a fallback.
@@ -57,6 +64,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: ruby tools/fetch-projects.rb
+
+      # Different spellings of one tag ("LFI"/"lfi") share a tag page and
+      # overwrite each other; unify them before building (stdlib only).
+      - name: Normalize tag spellings
+        run: python tools/normalize-tags.py
+
+      # 1200x630 link-preview cards (LinkedIn, X…) for every writeup plus the
+      # site card; _includes/head.html points og:image at them.
+      - name: Generate social preview cards
+        run: |
+          python -m pip install --quiet --disable-pip-version-check pillow
+          python tools/make-social-cards.py
 
       - name: Build site
         run: bundle exec jekyll b -d "_site${{ steps.pages.outputs.base_path }}"
@@ -101,13 +120,24 @@ jobs:
 
           TEMPLATE="tools/staticrypt-template.html"
 
-          # Each manifest entry is a JSON object {url, title, image}.
+          # Escape a value for the replacement side of a sed s|…|…| expression.
+          esc() { printf '%s' "$1" | sed -e 's/[\\|&]/\\&/g'; }
+
+          # Each manifest entry is a JSON object {url, title, image, difficulty,
+          # os, platform, lang, email, page} — see assets/protected.json.
           mapfile -t rows < <(jq -c '.[]' "$MANIFEST")
           for row in "${rows[@]}"; do
             url=$(jq -r '.url' <<<"$row")
             title=$(jq -r '.title' <<<"$row")
-            image=$(jq -r '.image' <<<"$row")
-            [ -z "$image" ] || [ "$image" = "null" ] && image="/assets/img/avatar.jpeg"
+            image=$(jq -r '.image // ""' <<<"$row")
+            diff=$(jq -r '.difficulty // ""' <<<"$row")
+            os=$(jq -r '.os // ""' <<<"$row")
+            platform=$(jq -r '.platform // ""' <<<"$row")
+            lang=$(jq -r '.lang // "en"' <<<"$row")
+            email=$(jq -r '.email // ""' <<<"$row")
+            page=$(jq -r '.page // ""' <<<"$row")
+            [ -z "$image" ] && image="/assets/img/avatar.jpeg"
+            [ -z "$platform" ] && platform="HackTheBox"
 
             f="${SITE}${url}index.html"
             if [ ! -f "$f" ]; then
@@ -115,10 +145,35 @@ jobs:
               continue
             fi
 
-            # Build a per-post password page by injecting the banner image into
-            # the site-themed StatiCrypt template.
+            # Per-post password page: the machine card (art, difficulty, OS,
+            # platform), the copy in the page's language and a prefilled
+            # "Request access" email. "none" hides a missing badge.
+            diff_class=$(tr '[:upper:]' '[:lower:]' <<<"${diff:-none}")
+            os_class="${os:-none}"
             tpl="$(mktemp)"
-            sed "s|%%POST_IMAGE%%|${image}|g" "$TEMPLATE" > "$tpl"
+            sed -e "s|%%LANG%%|$(esc "$lang")|g" \
+                -e "s|%%POST_IMAGE%%|$(esc "$image")|g" \
+                -e "s|%%PLATFORM%%|$(esc "$platform")|g" \
+                -e "s|%%DIFF_CLASS%%|$(esc "$diff_class")|g" \
+                -e "s|%%DIFF%%|$(esc "$diff")|g" \
+                -e "s|%%OS_CLASS%%|$(esc "$os_class")|g" \
+                -e "s|%%OS%%|$(esc "${os^}")|g" \
+                -e "s|%%EMAIL%%|$(esc "$email")|g" \
+                -e "s|%%TITLE_URI%%|$(esc "$(jq -rn --arg s "$title" '$s|@uri')")|g" \
+                -e "s|%%PAGE_URI%%|$(esc "$(jq -rn --arg s "$page" '$s|@uri')")|g" \
+                "$TEMPLATE" > "$tpl"
+
+            if [ "$lang" = "es" ]; then
+              t_instr="¿Tienes la contraseña? Introdúcela para leer el writeup completo."
+              t_button="Desbloquear"; t_placeholder="Contraseña"; t_remember="Recordarme"
+              t_error="Contraseña incorrecta, inténtalo de nuevo."
+              t_show="Mostrar contraseña"; t_hide="Ocultar contraseña"
+            else
+              t_instr="Have the password? Enter it to unlock the full writeup."
+              t_button="Unlock"; t_placeholder="Password"; t_remember="Remember me"
+              t_error="Wrong password, try again."
+              t_show="Show password"; t_hide="Hide password"
+            fi
 
             out="$(mktemp -d)"
             # `--short` skips StatiCrypt's interactive "short password" prompt
@@ -130,8 +185,13 @@ jobs:
                 --short \
                 --template "$tpl" \
                 --template-title "$title" \
-                --template-instructions "This writeup is password-protected. Enter the password to read the full content." \
-                --template-button "Unlock" \
+                --template-instructions "$t_instr" \
+                --template-button "$t_button" \
+                --template-placeholder "$t_placeholder" \
+                --template-remember "$t_remember" \
+                --template-error "$t_error" \
+                --template-toggle-show "$t_show" \
+                --template-toggle-hide "$t_hide" \
                 --directory "$out" < /dev/null )
             mv "$out/index.html" "$f"
             rm -rf "$out" "$tpl"

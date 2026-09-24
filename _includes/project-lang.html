@@ -1,0 +1,31 @@
+{% comment %}
+  A project's languages, from its `language` field ("Python", or a list such
+  as "JavaScript, python"). Usage: {% include project-lang.html language=p.language %}
+    pl_keys   lower-case slugs, one per language ("javascript", "python")
+    pl_key    the first one — it colours the card (`lang-<key>` in the SCSS)
+    pl_ext    that language's file extension, shown as the card's icon
+  Display names come from `project-lang-name.html` (so "python" reads Python).
+{% endcomment %}
+{% assign pl_keys = '' | split: '' %}
+{% assign pl_raw = include.language | default: '' | split: ',' %}
+{% for pl_item in pl_raw %}
+  {% assign pl_k = pl_item | strip | downcase | slugify %}
+  {% if pl_k != '' %}
+    {% unless pl_keys contains pl_k %}
+      {% assign pl_keys = pl_keys | push: pl_k %}
+    {% endunless %}
+  {% endif %}
+{% endfor %}
+{% assign pl_key = pl_keys | first | default: 'none' %}
+{% case pl_key %}
+  {% when 'python' %}{% assign pl_ext = '.py' %}
+  {% when 'javascript' %}{% assign pl_ext = '.js' %}
+  {% when 'typescript' %}{% assign pl_ext = '.ts' %}
+  {% when 'java' %}{% assign pl_ext = '.java' %}
+  {% when 'php' %}{% assign pl_ext = '.php' %}
+  {% when 'html' %}{% assign pl_ext = '.html' %}
+  {% when 'css' %}{% assign pl_ext = '.css' %}
+  {% when 'c' %}{% assign pl_ext = '.c' %}
+  {% when 'shell' %}{% assign pl_ext = '.sh' %}
+  {% else %}{% assign pl_ext = '{ }' %}
+{% endcase %}

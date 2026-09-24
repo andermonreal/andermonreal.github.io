@@ -1,0 +1,302 @@
+---
+layout: default
+panel_includes:
+  - toc
+tail_includes:
+  - related-posts
+  - post-nav
+script_includes:
+  - comment
+# Override of jekyll-theme-chirpy 7.5's `post` layout, restyled as a writeup
+# page (styles: the "Writeup pages" section of assets/css/…chirpy.scss).
+# Kept from upstream: the TOC bar/popup, the content, categories, license and
+# sharing. Changed:
+#   * The header is a machine card — the round banner art ringed in the
+#     difficulty colour over its own blurred glow, a kicker, the title and the
+#     posted / updated / read-time / author line.
+#   * The "Field | Details" table every writeup opens with moves up into that
+#     card as a spec sheet (difficulty as its coloured badge, OS with its
+#     icon). It is only cut out of the content when its header row says
+#     Field / Campo — any other first table stays where it is.
+#   * Tags at the bottom are pills, CVE ids highlighted.
+#   * A thin reading-progress bar along the top.
+# The `wu-post diff-<level>` classes on <article> give the whole page (and,
+# via :has(), the TOC panel) the difficulty colour as `--diff`.
+---
+
+{% include lang.html %}
+
+{% include toc-status.html %}
+
+<!-- Difficulty, OS and platform, read the same way as on Machines. -->
+{% include machine-meta.html post=page %}
+{% assign wu_diff = mm_diff %}
+{% assign wu_os = mm_os %}
+{% assign wu_platform = mm_platform %}
+{% assign wu_levels = mm_levels %}
+{% assign wu_os_levels = mm_os_levels %}
+
+{% include post-thumb.html post=page %}
+{% assign wu_thumb = thumb_src %}
+
+<!-- Cut the machine info table out of the content and dress it up. -->
+{% assign wu_body = content %}
+{% assign wu_specs = '' %}
+{% if content contains '<table>' %}
+  {% assign wu_before = content | split: '<table>' | first %}
+  {% assign wu_rest = content | remove_first: wu_before | remove_first: '<table>' %}
+  {% assign wu_table = wu_rest | split: '</table>' | first %}
+
+  {% if wu_table contains '<th>Field</th>' or wu_table contains '<th>Campo</th>' %}
+    {% assign wu_after = wu_rest | remove_first: wu_table | remove_first: '</table>' %}
+    {% assign wu_body = wu_before | append: wu_after %}
+
+    <!-- Difficulty → its badge; OS → brand icon; IP → monospace. -->
+    {% for level in wu_levels %}
+      {% capture wu_from %}<td>{{ level }}</td>{% endcapture %}
+      {% capture wu_to %}<td><span class="difficulty-badge difficulty-{{ level | downcase }}">{{ level }}</span></td>{% endcapture %}
+      {% assign wu_table = wu_table | replace: wu_from, wu_to %}
+    {% endfor %}
+    {% for os_name in wu_os_levels %}
+      {% capture wu_from %}<td>{{ os_name | capitalize }}{% endcapture %}
+      {% capture wu_to %}<td><i class="fab fa-{{ os_name }} brand-{{ os_name }}" aria-hidden="true"></i> {{ os_name | capitalize }}{% endcapture %}
+      {% assign wu_table = wu_table | replace: wu_from, wu_to %}
+    {% endfor %}
+    {% assign wu_table = wu_table | replace: '<td>IP</td>', '<td class="wu-key-ip">IP</td>' %}
+
+    {% capture wu_specs %}<table>{{ wu_table }}</table>{% endcapture %}
+  {% endif %}
+{% endif %}
+
+<article
+  class="px-1 wu-post{% if wu_diff != '' %} diff-{{ wu_diff | downcase }}{% endif %}"
+  data-toc="{{ enable_toc }}"
+>
+  <div class="wu-progress" aria-hidden="true"><span></span></div>
+
+  <header
+    class="wu-hero"
+    {% if wu_thumb != '' %}
+      style="--thumb: url('{{ wu_thumb }}');{% if page.image.lqip %} --lqip: url('{{ page.image.lqip }}');{% endif %}"
+    {% endif %}
+  >
+    <div class="wu-hero-main">
+      {% if wu_thumb != '' %}
+        <!-- A CSS background, not an <img>: refactor-content would otherwise
+             re-wrap it (the LQIP sits underneath until the art loads). -->
+        <span class="wu-art" aria-hidden="true"></span>
+      {% endif %}
+
+      <div class="wu-hero-text">
+        <p class="wu-kicker">// {% if wu_platform != '' %}{{ wu_platform }} · {% endif %}writeup</p>
+
+        <h1 data-toc-skip>{{ page.title }}</h1>
+
+        {% if page.description %}
+          <p class="post-desc fw-light">{{ page.description }}</p>
+        {% endif %}
+
+        <!-- Badges only when there is no spec sheet to carry them. -->
+        {% if wu_specs == '' %}
+          {% if wu_diff != '' or wu_os != '' %}
+            <div class="wu-badges">
+              {% if wu_diff != '' %}
+                <span class="difficulty-badge difficulty-{{ wu_diff | downcase }}">{{ wu_diff }}</span>
+              {% endif %}
+              {% if wu_os != '' %}
+                <span class="os-badge"><i class="fab fa-{{ wu_os }} brand-{{ wu_os }}" aria-hidden="true"></i> {{ wu_os | capitalize }}</span>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endif %}
+
+        <div class="post-meta text-muted wu-meta">
+          <!-- published date -->
+          <span>
+            <i class="far fa-calendar fa-fw" aria-hidden="true"></i>
+            {{ site.data.locales[lang].post.posted }}
+            {% include datetime.html date=page.date tooltip=true lang=lang %}
+          </span>
+
+          <!-- lastmod date -->
+          {% if page.last_modified_at and page.last_modified_at != page.date %}
+            <span>
+              <i class="fas fa-rotate fa-fw" aria-hidden="true"></i>
+              {{ site.data.locales[lang].post.updated }}
+              {% include datetime.html date=page.last_modified_at tooltip=true lang=lang %}
+            </span>
+          {% endif %}
+
+          <!-- read time -->
+          <span>
+            <i class="far fa-clock fa-fw" aria-hidden="true"></i>
+            {% include read-time.html content=content prompt=true lang=lang %}
+          </span>
+
+          <!-- author(s) -->
+          <span>
+            <i class="far fa-user fa-fw" aria-hidden="true"></i>
+            {% if page.author %}
+              {% assign authors = page.author %}
+            {% elsif page.authors %}
+              {% assign authors = page.authors %}
+            {% endif %}
+
+            {{ site.data.locales[lang].post.written_by }}
+
+            <em>
+              {% if authors %}
+                {% for author in authors %}
+                  {% if site.data.authors[author].url -%}
+                    <a href="{{ site.data.authors[author].url }}">{{ site.data.authors[author].name }}</a>
+                  {%- else -%}
+                    {{ site.data.authors[author].name }}
+                  {%- endif %}
+                  {% unless forloop.last %}{{ '</em>, <em>' }}{% endunless %}
+                {% endfor %}
+              {% else %}
+                <a href="{{ site.social.links[0] }}">{{ site.social.name }}</a>
+              {% endif %}
+            </em>
+          </span>
+
+          <!-- pageviews -->
+          {% if site.pageviews.provider and site.analytics[site.pageviews.provider].id %}
+            <span>
+              <i class="far fa-eye fa-fw" aria-hidden="true"></i>
+              <em id="pageviews">
+                <i class="fas fa-spinner fa-spin small"></i>
+              </em>
+              {{ site.data.locales[lang].post.pageview_measure }}
+            </span>
+          {% endif %}
+
+          {% if page.protected %}
+            <span class="wu-locked">
+              <i class="fas fa-lock fa-fw" aria-hidden="true"></i>
+              {% if site.active_lang == 'es' %}Protegido{% else %}Protected{% endif %}
+            </span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    {% if wu_specs != '' %}
+      <div class="wu-specs">{{ wu_specs }}</div>
+    {% endif %}
+  </header>
+
+  {% if enable_toc %}
+    <div id="toc-bar" class="d-flex align-items-center justify-content-between invisible">
+      <span class="label text-truncate">{{ page.title }}</span>
+      <button type="button" class="toc-trigger btn me-1">
+        <i class="fa-solid fa-list-ul fa-fw"></i>
+      </button>
+    </div>
+
+    <button id="toc-solo-trigger" type="button" class="toc-trigger btn btn-outline-secondary btn-sm">
+      <span class="label ps-2 pe-1">{{- site.data.locales[lang].panel.toc -}}</span>
+      <i class="fa-solid fa-angle-right fa-fw"></i>
+    </button>
+
+    <dialog id="toc-popup" class="p-0">
+      <div class="header d-flex flex-row align-items-center justify-content-between">
+        <div class="label text-truncate py-2 ms-4">{{- page.title -}}</div>
+        <button id="toc-popup-close" type="button" class="btn mx-1 my-1 opacity-75">
+          <i class="fas fa-close"></i>
+        </button>
+      </div>
+      <div id="toc-popup-content" class="px-4 py-3 pb-4"></div>
+    </dialog>
+  {% endif %}
+
+  <div class="content">
+    {{ wu_body }}
+  </div>
+
+  <div class="post-tail-wrapper text-muted">
+    <!-- categories -->
+    {% if page.categories.size > 0 %}
+      <div class="post-meta mb-3">
+        <i class="far fa-folder-open fa-fw me-1"></i>
+        {% for category in page.categories %}
+          <a href="{{ site.baseurl }}/categories/{{ category | slugify | url_encode }}/">{{ category }}</a>
+          {%- unless forloop.last -%},{%- endunless -%}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <!-- tags: pills, CVE ids highlighted -->
+    {% if page.tags.size > 0 %}
+      <div class="post-tags wu-tags">
+        <i class="fa fa-tags fa-fw me-1"></i>
+        {% for tag in page.tags %}
+          {% assign tag_head = tag | downcase | slice: 0, 4 %}
+          <a
+            href="{{ site.baseurl }}/tags/{{ tag | slugify | url_encode }}/"
+            class="post-tag no-text-decoration{% if tag_head == 'cve-' %} is-cve{% endif %}"
+          >
+            {{- tag -}}
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div
+      class="
+        post-tail-bottom
+        d-flex justify-content-between align-items-center mt-5 pb-2
+      "
+    >
+      <div class="license-wrapper">
+        {% if site.data.locales[lang].copyright.license.template %}
+          {% capture _replacement %}
+        <a href="{{ site.data.locales[lang].copyright.license.link }}">
+          {{ site.data.locales[lang].copyright.license.name }}
+        </a>
+        {% endcapture %}
+
+          {{ site.data.locales[lang].copyright.license.template | replace: ':LICENSE_NAME', _replacement }}
+        {% endif %}
+      </div>
+
+      {% include post-sharing.html lang=lang %}
+    </div>
+    <!-- .post-tail-bottom -->
+  </div>
+  <!-- div.post-tail-wrapper -->
+</article>
+
+<script>
+  /* Reading progress: the bar along the top fills as the article scrolls by. */
+  (function () {
+    const bar = document.querySelector('.wu-progress span');
+    const article = document.querySelector('article.wu-post');
+
+    if (!bar || !article) {
+      return;
+    }
+
+    let queued = false;
+
+    const update = () => {
+      const box = article.getBoundingClientRect();
+      const travel = box.height - window.innerHeight;
+      const done = travel > 0 ? Math.min(1, Math.max(0, -box.top / travel)) : 1;
+
+      bar.style.transform = `scaleX(${done})`;
+      queued = false;
+    };
+
+    const request = () => {
+      if (!queued) {
+        queued = true;
+        requestAnimationFrame(update);
+      }
+    };
+
+    window.addEventListener('scroll', request, { passive: true });
+    window.addEventListener('resize', request);
+    update();
+  })();
+</script>

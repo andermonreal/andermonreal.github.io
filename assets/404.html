@@ -1,0 +1,171 @@
+---
+layout: default
+title: "404: Page not found"
+permalink: /404.html
+# Override of jekyll-theme-chirpy's assets/404.html. GitHub Pages serves this
+# one file for every missing path, in either language, so the copy switches to
+# Spanish in the browser when the path starts with /es/ (English without JS).
+#
+# A terminal "cd"s into the path that failed; below it, if the last path
+# segment looks like a writeup (a typo'd /posts/managment/), the closest
+# machines are offered as "Did you mean…?" — otherwise the latest three. All
+# writeups are rendered as hidden cards; the script only picks which to show.
+# Styles: the "404" section of assets/css/jekyll-theme-chirpy.scss (the cards
+# reuse the landing's .recent-card).
+---
+
+{% include lang.html %}
+{% assign nf_posts = site.posts | where_exp: 'item', 'item.hidden != true' %}
+
+<div class="nf" data-lang="en">
+  <p class="nf-code" aria-hidden="true">404</p>
+  <h1 class="nf-title">
+    <span data-l="en">Page not found</span><span data-l="es">Página no encontrada</span>
+  </h1>
+  <p class="nf-lede">
+    <span data-l="en">Nothing lives at this address — it may have moved, or never existed.</span>
+    <span data-l="es">No hay nada en esta dirección: puede que se haya movido o que nunca existiera.</span>
+  </p>
+
+  <div class="terminal nf-terminal" aria-hidden="true">
+    <div class="terminal-bar">
+      <span class="terminal-dots"><i></i><i></i><i></i></span>
+      <span class="terminal-title">ander@kali: ~</span>
+    </div>
+    <div class="terminal-body">
+      <p class="t-line t-cmd"><span class="t-ps1"><b>ander@kali</b>:<em>~</em>$</span> cd <span class="nf-path">/unknown</span></p>
+      <p class="t-line nf-error">bash: cd: <span class="nf-path">/unknown</span>: No such file or directory</p>
+      <p class="t-line t-cmd"><span class="t-ps1"><b>ander@kali</b>:<em>~</em>$</span> <span class="t-cursor"></span></p>
+    </div>
+  </div>
+
+  <div class="nf-actions">
+    <a class="landing-btn landing-btn--primary" href="{{ '/' | relative_url }}" data-href-es="/es/">
+      <i class="fas fa-house" aria-hidden="true"></i>
+      <span data-l="en">Back home</span><span data-l="es">Volver al inicio</span>
+    </a>
+    <a class="landing-btn landing-btn--ghost" href="{{ '/machines/' | relative_url }}" data-href-es="/es/machines/">
+      <i class="fas fa-terminal" aria-hidden="true"></i>
+      <span data-l="en">Browse the writeups</span><span data-l="es">Ver los writeups</span>
+    </a>
+  </div>
+
+  <section class="nf-more" aria-labelledby="nf-more-title">
+    <h2 class="nf-more-title" id="nf-more-title">
+      <span class="nf-latest"><span data-l="en">Latest writeups</span><span data-l="es">Últimos writeups</span></span>
+      <span class="nf-guess" hidden><span data-l="en">Did you mean…?</span><span data-l="es">¿Querías decir…?</span></span>
+    </h2>
+
+    <div class="landing-recent nf-cards">
+      {% for p in nf_posts %}
+        {% include machine-meta.html post=p %}
+        {% include post-thumb.html post=p %}
+        <a
+          class="recent-card{% if mm_diff != '' %} diff-{{ mm_diff | downcase }}{% endif %}"
+          href="{{ p.url | relative_url }}"
+          data-slug="{{ p.slug }}"
+          {% if forloop.index > 3 %}hidden{% endif %}
+        >
+          <span class="recent-top">
+            {% if thumb_src != '' %}
+              <span class="recent-thumb" style="background-image: url('{{ thumb_src }}');" aria-hidden="true"></span>
+            {% endif %}
+            <span class="recent-head">
+              <span class="recent-title">{{ p.title }}</span>
+              <span class="recent-badges">
+                {% if mm_diff != '' %}
+                  <span class="difficulty-badge difficulty-{{ mm_diff | downcase }}">{{ mm_diff }}</span>
+                {% endif %}
+                {% if mm_os != '' %}
+                  <span class="os-badge"><i class="fab fa-{{ mm_os }} brand-{{ mm_os }}" aria-hidden="true"></i> {{ mm_os | capitalize }}</span>
+                {% endif %}
+              </span>
+            </span>
+          </span>
+          <span class="recent-meta">
+            <span>{{ mm_platform }} · {% include datetime.html date=p.date lang=lang %}</span>
+            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+          </span>
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+
+<script>
+  /* Language from the path, the failed path into the terminal, and the
+     "did you mean" pick: the writeups whose slug is closest to the path's last
+     segment (edit distance, or one containing the other). */
+  (function () {
+    const root = document.querySelector('.nf');
+
+    if (!root) {
+      return;
+    }
+
+    let path = window.location.pathname;
+    try {
+      path = decodeURIComponent(path);
+    } catch (e) {}
+
+    const spanish = path === '/es' || path.startsWith('/es/');
+    root.dataset.lang = spanish ? 'es' : 'en';
+    document.querySelectorAll('.nf-path').forEach((el) => {
+      el.textContent = path;
+    });
+
+    const cards = Array.from(root.querySelectorAll('.nf-cards .recent-card'));
+
+    if (spanish) {
+      root.querySelectorAll('[data-href-es]').forEach((a) => {
+        a.setAttribute('href', a.dataset.hrefEs);
+      });
+      cards.forEach((card) => {
+        card.setAttribute('href', `/es${card.getAttribute('href')}`);
+      });
+    }
+
+    const clean = (text) => text.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const last = path.split('/').filter(Boolean).pop() || '';
+    const query = clean(last.replace(/\.html?$/i, ''));
+
+    if (query.length < 3) {
+      return;
+    }
+
+    /* Classic Levenshtein distance, two rows. */
+    const distance = (a, b) => {
+      let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+      for (let i = 1; i <= a.length; i += 1) {
+        const row = [i];
+        for (let j = 1; j <= b.length; j += 1) {
+          row[j] = Math.min(prev[j] + 1, row[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        }
+        prev = row;
+      }
+      return prev[b.length];
+    };
+
+    const guesses = cards
+      .map((card) => {
+        const slug = clean(card.dataset.slug);
+        const contains = slug.includes(query) || query.includes(slug);
+        return { card, score: contains ? 0 : distance(query, slug) / Math.max(query.length, slug.length) };
+      })
+      .filter((guess) => guess.score <= 0.45)
+      .sort((a, b) => a.score - b.score)
+      .slice(0, 3);
+
+    if (guesses.length) {
+      cards.forEach((card) => {
+        card.hidden = true;
+      });
+      guesses.forEach(({ card }) => {
+        card.hidden = false;
+        card.parentElement.appendChild(card); /* best match first */
+      });
+      root.querySelector('.nf-latest').hidden = true;
+      root.querySelector('.nf-guess').hidden = false;
+    }
+  })();
+</script>
