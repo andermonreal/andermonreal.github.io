@@ -132,11 +132,15 @@ layout: default
       <span class="kpi-num" data-count="{{ ws_total }}">{{ ws_total }}</span>
       <span class="kpi-label">{% if is_es %}Writeups publicados{% else %}Writeups published{% endif %}</span>
     </div>
-    <div class="kpi">
+    <!-- Opens the CVE index. -->
+    <a class="kpi kpi-link" href="{{ '/cves/' | relative_url }}">
       <i class="fas fa-bug kpi-icon" aria-hidden="true"></i>
       <span class="kpi-num" data-count="{{ ws_cve_count }}">{{ ws_cve_count }}</span>
-      <span class="kpi-label">{% if is_es %}CVEs explotados{% else %}CVEs exploited{% endif %}</span>
-    </div>
+      <span class="kpi-label">
+        {% if is_es %}CVEs explotados{% else %}CVEs exploited{% endif %}
+        <i class="fas fa-arrow-right kpi-go" aria-hidden="true"></i>
+      </span>
+    </a>
     <div class="kpi">
       <i class="fas fa-screwdriver-wrench kpi-icon" aria-hidden="true"></i>
       <span class="kpi-num" data-count="{{ ws_topic_count }}">{{ ws_topic_count }}</span>

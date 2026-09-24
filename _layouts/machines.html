@@ -184,9 +184,9 @@ layout: default
         </div>
 
         <div class="stat-hero-foot">
-          <span class="stat-foot-item">
+          <a class="stat-foot-item stat-latest" href="{{ '/cves/' | relative_url }}">
             <i class="fas fa-bug" aria-hidden="true"></i><b>{{ ws_cve_count }}</b> {{ t_cves }}
-          </span>
+          </a>
           {% if latest_post %}
             <a class="stat-foot-item stat-latest" href="{{ latest_post.url | relative_url }}">
               {% if latest_thumb != '' %}

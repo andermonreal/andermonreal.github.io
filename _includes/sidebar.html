@@ -1,27 +1,96 @@
 <!-- The Side Bar -->
 <!--
-  Project override of the theme's `sidebar.html`. The ONLY change versus the
-  stock Chirpy 7.5 file is the "language switcher" block inside .sidebar-bottom
-  (clearly marked below). Keep in sync when upgrading the theme.
+  Project override of the theme's `sidebar.html`. Changes versus the stock
+  Chirpy 7.5 file (keep in sync when upgrading the theme):
+    * the avatar gets an "available" status dot;
+    * the subtitle is a localised `// offensive security` kicker instead of
+      `site.tagline`;
+    * nav items show counts (writeups, CVEs, projects — sidebar-counts.html);
+    * the "language switcher" block inside .sidebar-bottom (marked below);
+    * a "skip to content" link before the <aside>, and a script that makes
+      sideways-scrolling code blocks / tables reachable from the keyboard;
+    * a localised aria-label on the <nav>.
+  Styles: the "Sidebar" section of assets/css/jekyll-theme-chirpy.scss.
 -->
+
+{%- capture sb_counts -%}{% include_cached sidebar-counts.html %}{%- endcapture -%}
+{%- assign sb_counts = sb_counts | strip | split: '|' -%}
+{%- assign sb_tagline = 'offensive security' -%}
+{%- assign sb_status = 'Open to opportunities' -%}
+{%- if site.active_lang == 'es' -%}
+  {%- assign sb_tagline = 'seguridad ofensiva' -%}
+  {%- assign sb_status = 'Disponible para nuevas oportunidades' -%}
+{%- endif -%}
+
+<!-- Skip link: the first thing a keyboard user reaches on every page (this
+     include is the first thing in <body>). Invisible until focused; it jumps
+     past the sidebar and topbar to the page's <main>. -->
+<a class="skip-link" href="#main-wrapper">
+  {%- if site.active_lang == 'es' -%}Saltar al contenido{%- else -%}Skip to content{%- endif -%}
+</a>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const skip = document.querySelector('.skip-link');
+    const main = document.querySelector('main');
+
+    if (!skip || !main) {
+      return;
+    }
+
+    main.id = main.id || 'main-content';
+    main.setAttribute('tabindex', '-1');
+    skip.setAttribute('href', `#${main.id}`);
+    skip.addEventListener('click', (event) => {
+      event.preventDefault();
+      main.focus({ preventScroll: true });
+      main.scrollIntoView();
+    });
+  });
+
+  /* Code blocks and tables that overflow sideways: make them focusable so
+     the keyboard can scroll them (WCAG 2.1.1), and give each a unique name
+     ("Code block 3") — regions sharing one label can't be told apart. */
+  window.addEventListener('load', () => {
+    const es = document.documentElement.lang.startsWith('es');
+    const seen = { code: 0, table: 0 };
+    document.querySelectorAll('.highlight, .table-wrapper, pre').forEach((el) => {
+      /* a bare <pre> is a block Rouge didn't highlight (unknown language) */
+      if (el.matches('pre') && el.closest('.highlight')) {
+        return;
+      }
+      const kind = el.matches('.table-wrapper') ? 'table' : 'code';
+      seen[kind] += 1;
+      if (el.scrollWidth > el.clientWidth + 1 && !el.hasAttribute('tabindex')) {
+        const noun = kind === 'code' ? (es ? 'Bloque de código' : 'Code block') : (es ? 'Tabla' : 'Table');
+        el.setAttribute('tabindex', '0');
+        el.setAttribute('role', 'region');
+        el.setAttribute('aria-label', `${noun} ${seen[kind]}`);
+      }
+    });
+  });
+</script>
 
 <aside aria-label="Sidebar" id="sidebar" class="d-flex flex-column align-items-end">
   <header class="profile-wrapper">
-    <a href="{{ '/' | relative_url }}" id="avatar" class="rounded-circle">
-      {%- if site.avatar != empty and site.avatar -%}
-        {%- capture avatar_url -%}
-          {% include media-url.html src=site.avatar %}
-        {%- endcapture -%}
-        <img src="{{- avatar_url -}}" width="112" height="112" alt="avatar" onerror="this.style.display='none'">
-      {%- endif -%}
-    </a>
+    <span class="sb-avatar">
+      <a href="{{ '/' | relative_url }}" id="avatar" class="rounded-circle">
+        {%- if site.avatar != empty and site.avatar -%}
+          {%- capture avatar_url -%}
+            {% include media-url.html src=site.avatar %}
+          {%- endcapture -%}
+          <img src="{{- avatar_url -}}" width="112" height="112" alt="avatar" onerror="this.style.display='none'">
+        {%- endif -%}
+      </a>
+      <!-- "Available": the landing's status dot, on the avatar. -->
+      <span class="sb-status" title="{{ sb_status }}" aria-hidden="true"></span>
+    </span>
 
     <a class="site-title d-block" href="{{ '/' | relative_url }}">{{ site.title }}</a>
-    <p class="site-subtitle fst-italic mb-0">{{ site.tagline }}</p>
+    <p class="site-subtitle mb-0">// {{ sb_tagline }}</p>
   </header>
   <!-- .profile-wrapper -->
 
-  <nav class="flex-column flex-grow-1 w-100 ps-0">
+  <nav class="flex-column flex-grow-1 w-100 ps-0" aria-label="{% if site.active_lang == 'es' %}Navegación principal{% else %}Main navigation{% endif %}">
     <ul class="nav">
       <!-- home -->
       <li class="nav-item{% if page.layout == 'home' %}{{ " active" }}{% endif %}">
@@ -38,6 +107,11 @@
             {% capture tab_name %}{{ tab.url | split: '/' }}{% endcapture %}
 
             <span>{{ site.data.locales[include.lang].tabs.[tab_name] | default: tab.title | upcase }}</span>
+            {%- case tab_name -%}
+              {%- when 'machines' -%}<span class="nav-count">{{ sb_counts[0] }}</span>
+              {%- when 'cves' -%}<span class="nav-count">{{ sb_counts[1] }}</span>
+              {%- when 'projects' -%}<span class="nav-count">{{ sb_counts[2] }}</span>
+            {%- endcase %}
           </a>
         </li>
         <!-- .nav-item -->

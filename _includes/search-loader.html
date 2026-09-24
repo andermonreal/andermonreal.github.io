@@ -1,0 +1,68 @@
+<!--
+  Jekyll Simple Search loader
+  See: <https://github.com/christian-fei/Simple-Jekyll-Search>
+
+  Override of jekyll-theme-chirpy 7.5's search-loader.html: each result is a
+  machine card — the round art ringed in its difficulty colour, the title, the
+  difficulty / OS / platform / lock badges and a two-line excerpt — built from
+  the extra fields of assets/js/data/search.json. A protected writeup has no
+  text in the index, so its card says so instead of an excerpt.
+  NB: the template sits in a single-quoted JS string, so it must never
+  contain a single quote.
+-->
+
+{% assign sl_lang = include.lang | slice: 0, 2 %}
+{% assign sl_locked = 'Protected' %}
+{% assign sl_note = 'Password-protected writeup.' %}
+{% if sl_lang == 'es' %}
+  {% assign sl_locked = 'Protegido' %}
+  {% assign sl_note = 'Writeup protegido con contraseña.' %}
+{% endif %}
+
+{% capture result_elem %}
+  <a class="search-card diff-{diffslug}" href="{url}">
+    <span class="search-thumb" style="background-image: url({image})" aria-hidden="true"></span>
+    <span class="search-body">
+      <span class="search-title">{title}</span>
+      <span class="search-meta">{diff}{os}{locked}{platform}</span>
+      <span class="search-excerpt">{content}</span>
+    </span>
+  </a>
+{% endcapture %}
+
+{% capture not_found %}<p class="mt-5">{{ site.data.locales[include.lang].search.no_results }}</p>{% endcapture %}
+
+<script>
+  {% comment %} Note: dependent library will be loaded in `js-selector.html` {% endcomment %}
+  document.addEventListener('DOMContentLoaded', () => {
+    const lockedLabel = {{ sl_locked | jsonify }};
+    const lockedNote = {{ sl_note | jsonify }};
+    const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1);
+
+    SimpleJekyllSearch({
+      searchInput: document.getElementById('search-input'),
+      resultsContainer: document.getElementById('search-results'),
+      json: '{{ '/assets/js/data/search.json' | relative_url }}',
+      searchResultTemplate: '{{ result_elem | strip_newlines }}',
+      noResultsText: '{{ not_found }}',
+      templateMiddleware: function (prop, value) {
+        switch (prop) {
+          case 'diff':
+            return value ? `<span class="difficulty-badge difficulty-${value.toLowerCase()}">${value}</span>` : '';
+          case 'os':
+            return value
+              ? `<span class="os-badge"><i class="fab fa-${value} brand-${value}" aria-hidden="true"></i> ${capitalize(value)}</span>`
+              : '';
+          case 'locked':
+            return value ? `<span class="os-badge"><i class="fas fa-lock" aria-hidden="true"></i> ${lockedLabel}</span>` : '';
+          case 'platform':
+            return value ? `<span class="search-platform"><i class="fas fa-layer-group" aria-hidden="true"></i> ${value}</span>` : '';
+          case 'content':
+            return value || `<em>${lockedNote}</em>`;
+          default:
+            return undefined;
+        }
+      }
+    });
+  });
+</script>

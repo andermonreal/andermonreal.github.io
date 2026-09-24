@@ -1,0 +1,19 @@
+{%- comment -%}
+  The sidebar's nav counts as "writeups|cves|projects". Always included with
+  `include_cached` (no parameters), so this runs once per build rather than
+  once for each of the site's ~700 pages.
+{%- endcomment -%}
+{%- assign sc_posts = site.posts | where_exp: 'item', 'item.hidden != true' -%}
+{%- assign sc_cves = '' | split: '' -%}
+{%- for sc_p in sc_posts -%}
+  {%- for sc_t in sc_p.tags -%}
+    {%- assign sc_l = sc_t | downcase -%}
+    {%- assign sc_h = sc_l | slice: 0, 4 -%}
+    {%- if sc_h == 'cve-' -%}
+      {%- unless sc_cves contains sc_l -%}
+        {%- assign sc_cves = sc_cves | push: sc_l -%}
+      {%- endunless -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endfor -%}
+{{- sc_posts.size }}|{{ sc_cves.size }}|{{ site.data.projects_generated.size | default: 0 -}}

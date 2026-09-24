@@ -1,0 +1,163 @@
+{% comment %}
+  Body of the tag and category pages (jekyll-archives: page.title = the tag /
+  category, page.posts = its writeups, newest first). Used by _layouts/tag.html
+  and _layouts/category.html with kind='tag' or kind='category'.
+
+  A header like the Archive's — kicker, name, count, the difficulty split and
+  a button that opens the Machines finder already filtered (a tag becomes a
+  search, a platform or difficulty becomes its chip) — then the writeups as
+  the Archive's machine rows. A CVE tag also links to NVD and the CVE index.
+{% endcomment %}
+{% assign tx_kind = include.kind %}
+{% assign tx_posts = page.posts | where_exp: 'item', 'item.hidden != true' %}
+{% assign tx_total = tx_posts | size %}
+{% assign tx_name = page.title %}
+{% assign tx_levels = 'Easy,Medium,Hard,Insane' | split: ',' %}
+{% assign tx_head = tx_name | downcase | slice: 0, 4 %}
+{% assign tx_is_cve = false %}
+{% if tx_kind == 'tag' and tx_head == 'cve-' %}{% assign tx_is_cve = true %}{% endif %}
+
+{% assign t_kind = 'Tag' %}
+{% assign t_one = '1 writeup' %}
+{% assign t_many = ':n writeups' %}
+{% assign t_lede_tag = 'Writeups tagged “:x”, newest first.' %}
+{% assign t_lede_cat = 'Writeups in :x, newest first.' %}
+{% assign t_finder = 'Open in the finder' %}
+{% assign t_nvd = 'View on NVD' %}
+{% assign t_cves = 'All CVEs' %}
+{% assign t_protected = 'Protected' %}
+{% assign t_mon = 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec' | split: ',' %}
+{% if tx_kind == 'category' %}{% assign t_kind = 'Category' %}{% endif %}
+
+{% if site.active_lang == 'es' %}
+  {% assign t_kind = 'Etiqueta' %}
+  {% if tx_kind == 'category' %}{% assign t_kind = 'Categoría' %}{% endif %}
+  {% assign t_lede_tag = 'Writeups con la etiqueta «:x», del más reciente al más antiguo.' %}
+  {% assign t_lede_cat = 'Writeups de :x, del más reciente al más antiguo.' %}
+  {% assign t_finder = 'Abrir en el buscador' %}
+  {% assign t_nvd = 'Ver en NVD' %}
+  {% assign t_cves = 'Todos los CVEs' %}
+  {% assign t_protected = 'Protegido' %}
+  {% assign t_mon = 'ene,feb,mar,abr,may,jun,jul,ago,sep,oct,nov,dic' | split: ',' %}
+{% endif %}
+
+<!-- Where "open in the finder" goes: a difficulty or platform chip for a
+     category, a search for a tag. -->
+{% if tx_kind == 'category' %}
+  {% if tx_levels contains tx_name %}
+    {% capture tx_finder %}{{ '/machines/' | relative_url }}?d={{ tx_name | downcase }}{% endcapture %}
+  {% else %}
+    {% capture tx_finder %}{{ '/machines/' | relative_url }}?p={{ tx_name | downcase | url_encode }}{% endcapture %}
+  {% endif %}
+{% else %}
+  {% capture tx_finder %}{{ '/machines/' | relative_url }}?q={{ tx_name | url_encode }}{% endcapture %}
+{% endif %}
+
+<div class="tax">
+  <header class="arc-head tax-head">
+    <div class="arc-head-text">
+      <p class="landing-kicker">
+        {%- if tx_kind == 'category' -%}
+          // ls ~/writeups/{{ tx_name | downcase | slugify }}
+        {%- else -%}
+          // grep -rl "{{ tx_name }}" ~/writeups
+        {%- endif -%}
+      </p>
+      <h1 class="arc-title tax-title">
+        <span class="tax-kind">{{ t_kind }}</span>
+        {% if tx_is_cve %}{{ tx_name | upcase }}{% else %}{{ tx_name }}{% endif %}
+      </h1>
+      <p class="arc-lede">
+        {% if tx_kind == 'category' %}
+          {{ t_lede_cat | replace: ':x', tx_name }}
+        {% elsif tx_is_cve %}
+          {% assign tx_upper = tx_name | upcase %}
+          {{ t_lede_tag | replace: ':x', tx_upper }}
+        {% else %}
+          {{ t_lede_tag | replace: ':x', tx_name }}
+        {% endif %}
+      </p>
+
+      <div class="tax-actions">
+        <a class="landing-btn landing-btn--ghost" href="{{ tx_finder }}">
+          <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+          {{ t_finder }}
+        </a>
+        {% if tx_is_cve %}
+          <a
+            class="landing-btn landing-btn--ghost"
+            href="https://nvd.nist.gov/vuln/detail/{{ tx_name | upcase }}"
+            target="_blank"
+            rel="noopener"
+          >
+            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            {{ t_nvd }}
+          </a>
+          <a class="landing-btn landing-btn--ghost" href="{{ '/cves/' | relative_url }}">
+            <i class="fas fa-bug" aria-hidden="true"></i>
+            {{ t_cves }}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="arc-kpis">
+      <div class="arc-kpi">
+        <span class="arc-kpi-num">{{ tx_total }}</span>
+        <span class="arc-kpi-label">writeups</span>
+      </div>
+      <!-- The difficulty split, as coloured pills (levels with none left out). -->
+      <div class="arc-kpi tax-split">
+        <span class="tax-split-pills">
+          {% for level in tx_levels %}
+            {% assign lv_n = tx_posts | where_exp: 'p', 'p.categories contains level' | size %}
+            {% if lv_n > 0 %}
+              <span class="difficulty-badge difficulty-{{ level | downcase }}">{{ level }} {{ lv_n }}</span>
+            {% endif %}
+          {% endfor %}
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <ol class="arc-list tax-list">
+    {% for p in tx_posts %}
+      {% include machine-meta.html post=p %}
+      {% include post-thumb.html post=p %}
+      {% assign mi = p.date | date: '%m' | plus: 0 | minus: 1 %}
+      <li class="arc-item{% if mm_diff != '' %} diff-{{ mm_diff | downcase }}{% endif %}">
+        <a
+          class="arc-link"
+          href="{{ p.url | relative_url }}"
+          {% if thumb_src != '' %}style="--thumb: url('{{ thumb_src }}');"{% endif %}
+        >
+          <span class="arc-day">
+            <span class="arc-day-n">{{ p.date | date: '%d' }}</span>
+            <span class="arc-day-m">{{ t_mon[mi] }} {{ p.date | date: '%y' }}</span>
+          </span>
+          {% if thumb_src != '' %}
+            <span class="arc-thumb" aria-hidden="true"></span>
+          {% endif %}
+          <span class="arc-main">
+            <span class="arc-name">{{ p.title }}</span>
+            <span class="arc-meta">
+              {% if mm_diff != '' %}
+                <span class="difficulty-badge difficulty-{{ mm_diff | downcase }}">{{ mm_diff }}</span>
+              {% endif %}
+              {% if mm_os != '' %}
+                <span class="os-badge"><i class="fab fa-{{ mm_os }} brand-{{ mm_os }}" aria-hidden="true"></i> {{ mm_os | capitalize }}</span>
+              {% endif %}
+              {% if p.protected %}
+                <span class="os-badge"><i class="fas fa-lock" aria-hidden="true"></i> {{ t_protected }}</span>
+              {% endif %}
+              {% if mm_platform != '' %}
+                <span class="arc-platform"><i class="fas fa-layer-group" aria-hidden="true"></i> {{ mm_platform }}</span>
+              {% endif %}
+            </span>
+          </span>
+          <span class="arc-arrow" aria-hidden="true"><i class="fas fa-arrow-right"></i></span>
+        </a>
+      </li>
+    {% endfor %}
+  </ol>
+</div>

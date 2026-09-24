@@ -14,8 +14,9 @@
   {%- endcapture -%}
 
   <!-- Setup Open Graph image -->
-  <!-- Local override of jekyll-theme-chirpy 7.5's head.html — the only change
-       is this block: a writeup whose 1200x630 social card exists
+  <!-- Local override of jekyll-theme-chirpy 7.5's head.html — two changes:
+       the theme stylesheet's URL (see "Theme style" below), and this block: a
+       writeup whose 1200x630 social card exists
        (assets/img/og/<slug>.jpg, rendered by tools/make-social-cards.py in CI)
        gets that card as og:image / twitter:image instead of its round banner,
        which link previews crop badly. "Exists" = listed in the script's
@@ -112,8 +113,13 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
   {% endunless %}
 
-  <!-- Theme style -->
-  <link rel="stylesheet" href="{{ '/assets/css/:THEME.css' | replace: ':THEME', site.theme | relative_url }}">
+  <!-- Theme style. Local change: in development the URL carries the build
+       time. `jekyll serve --livereload` sends CSS without its no-cache headers
+       (jekyll 4.4's servlet returns before adding them to non-HTML files), so
+       the browser kept using a stylesheet from hours before — a printout came
+       out with print rules already fixed. A new URL per rebuild rules that out. -->
+  <link rel="stylesheet" href="{{ '/assets/css/:THEME.css' | replace: ':THEME', site.theme | relative_url }}
+    {%- unless jekyll.environment == 'production' -%}?v={{ site.time | date: '%s' }}{%- endunless -%}">
 
   <!-- Web Font -->
   <link rel="stylesheet" href="{{ site.data.origin[type].webfonts | relative_url }}">

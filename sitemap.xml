@@ -1,0 +1,55 @@
+---
+layout: null
+sitemap: false
+permalink: /sitemap.xml
+# Bilingual sitemap. It replaces jekyll-sitemap's (which steps aside when a
+# sitemap.xml exists): that one only knew the English build, so no /es/ page
+# was ever listed. Every page and writeup is emitted once per language, each
+# entry carrying its hreflang alternates (+ x-default → English), which is how
+# Google pairs translations. The whole site is mirrored under /es/, so the
+# Spanish URL is the English one with the /es prefix.
+#
+# Left out: password-protected writeups (their public page is a `noindex`
+# password prompt), hidden posts, the 404 and anything marked `sitemap: false`.
+---
+{%- if site.languages -%}
+  {%- assign langs = site.languages -%}
+{%- else -%}
+  {%- assign langs = 'en' | split: ',' -%}
+{%- endif -%}
+{%- assign def_lang = site.default_lang | default: 'en' -%}
+{%- assign base = site.url | append: site.baseurl -%}
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+{%- assign entries = '' | split: '' -%}
+{%- for doc in site.posts -%}
+  {%- unless doc.sitemap == false or doc.hidden or doc.protected -%}
+    {%- assign lastmod = doc.last_modified_at | default: doc.date | date_to_xmlschema -%}
+    {%- capture entry -%}{{ doc.url }}|{{ lastmod }}{%- endcapture -%}
+    {%- assign entries = entries | push: entry -%}
+  {%- endunless -%}
+{%- endfor -%}
+{%- for page in site.html_pages -%}
+  {%- unless page.sitemap == false or page.url contains '404' -%}
+    {%- capture entry -%}{{ page.url | replace: '/index.html', '/' }}|{{ page.last_modified_at | date_to_xmlschema }}{%- endcapture -%}
+    {%- assign entries = entries | push: entry -%}
+  {%- endunless -%}
+{%- endfor -%}
+{%- assign entries = entries | uniq -%}
+{%- for entry in entries -%}
+  {%- assign parts = entry | split: '|' -%}
+  {%- assign path = parts[0] -%}
+  {%- for lang in langs %}
+  <url>
+    <loc>{{ base }}{% if lang != def_lang %}/{{ lang }}{% endif %}{{ path }}</loc>
+    {%- if parts[1] and parts[1] != '' %}
+    <lastmod>{{ parts[1] }}</lastmod>
+    {%- endif -%}
+    {%- for alt in langs %}
+    <xhtml:link rel="alternate" hreflang="{{ alt }}" href="{{ base }}{% if alt != def_lang %}/{{ alt }}{% endif %}{{ path }}" />
+    {%- endfor %}
+    <xhtml:link rel="alternate" hreflang="x-default" href="{{ base }}{{ path }}" />
+  </url>
+  {%- endfor -%}
+{%- endfor %}
+</urlset>

@@ -178,6 +178,15 @@ script_includes:
             </span>
           {% endif %}
         </div>
+
+        <!-- Print the writeup as a clean report ("Save as PDF" in the print
+             dialog); the print styles live in the "Print" section of the SCSS. -->
+        <div class="wu-actions">
+          <button type="button" class="wu-action" id="wu-print">
+            <i class="fas fa-file-pdf" aria-hidden="true"></i>
+            {% if site.active_lang == 'es' %}Guardar como PDF{% else %}Save as PDF{% endif %}
+          </button>
+        </div>
       </div>
     </div>
 
@@ -265,6 +274,11 @@ script_includes:
     <!-- .post-tail-bottom -->
   </div>
   <!-- div.post-tail-wrapper -->
+
+  <!-- Only in print: who wrote it and where the live version is. -->
+  <p class="wu-print-footer">
+    {{ site.social.name }} · {{ page.title }} · {{ page.url | absolute_url }}
+  </p>
 </article>
 
 <script>
@@ -299,4 +313,46 @@ script_includes:
     window.addEventListener('resize', request);
     update();
   })();
+
+  /* "Save as PDF": screenshots further down are lazy-loaded and may not be
+     there yet — load them all first (4 s at most), then open the print
+     dialog. */
+  (function () {
+    const button = document.getElementById('wu-print');
+
+    if (!button) {
+      return;
+    }
+
+    button.addEventListener('click', async () => {
+      const images = Array.from(document.querySelectorAll('article.wu-post img'));
+
+      images.forEach((img) => {
+        img.loading = 'eager';
+      });
+
+      const loaded = images.map((img) =>
+        img.complete
+          ? null
+          : new Promise((resolve) => {
+              img.addEventListener('load', resolve, { once: true });
+              img.addEventListener('error', resolve, { once: true });
+            })
+      );
+
+      await Promise.race([Promise.all(loaded), new Promise((resolve) => setTimeout(resolve, 4000))]);
+      window.print();
+    });
+  })();
+
+  /* Before any print (the button or Ctrl+P): code blocks of up to 8 lines
+     are kept in one piece on paper; longer ones may split across pages (at
+     least 3 lines on each side), so no page is left half empty. */
+  window.addEventListener('beforeprint', () => {
+    document.querySelectorAll('article.wu-post div[class^="language-"]').forEach((block) => {
+      const code = block.querySelector('td.rouge-code pre') || block.querySelector('pre');
+      const lines = code ? code.textContent.replace(/\n$/, '').split('\n').length : 0;
+      block.toggleAttribute('data-print-keep', lines <= 8);
+    });
+  });
 </script>

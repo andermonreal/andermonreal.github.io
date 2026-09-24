@@ -107,7 +107,7 @@ layout: default
         </div>
       </div>
 
-      <div class="arc-grid" role="list">
+      <div class="arc-grid">
         <span class="arc-grid-corner" aria-hidden="true"></span>
         {% for m in (0..11) %}
           <span class="arc-grid-mon" aria-hidden="true">{{ t_mon[m] }}</span>
@@ -135,12 +135,12 @@ layout: default
             {% endif %}
 
             {% if y == now_year and m > now_month %}
-              <span class="arc-cell is-future" role="listitem" aria-hidden="true"></span>
+              <span class="arc-cell is-future" aria-hidden="true"></span>
             {% elsif n == 0 %}
-              <span class="arc-cell heat-0" role="listitem" title="{{ label }}" aria-label="{{ label }}"></span>
+              <span class="arc-cell heat-0" title="{{ label }}" aria-hidden="true"></span>
             {% else %}
               {% if n >= 7 %}{% assign lvl = 4 %}{% elsif n >= 4 %}{% assign lvl = 3 %}{% elsif n >= 2 %}{% assign lvl = 2 %}{% else %}{% assign lvl = 1 %}{% endif %}
-              <a class="arc-cell heat-{{ lvl }}" role="listitem" href="#m-{{ key }}" title="{{ label }}" aria-label="{{ label }}">
+              <a class="arc-cell heat-{{ lvl }}" href="#m-{{ key }}" title="{{ label }}" aria-label="{{ label }}">
                 <span class="arc-cell-n" aria-hidden="true">{{ n }}</span>
               </a>
             {% endif %}

@@ -1,22 +1,43 @@
 ---
 layout: compress
 swcache: true
-# Overrides the Chirpy theme's search index to EXCLUDE password-protected
-# posts (front-matter `protected: true`). Otherwise the full post text would
-# leak through the site search even though the page itself is encrypted.
+# Overrides the Chirpy theme's search index (used by the topbar search).
+#
+# Password-protected posts (front-matter `protected: true`) are listed by
+# their public facts only — title, categories, tags, difficulty, OS — with an
+# EMPTY `content`: their text must never leak through the search even though
+# the page itself is encrypted. (Those facts are public anyway: the Machines
+# page and the tag pages show them.)
+#
+# The extra fields feed the machine-card result template in
+# _includes/search-loader.html: `image` (the round art), `diff` / `diffslug`,
+# `os`, `platform` and `locked`.
 ---
 
-{% assign searchable = site.posts | where_exp: 'post', 'post.protected != true' %}
+{% assign searchable = site.posts | where_exp: 'post', 'post.hidden != true' %}
 [
   {% for post in searchable %}
+  {% include machine-meta.html post=post %}
+  {% include post-thumb.html post=post %}
   {
     "title": {{ post.title | jsonify }},
     "url": {{ post.url | relative_url | jsonify }},
     "categories": {{ post.categories | join: ', ' | jsonify }},
     "tags": {{ post.tags | join: ', ' | jsonify }},
     "date": {{ post.date | jsonify }},
+    "image": {{ thumb_src | jsonify }},
+    "diff": {{ mm_diff | jsonify }},
+    "diffslug": {{ mm_diff | downcase | default: 'none' | jsonify }},
+    "os": {{ mm_os | jsonify }},
+    "platform": {{ mm_platform | jsonify }},
+    {% if post.protected %}
+    "locked": "1",
+    "content": ""
+    {% else %}
+    "locked": "",
     {% capture content -%}{% include post-summary.html full_text=true %}{%- endcapture -%}
     "content": {{ content | jsonify }}
+    {% endif %}
   }{% unless forloop.last %},{% endunless %}
   {% endfor %}
 ]

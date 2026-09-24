@@ -462,6 +462,14 @@ body:has(#home-hero) {
     --diff: var(--diff-#{$level});
   }
 
+  .cve-machine.diff-#{$level} {
+    --diff: var(--diff-#{$level});
+  }
+
+  #search-results .search-card.diff-#{$level} {
+    --diff: var(--diff-#{$level});
+  }
+
   /* Writeup pages: the whole page (TOC panel included) takes the machine's
      difficulty colour; the related and older / newer cards take their own.
      Separate rules, so a browser without :has() still gets the cards. */
@@ -1373,15 +1381,8 @@ body:has(#home-hero) {
   color: #34b36f; /* Android green */
 }
 
-/* -------------------------------------------------------------------------
-   2. Per-tag / per-category listing pages (/tags/<name>/, /categories/<name>/).
-   Those archives are still generated and linked from every writeup — only the
-   /tags/ and /categories/ index tabs are gone.
-   ------------------------------------------------------------------------- */
-#page-category ul > li,
-#page-tag ul > li {
-  padding: 0.75rem 0;
-}
+/* (2. The per-tag / per-category pages now live in the "Tag and category
+   pages" section below.) */
 
 /* -------------------------------------------------------------------------
    3. Sidebar — Hack The Box icon.
@@ -1425,11 +1426,11 @@ body:has(#home-hero) {
 
   /* Text */
   --text-color: #3b352a;
-  --text-muted-color: #7c7363;
+  --text-muted-color: #675e4f; /* ≥ 4.5:1 on every beige surface (was #7c7363) */
   --heading-color: #2c2820;
   --label-color: #5d5648;
   --blockquote-border-color: #e3d8c1;
-  --blockquote-text-color: #7c7363;
+  --blockquote-text-color: #675e4f;
   --link-color: #0056b2; /* keep a clear, AA-accessible link blue on beige */
 
   /* Buttons / inputs */
@@ -1478,6 +1479,8 @@ body:has(#home-hero) {
   --code-color: #3a3a3a;
   --code-header-muted-color: #e3d8c2;
   --code-header-icon-color: #c4b9a1;
+  --code-header-text-color: #675e4f; /* the language label: 4.9:1 on the header */
+  --highlight-lineno-color: #6f6656; /* line numbers, ≥ 4.5:1 on the code bg */
 
   /* Difficulty + trend colours, stepped for the beige surface (validated as a
      set — see the $difficulty-levels note in section 1). */
@@ -1578,7 +1581,7 @@ html[data-mode="light"] {
     border-radius: 999px;
     background: transparent;
     box-shadow: none;
-    color: var(--sidebar-muted-color);
+    color: var(--text-color); /* the muted tone fell under 4.5:1 on the pill */
     text-decoration: none;
     transition:
       background-color 0.18s ease,
@@ -1591,7 +1594,7 @@ html[data-mode="light"] {
 
     /* The current language: a clearly filled accent segment. */
     &.active {
-      color: #fff;
+      color: var(--sidebar-bg); /* white on the dark theme's light blue was 2.1:1 */
       background: var(--link-color);
     }
   }
@@ -2571,6 +2574,39 @@ html {
   font-weight: 600;
 }
 
+/* A number that opens its page (CVEs → the CVE index). */
+.kpi-link {
+  color: inherit;
+  text-decoration: none;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+
+  .kpi-go {
+    margin-left: 0.25rem;
+    font-size: 0.75em;
+    transition: transform 0.18s ease;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--hero-accent) 50%, var(--main-border-color));
+    box-shadow: 0 14px 30px -18px rgb(0 0 0 / 55%);
+    color: inherit;
+    text-decoration: none;
+
+    .kpi-go {
+      transform: translateX(3px);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 3px;
+  }
+}
+
 /* --- Section scaffolding ------------------------------------------------- */
 .landing-section {
   margin-top: 3.5rem;
@@ -3247,6 +3283,50 @@ body:has(.wu-post) {
   }
 }
 
+/* "Save as PDF" — a quiet pill under the meta line. */
+.wu-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+.wu-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--main-border-color);
+  border-radius: 2rem;
+  background: var(--main-bg);
+  color: var(--text-color);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+
+  i {
+    color: var(--diff);
+  }
+
+  &:hover {
+    border-color: var(--link-color);
+    color: var(--link-color);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 2px;
+  }
+}
+
+/* Screen: hidden. Print: the signature line at the end of the report. */
+.wu-print-footer {
+  display: none;
+}
+
 /* The spec sheet: the writeup's own "Field | Details" table, as a strip of
    key / value tiles. Right + bottom hairlines on every tile, the overhang
    clipped, so any number of rows wraps cleanly. */
@@ -3265,6 +3345,7 @@ body:has(.wu-post) {
     width: 100%;
     min-width: 0;
     margin: 0;
+    overflow: visible; /* upstream's overflow-x made it a (keyboard-unreachable) scroller */
 
     thead {
       display: none; /* "Field / Details" — the tiles say it already */
@@ -3535,9 +3616,20 @@ div[class^='language-'] {
   }
 }
 
+/* Rouge tags what its lexer can't place (the ">" of a `PS C:\Users\x>`
+   prompt, a stray "$") as an error, and the theme paints those as red boxes,
+   which in a writeup read as typos. Show them as plain text. Same specificity
+   as the theme's rule (it comes before this file), hence the html selectors. */
+html[data-mode] .highlight .err,
+html:not([data-mode]) .highlight .err {
+  color: inherit;
+  background-color: transparent;
+}
+
 @mixin wu-dark-code {
   --highlight-bg-color: #0d1117;
   --code-header-bg: #161b22;
+  --code-header-text-color: #8b949e; /* the language label: 5.7:1 (upstream's was 3.2:1) */
   --language-border-color: rgb(255 255 255 / 9%);
 }
 
@@ -4308,6 +4400,657 @@ a.arc-cell {
 }
 
 /* -------------------------------------------------------------------------
+   Tag and category pages (/tags/<tag>/, /categories/<name>/). Markup:
+   _includes/taxonomy-page.html. The Archive's header and machine rows,
+   without the timeline's line.
+   ------------------------------------------------------------------------- */
+body:has(.tax) {
+  #panel-wrapper {
+    display: none;
+  }
+
+  main.col-xl-9,
+  #tail-wrapper {
+    width: 100%;
+  }
+}
+
+.tax {
+  container-type: inline-size;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding-top: 1rem;
+}
+
+.tax-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.7rem;
+  overflow-wrap: anywhere;
+}
+
+.tax-kind {
+  padding: 0.18rem 0.6rem;
+  border: 1px solid var(--main-border-color);
+  border-radius: 2rem;
+  background: var(--main-bg);
+  color: var(--text-muted-color);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tax-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.1rem;
+
+  .landing-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+}
+
+.tax-split {
+  justify-content: center;
+}
+
+.tax-split-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  max-width: 15rem;
+}
+
+.tax-list {
+  margin-top: 1.5rem;
+  padding-left: 0;
+
+  .arc-item::before {
+    display: none; /* no timeline line here */
+  }
+}
+
+/* -------------------------------------------------------------------------
+   CVE index (/cves/). Markup: _layouts/cves.html. The Archive's header with a
+   CVEs-by-year column chart (one hue, bars from a shared baseline, the count
+   on each cap), a filter box and one row per CVE: its NVD link and the
+   machine(s) where it was exploited.
+   ------------------------------------------------------------------------- */
+body:has(.cve) {
+  #panel-wrapper {
+    display: none;
+  }
+
+  main.col-xl-9,
+  #tail-wrapper {
+    width: 100%;
+  }
+}
+
+.cve {
+  container-type: inline-size;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding-top: 1rem;
+}
+
+.cve-head {
+  align-items: stretch;
+}
+
+.cve-kpis {
+  margin-top: 1.1rem;
+}
+
+.cve-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 17rem;
+  margin: 0;
+  padding: 0.9rem 1rem 0.75rem;
+  border: 1px solid var(--main-border-color);
+  border-radius: 12px;
+  background: var(--main-bg);
+}
+
+.cve-bars {
+  display: grid;
+  grid-auto-columns: minmax(1.5rem, 1fr);
+  grid-auto-flow: column;
+  gap: 0.4rem;
+  height: 8rem;
+}
+
+.cve-bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+}
+
+.cve-bar-track {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.2rem;
+  width: 100%;
+  min-height: 0;
+  padding-top: 1.2rem;
+}
+
+/* ≤ 24px wide, 4px rounded cap, square on the baseline. */
+.cve-bar {
+  width: min(100%, 1.5rem);
+  height: var(--h);
+  min-height: 2px;
+  border-radius: 4px 4px 0 0;
+  background: var(--link-color);
+  transform-origin: 50% 100%;
+  animation: cve-bar-up 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+.cve-bar-col.is-zero .cve-bar {
+  height: 2px;
+  background: var(--main-border-color);
+}
+
+.cve-bar-n {
+  color: var(--heading-color);
+  font-size: 0.72rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+
+  .is-zero & {
+    color: var(--text-muted-color);
+    font-weight: 600;
+  }
+}
+
+.cve-bar-year {
+  margin-top: 0.35rem;
+  padding-top: 0.3rem;
+  width: 100%;
+  border-top: 1px solid var(--main-border-color); /* the shared baseline */
+  color: var(--text-muted-color);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+@keyframes cve-bar-up {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+.cve-search {
+  margin: 1.25rem 0 0.5rem;
+}
+
+.cve-year {
+  margin-top: 1.75rem;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.cve-year-title {
+  margin: 0 0 0.7rem;
+  color: var(--heading-color);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.cve-rows {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cve-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem 1rem;
+  padding: 0.65rem 0.8rem 0.65rem 0.9rem;
+  border: 1px solid var(--main-border-color);
+  border-radius: 14px;
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.cve-id {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--link-color) 40%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--link-color) 11%, transparent);
+  color: var(--link-color);
+  font-family: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas,
+    monospace;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+
+  i {
+    font-size: 0.7em;
+    opacity: 0.75;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--link-color) 20%, transparent);
+    color: var(--link-color);
+    text-decoration: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 2px;
+  }
+}
+
+.cve-machines {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.cve-machine {
+  --diff: var(--main-border-color);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.7rem 0.25rem 0.3rem;
+  border: 1px solid var(--main-border-color);
+  border-radius: 2rem;
+  background: var(--main-bg);
+  color: var(--heading-color);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--diff) 60%, var(--main-border-color));
+    color: var(--heading-color);
+    text-decoration: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 2px;
+  }
+
+  .difficulty-badge {
+    font-size: 0.6rem;
+  }
+}
+
+.cve-thumb {
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  background: var(--card-bg) var(--thumb) center / cover no-repeat;
+  box-shadow:
+    0 0 0 2px var(--main-bg),
+    0 0 0 3.5px var(--diff);
+}
+
+.cve-lock {
+  color: var(--text-muted-color);
+  font-size: 0.72rem;
+}
+
+@container (max-width: 720px) {
+  .cve-chart {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cve-bar {
+    animation: none;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Topbar search results (_includes/search-loader.html): a grid of machine
+   cards. `#search-results` carries Bootstrap's d-flex (with !important) and
+   upstream styles `#search-results a` as a big heading link, hence the
+   id-level selectors here.
+   ------------------------------------------------------------------------- */
+#search-results {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 0.85rem;
+  align-content: start;
+
+  > p {
+    grid-column: 1 / -1;
+    text-align: center;
+  }
+}
+
+#search-results .search-card {
+  --diff: var(--main-border-color);
+
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  overflow: hidden;
+  padding: 1rem 1.05rem;
+  border: 1px solid var(--main-border-color);
+  border-radius: 14px;
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+  color: inherit;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  text-decoration: none;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--diff) 55%, var(--main-border-color));
+    box-shadow: 0 14px 30px -20px color-mix(in srgb, var(--diff) 80%, #000);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 3px;
+  }
+
+  i {
+    margin: 0;
+    color: inherit;
+    font-size: 1em;
+  }
+
+  .os-badge i {
+    font-size: 1.05em;
+  }
+
+  .search-platform i {
+    color: var(--text-muted-color);
+  }
+}
+
+.search-thumb {
+  flex: 0 0 auto;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background-color: var(--main-bg);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow:
+    0 0 0 2px var(--card-bg),
+    0 0 0 4px var(--diff);
+}
+
+.search-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.search-title {
+  color: var(--heading-color);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.search-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0.45rem;
+}
+
+.search-platform {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--text-muted-color);
+  font-size: 0.74rem;
+}
+
+.search-excerpt {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--text-muted-color);
+  font-size: 0.84rem;
+  line-height: 1.5;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* Breadcrumb links: underlined, so they don't rely on colour alone to stand
+   out from the current page's name next to them. */
+#breadcrumb a {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  text-underline-offset: 3px;
+}
+
+/* Code blocks and tables that scroll sideways get tabindex="0" (sidebar.html
+   script) so keyboard users can scroll them too; show where focus is. */
+.highlight[tabindex]:focus-visible,
+.table-wrapper[tabindex]:focus-visible {
+  outline: 2px solid var(--link-color);
+  outline-offset: 2px;
+}
+
+/* "Skip to content" — off-screen until a keyboard user tabs onto it. */
+.skip-link {
+  position: absolute; /* not fixed: Chrome repeats fixed elements on every printed page */
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 2000;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  background: #9fef00;
+  color: #12160b;
+  font-weight: 800;
+  text-decoration: none;
+  transform: translateY(-250%);
+  transition: transform 0.15s ease;
+
+  &:focus,
+  &:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 2px;
+    color: #12160b;
+    text-decoration: none;
+    transform: none;
+  }
+}
+
+/* The skip link focuses <main>; no ring around the whole column for that. */
+main:focus {
+  outline: none;
+}
+
+/* -------------------------------------------------------------------------
+   Sidebar (_includes/sidebar.html). The same finish as the pages: a faint
+   accent glow at the top, the avatar ringed in the accent with the landing's
+   "available" dot, the subtitle as a `//` kicker, nav counts, and the active
+   item marked with an accent bar.
+   ------------------------------------------------------------------------- */
+#sidebar {
+  background:
+    radial-gradient(130% 38% at 0% 0%, color-mix(in srgb, var(--hero-accent) 8%, transparent), transparent 70%),
+    var(--sidebar-bg);
+
+  .sb-avatar {
+    position: relative;
+    display: inline-block;
+  }
+
+  #avatar {
+    box-shadow:
+      0 0 0 2px var(--sidebar-bg),
+      0 0 0 4px color-mix(in srgb, var(--hero-accent) 60%, transparent),
+      0 12px 30px -12px rgb(0 0 0 / 55%);
+  }
+
+  /* The dot; its pulse runs on a pseudo-element so the ring stays put. */
+  .sb-status {
+    position: absolute;
+    right: 0.3rem;
+    bottom: 0.3rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: #3fb950;
+    box-shadow: 0 0 0 3px var(--sidebar-bg);
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      animation: landing-pulse 2s infinite;
+    }
+  }
+
+  .site-title {
+    font-size: 1.6rem;
+    letter-spacing: -0.01em;
+  }
+
+  .site-subtitle {
+    color: var(--hero-accent);
+    font-family: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas,
+      monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    word-spacing: 0;
+  }
+
+  ul li.nav-item {
+    opacity: 1; /* upstream's 0.9 dropped the labels under 4.5:1 */
+
+    a.nav-link {
+      position: relative;
+      transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
+
+      &:focus-visible {
+        outline: 2px solid var(--link-color);
+        outline-offset: -2px;
+      }
+    }
+
+    &.active a.nav-link {
+      background: color-mix(in srgb, var(--hero-accent) 11%, var(--sidebar-hover-bg));
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 22%;
+        bottom: 22%;
+        left: 0;
+        width: 3px;
+        border-radius: 3px;
+        background: var(--hero-accent);
+      }
+
+      i {
+        color: var(--hero-accent);
+        opacity: 1;
+      }
+    }
+  }
+
+  .nav-count {
+    margin-left: auto;
+    padding: 0 0.45rem;
+    border-radius: 2rem;
+    background: color-mix(in srgb, var(--sidebar-muted-color) 16%, transparent);
+    color: var(--text-color);
+    font-size: 0.68rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.6;
+  }
+
+  .nav-item.active .nav-count {
+    background: color-mix(in srgb, var(--hero-accent) 20%, transparent);
+    color: var(--sidebar-active-color);
+  }
+
+  /* Bottom buttons (social + mode toggle): the accent on hover, a visible
+     keyboard ring. */
+  .sidebar-bottom {
+    a,
+    #mode-toggle {
+      transition:
+        color 0.15s ease,
+        background-color 0.15s ease,
+        box-shadow 0.15s ease;
+
+      &:hover {
+        color: var(--hero-accent);
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--hero-accent) 55%, transparent);
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--link-color);
+        outline-offset: 2px;
+      }
+    }
+
+    .lang-switch .lang-opt {
+      box-shadow: none;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #sidebar .sb-status::after {
+    animation: none;
+  }
+}
+
+/* -------------------------------------------------------------------------
    404 (assets/404.html). A centred column: a big gradient "404", a terminal
    that `cd`s into the missing path, the way back, and "did you mean…?" cards
    (the landing's .recent-card). The page picks its language from the path.
@@ -4418,4 +5161,262 @@ body:has(.landing) #tail-wrapper {
 body:has(.landing) #tail-wrapper > footer {
   max-width: 1080px; /* match the .landing column */
   margin-inline: auto;
+}
+
+/* -------------------------------------------------------------------------
+   Print / "Save as PDF" (the button in a writeup's header, or Ctrl+P): the
+   writeup as a clean report — no sidebar, topbar, panel or tail; white
+   paper whatever the theme; the machine card as the cover block; code
+   wrapped instead of cut off; external links followed by their URL; and a
+   signature line at the end. Code blocks keep their theme (dark terminals
+   print as dark terminals), so their syntax colours stay legible.
+   ------------------------------------------------------------------------- */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm 12mm 16mm;
+  }
+
+  /* Paper colours for everything that isn't code. The three selectors match
+     the theme's own (with or without a data-mode) at equal specificity, and
+     this block comes last, so paper wins in every mode. */
+  html,
+  html[data-mode],
+  html:not([data-mode]) {
+    /* The page margins take the canvas colour, which the dark theme's
+       `color-scheme: dark` turns near-black: keep the paper white. */
+    color-scheme: light;
+    background: #fff !important;
+
+    --main-bg: #fff;
+    --card-bg: #fff;
+    --main-border-color: #d0d7de;
+    --text-color: #1f2328;
+    --text-muted-color: #57606a;
+    --heading-color: #0d1117;
+    --link-color: #0550ae;
+    --hero-accent: #3f6a0a;
+    --diff-easy: #09672e;
+    --diff-medium: #b68611;
+    --diff-hard: #a10128;
+    --diff-insane: #6c1bcf;
+  }
+
+  body {
+    background: #fff !important;
+    color: var(--text-color);
+  }
+
+  .skip-link,
+  #sidebar,
+  #topbar-wrapper,
+  #panel-wrapper,
+  #tail-wrapper,
+  #back-to-top,
+  #mask,
+  #notification,
+  #search-result-wrapper,
+  #toc-bar,
+  #toc-solo-trigger,
+  #toc-popup,
+  .wu-progress,
+  .wu-actions,
+  .post-tail-bottom,
+  .code-header button {
+    display: none !important;
+  }
+
+  #main-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+
+    > .container {
+      max-width: none !important;
+      min-height: 0;
+      padding: 0 !important;
+    }
+
+    .row {
+      display: block;
+      margin: 0;
+    }
+  }
+
+  main {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  /* Keep the colours that carry meaning (badges, rings, code, the art). */
+  .wu-hero,
+  .wu-art,
+  .wu-specs,
+  .difficulty-badge,
+  .os-badge,
+  .post-tag,
+  div[class^='language-'],
+  .table-wrapper,
+  blockquote,
+  .content h2::before,
+  .content h3::before {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* The cover block. */
+  .wu-hero {
+    margin-top: 0;
+    box-shadow: none;
+    break-inside: avoid;
+
+    &::before {
+      display: none; /* the blurred glow prints as a smudge */
+    }
+
+    h1 {
+      background: none !important;
+      color: var(--heading-color) !important;
+      -webkit-text-fill-color: currentColor;
+    }
+  }
+
+  .wu-post .content {
+    margin-top: 6mm;
+    font-size: 10.5pt;
+    line-height: 1.6;
+  }
+
+  .wu-post .content h2,
+  .wu-post .content h3,
+  .wu-post .content h4 {
+    break-after: avoid;
+  }
+
+  .wu-post .content h2 {
+    margin-top: 8mm;
+  }
+
+  .wu-post .content .anchor {
+    display: none;
+  }
+
+  img,
+  a.popup,
+  .table-wrapper tr,
+  blockquote {
+    break-inside: avoid;
+  }
+
+  /* Nothing scrolls on paper: clip instead (no scrollbars, rounded corners
+     kept — the cells wrap, so nothing is actually cut). `clip`, not `hidden`:
+     a hidden-overflow box is a scroll container, which can't be split across
+     pages, so a long table would jump whole to the next one. */
+  .table-wrapper,
+  .wu-specs {
+    overflow: clip !important;
+  }
+
+  /* Spec tiles are narrower on A4: values wrap rather than ellipsis. */
+  .wu-specs .table-wrapper > table {
+    tbody tr {
+      padding: 0.6rem 0.85rem;
+    }
+
+    td:last-child {
+      overflow: visible;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  .content img {
+    max-height: 115mm;
+    box-shadow: none !important;
+    object-fit: contain;
+  }
+
+  /* Code: wrap long lines (a printed page can't scroll), no line numbers. */
+  div[class^='language-'] {
+    box-shadow: none;
+    border: 1px solid var(--language-border-color);
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone; /* a block split across pages: both halves framed */
+  }
+
+  .highlight,
+  .highlight pre,
+  td.rouge-code pre,
+  pre {
+    overflow: visible !important;
+    white-space: pre-wrap !important;
+    word-break: break-word;
+  }
+
+  /* Beats upstream's `.highlight table td:first-child { display: inline-block }`
+     — with wrapped lines the numbers would no longer match the lines. */
+  .highlight td.rouge-gutter {
+    display: none !important;
+  }
+
+  /* Rouge lays a block out as a one-row table, and a table row can't be split
+     across pages: a block that didn't fit jumped whole to the next page and
+     left its header behind an empty frame. On paper it's plain blocks. */
+  .highlight > code,
+  .highlight .rouge-table,
+  .highlight .rouge-table tbody,
+  .highlight .rouge-table tr,
+  .highlight .rouge-table td.rouge-code {
+    display: block;
+    width: 100%;
+  }
+
+  .highlight pre {
+    orphans: 3;
+    widows: 3;
+  }
+
+  .code-header {
+    break-after: avoid; /* never a header alone at the foot of a page */
+  }
+
+  /* Short blocks stay in one piece; the rest may split (the attribute is set
+     on `beforeprint`, see the end of _layouts/post.html). */
+  div[class^='language-'][data-print-keep] {
+    break-inside: avoid;
+  }
+
+  /* Inline code on paper (its theme colours are made for the screen). Not the
+     <code> wrapping a highlighted block: that one keeps its terminal colours. */
+  .content :not(pre, .highlight) > code {
+    background: #eff1f3 !important;
+    color: #0a3069 !important;
+  }
+
+  /* External links: show where they go. */
+  .content a[href^='http']:not(.img-link)::after {
+    content: ' (' attr(href) ')';
+    color: var(--text-muted-color);
+    font-size: 0.8em;
+    word-break: break-all;
+  }
+
+  .wu-post .post-tail-wrapper {
+    margin-top: 8mm;
+    break-inside: avoid;
+  }
+
+  .wu-print-footer {
+    display: block;
+    margin: 6mm 0 0;
+    padding-top: 3mm;
+    border-top: 1px solid var(--main-border-color);
+    color: var(--text-muted-color);
+    font-size: 8.5pt;
+  }
 }

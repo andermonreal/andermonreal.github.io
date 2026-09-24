@@ -28,7 +28,7 @@ timezone: Europe/Madrid
 
 title: Monre's Writeups # the main title
 
-tagline: Security Engineer # it will display as the subtitle
+tagline: Offensive Security # site subtitle (the sidebar shows a localised version)
 
 description: >- # used by seo meta and the atom feed
   Writeups and technical notes on offensive security, CTFs and HackTheBox machines.
