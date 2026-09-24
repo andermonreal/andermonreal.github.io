@@ -10,6 +10,25 @@
 
 /* append your custom style below */
 
+/* Bootstrap's screen-reader-only helper, defined here on purpose. In
+   development Chirpy also loads the full Bootstrap from a CDN, but the
+   production build only ships a trimmed bundle with the Bootstrap classes the
+   theme itself uses — and this isn't one of them. Without this rule the
+   sparkline's data table (and other screen-reader text) showed up on screen
+   in production only. Rule of thumb: any Bootstrap class the site uses that
+   the theme doesn't must be defined here. */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
 /* Shrink and center the post banner (front-matter preview image).
    Scoped to the <article> a post layout renders as a direct child of <main>,
    so it never touches the home page's avatar thumbnails. */
@@ -3632,6 +3651,7 @@ html[data-mode="dark"] {
     }
 
     h4 {
+      margin: 0; /* not Bootstrap's .my-0 — the production bundle lacks it */
       color: var(--heading-color);
       font-size: 1.12rem;
       font-weight: 800;
