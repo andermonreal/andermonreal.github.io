@@ -1,0 +1,89 @@
+{% comment %}
+  Shared writeup statistics, computed once from the posts so every number on
+  the site stays in sync. Used by the Machines dashboard (_layouts/machines.html)
+  and the home landing (_layouts/home.html).
+
+  Assigns into the caller's scope:
+    ws_posts        visible writeups: pinned first, then newest first
+    ws_total        how many there are
+    ws_levels       the difficulty categories, easiest first
+    ws_os_levels    the OS tags a writeup can carry (its "system")
+    ws_platforms    every other category (HackTheBox, TryHackMe, …), sorted
+    ws_cve_count    distinct CVE ids across all writeup tags
+    ws_topic_count  distinct technique / tool tags (CVE ids and OS tags aside)
+    ws_year         the build year; ws_year_count = writeups dated in it
+    ws_spark        cumulative writeup count at the end of each of the last
+                    12 months, oldest first
+    ws_spark_keys   those months as YYYYMM numbers (same order)
+{% endcomment %}
+
+{% assign ws_pinned = site.posts | where_exp: 'item', 'item.pin == true and item.hidden != true' %}
+{% assign ws_normal = site.posts | where_exp: 'item', 'item.pin != true and item.hidden != true' %}
+{% assign ws_posts = ws_pinned | concat: ws_normal %}
+{% assign ws_total = ws_posts | size %}
+
+{% assign ws_levels = 'Easy,Medium,Hard,Insane' | split: ',' %}
+{% assign ws_os_levels = 'linux,windows,android' | split: ',' %}
+
+{% assign ws_platforms = '' | split: '' %}
+{% assign ws_cves = '' | split: '' %}
+{% assign ws_topics = '' | split: '' %}
+{% assign ws_year = site.time | date: '%Y' %}
+{% assign ws_year_count = 0 %}
+
+{% for ws_p in ws_posts %}
+  {% for ws_cat in ws_p.categories %}
+    {% unless ws_levels contains ws_cat or ws_platforms contains ws_cat %}
+      {% assign ws_platforms = ws_platforms | push: ws_cat %}
+    {% endunless %}
+  {% endfor %}
+
+  {% for ws_tag in ws_p.tags %}
+    {% assign ws_t = ws_tag | downcase %}
+    {% assign ws_head = ws_t | slice: 0, 4 %}
+    {% if ws_head == 'cve-' and ws_t.size > 4 %}
+      {% unless ws_cves contains ws_t %}
+        {% assign ws_cves = ws_cves | push: ws_t %}
+      {% endunless %}
+    {% elsif ws_t != 'cve' %}
+      {% unless ws_os_levels contains ws_t or ws_topics contains ws_t %}
+        {% assign ws_topics = ws_topics | push: ws_t %}
+      {% endunless %}
+    {% endif %}
+  {% endfor %}
+
+  {% assign ws_py = ws_p.date | date: '%Y' %}
+  {% if ws_py == ws_year %}
+    {% assign ws_year_count = ws_year_count | plus: 1 %}
+  {% endif %}
+{% endfor %}
+
+{% assign ws_platforms = ws_platforms | sort %}
+{% assign ws_cve_count = ws_cves | size %}
+{% assign ws_topic_count = ws_topics | size %}
+
+<!-- Growth over the last 12 months (for the dashboard sparkline). -->
+{% assign ws_now_y = site.time | date: '%Y' | plus: 0 %}
+{% assign ws_now_m = site.time | date: '%m' | plus: 0 %}
+{% assign ws_spark = '' | split: '' %}
+{% assign ws_spark_keys = '' | split: '' %}
+{% for ws_i in (0..11) %}
+  {% assign ws_m = ws_now_m | minus: 11 | plus: ws_i %}
+  {% assign ws_y = ws_now_y %}
+  {% if ws_m < 1 %}
+    {% assign ws_m = ws_m | plus: 12 %}
+    {% assign ws_y = ws_y | minus: 1 %}
+  {% endif %}
+  {% assign ws_key = ws_y | times: 100 | plus: ws_m %}
+
+  {% assign ws_cum = 0 %}
+  {% for ws_p in ws_posts %}
+    {% assign ws_pk = ws_p.date | date: '%Y%m' | plus: 0 %}
+    {% if ws_pk <= ws_key %}
+      {% assign ws_cum = ws_cum | plus: 1 %}
+    {% endif %}
+  {% endfor %}
+
+  {% assign ws_spark = ws_spark | push: ws_cum %}
+  {% assign ws_spark_keys = ws_spark_keys | push: ws_key %}
+{% endfor %}

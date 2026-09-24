@@ -1,101 +1,378 @@
 ---
 layout: default
-# Root landing page (`/` and, via polyglot, `/es/`). A hero presentation that
-# introduces Ander and leads into the writeups and projects.
+# Root landing page (`/` and, via polyglot, `/es/`) — the first thing a visitor
+# sees, built to pull them in and point them straight at the work:
+#
+#   1. Hero — who, what and the call to action, beside a terminal that "types"
+#      a short intro. The terminal is decorative (aria-hidden); everything it
+#      says is also on the page as real content.
+#   2. Numbers — writeups, CVEs, techniques and platforms, from the shared
+#      writeup-stats include (the same figures as the Machines dashboard).
+#   3. Latest writeups — the three newest machines.
+#   4. Featured project — the Didymus spotlight.
+#   5. About — a short bio plus topic chips that open their tag pages.
+#   6. Contact — a closing call to action.
 #
 # It is named `home` (and index.* set `layout: home`) so the sidebar's built-in
 # "Home" item keeps its active highlight — that check is `page.layout == 'home'`.
 # Copy is bilingual through `site.active_lang`; styling lives in the "Landing
 # page" section of assets/css/jekyll-theme-chirpy.scss.
 #
-# The avatar is a CSS background (not an <img>) on purpose: on the home layout
-# Chirpy's `refactor-content` would otherwise wrap it in a `.preview-img`.
+# Images are CSS backgrounds (never <img>) on purpose: on the home layout
+# Chirpy's `refactor-content` would otherwise wrap them in a `.preview-img`.
 ---
+
+{% include lang.html %}
+{% include writeup-stats.html %}
 
 {% assign is_es = false %}
 {% if site.active_lang == 'es' %}{% assign is_es = true %}{% endif %}
 
+{% assign recent = site.posts | where_exp: 'item', 'item.hidden != true' %}
+{% assign email = site.social.email %}
+{% assign linkedin = 'https://www.linkedin.com/in/ander-monreal-ayanz-485794291' %}
+{% assign htb_profile = 'https://app.hackthebox.com/users/1723818' %}
+
+<!-- About → topic chips. Each slug must be a tag some writeup uses (the chip
+     opens /tags/<slug>/); the display names are per language. -->
+{% assign topic_slugs = 'command-injection,deserialization,sqli,ssti,lfi,race-condition,container-escape,kubernetes,active-directory,privilege-escalation' | split: ',' %}
+{% if is_es %}
+  {% assign topic_names = 'Inyección de comandos,Deserialización,SQLi,SSTI,LFI,Condiciones de carrera,Escape de contenedores,Kubernetes,Active Directory,Escalada de privilegios' | split: ',' %}
+{% else %}
+  {% assign topic_names = 'Command injection,Deserialization,SQLi,SSTI,LFI,Race conditions,Container escape,Kubernetes,Active Directory,Privilege escalation' | split: ',' %}
+{% endif %}
+
 <div class="landing">
+  <!-- 1. Hero ------------------------------------------------------------- -->
   <section class="landing-hero">
-    <span
-      class="landing-avatar"
-      style="background-image: url('{{ site.avatar | relative_url }}');"
-      role="img"
-      aria-label="{{ site.social.name }}"
-    ></span>
+    <div class="landing-intro">
+      <!-- Only shown while the sidebar (which carries the avatar) is hidden. -->
+      <span
+        class="landing-avatar"
+        style="background-image: url('{{ site.avatar | relative_url }}');"
+        role="img"
+        aria-label="{{ site.social.name }}"
+      ></span>
 
-    <p class="landing-eyebrow">
-      {% if is_es %}Ingeniero Informático · Máster en Ciberseguridad{% else %}Computer Engineer · MSc in Cybersecurity{% endif %}
-    </p>
+      <p class="landing-status">
+        <span class="status-dot" aria-hidden="true"></span>
+        {% if is_es %}Disponible · pentesting y seguridad ofensiva{% else %}Open to opportunities · pentesting &amp; offensive security{% endif %}
+      </p>
 
-    <h1 class="landing-name">{{ site.social.name }}</h1>
+      <h1 class="landing-name">{{ site.social.name }}</h1>
 
-    <p class="landing-tagline">
-      {% if is_es %}
-        Centrado en <strong>seguridad ofensiva</strong>: comprometo máquinas y documento exactamente cómo.
-      {% else %}
-        Focused on <strong>offensive security</strong>: I break into machines and document exactly how.
-      {% endif %}
-    </p>
+      <p class="landing-eyebrow">
+        {% if is_es %}Ingeniero Informático · Máster en Ciberseguridad{% else %}Computer Engineer · MSc in Cybersecurity{% endif %}
+      </p>
 
-    <p class="landing-status">
-      <span class="status-dot" aria-hidden="true"></span>
-      {% if is_es %}Disponible para oportunidades en pentesting y seguridad ofensiva{% else %}Open to opportunities in penetration testing &amp; offensive security{% endif %}
-    </p>
+      <p class="landing-tagline">
+        {% if is_es %}
+          Centrado en <strong>seguridad ofensiva</strong>: comprometo máquinas y documento exactamente cómo.
+        {% else %}
+          Focused on <strong>offensive security</strong>: I break into machines and document exactly how.
+        {% endif %}
+      </p>
 
-    <div class="landing-cta">
-      <a class="landing-btn landing-btn--primary" href="{{ '/machines/' | relative_url }}">
-        <i class="fas fa-terminal" aria-hidden="true"></i>
-        {% if is_es %}Ver los writeups{% else %}Read the writeups{% endif %}
-      </a>
-      <a class="landing-btn landing-btn--ghost" href="{{ '/projects/' | relative_url }}">
-        <i class="fas fa-diagram-project" aria-hidden="true"></i>
-        {% if is_es %}Ver proyectos{% else %}See the projects{% endif %}
-      </a>
+      <div class="landing-cta">
+        <a class="landing-btn landing-btn--primary" href="{{ '/machines/' | relative_url }}">
+          <i class="fas fa-terminal" aria-hidden="true"></i>
+          {% if is_es %}Ver los writeups{% else %}Read the writeups{% endif %}
+        </a>
+        <a class="landing-btn landing-btn--ghost" href="{{ '/projects/' | relative_url }}">
+          <i class="fas fa-diagram-project" aria-hidden="true"></i>
+          {% if is_es %}Ver proyectos{% else %}See the projects{% endif %}
+        </a>
+      </div>
+
+      <div class="landing-contact">
+        <a href="mailto:{{ email }}" aria-label="Email"><i class="fas fa-envelope" aria-hidden="true"></i></a>
+        <a href="https://github.com/andermonreal" target="_blank" rel="noopener" aria-label="GitHub"><i class="fab fa-github" aria-hidden="true"></i></a>
+        <a href="{{ linkedin }}" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fab fa-linkedin" aria-hidden="true"></i></a>
+        <a href="{{ htb_profile }}" target="_blank" rel="noopener" aria-label="Hack The Box"><i class="htb-icon" aria-hidden="true"></i></a>
+      </div>
     </div>
 
-    <div class="landing-contact">
-      <a href="mailto:amonreaya@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
-      <a href="https://github.com/andermonreal" target="_blank" rel="noopener" aria-label="GitHub"><i class="fab fa-github"></i></a>
-      <a href="https://www.linkedin.com/in/ander-monreal-ayanz-485794291" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+    <!-- The terminal types itself out (script below); without JS or with
+         reduced motion it is simply shown in full. -->
+    <div class="terminal" aria-hidden="true">
+      <div class="terminal-bar">
+        <span class="terminal-dots"><i></i><i></i><i></i></span>
+        <span class="terminal-title">ander@kali: ~</span>
+      </div>
+      <div class="terminal-body">
+        <p class="t-line t-cmd"><span class="t-ps1"><b>ander@kali</b>:<em>~</em>$</span> <span class="t-typed">whoami</span></p>
+        <p class="t-line t-out">ander · {% if is_es %}seguridad ofensiva{% else %}offensive security{% endif %}</p>
+
+        <p class="t-line t-cmd"><span class="t-ps1"><b>ander@kali</b>:<em>~</em>$</span> <span class="t-typed">cat focus.txt</span></p>
+        <p class="t-line t-out">{% if is_es %}explotación web · escalada de privilegios · CVEs · AD · contenedores{% else %}web exploitation · privilege escalation · CVEs · AD · containers{% endif %}</p>
+
+        <p class="t-line t-cmd"><span class="t-ps1"><b>ander@kali</b>:<em>~</em>$</span> <span class="t-typed">ls -t writeups/ | head -3</span></p>
+        <p class="t-line t-out t-ls">
+          {%- for p in recent limit: 3 -%}
+            <span>{{ p.title | slugify }}/</span>
+          {%- endfor -%}
+        </p>
+
+        <p class="t-line t-cmd t-prompt-end"><span class="t-ps1"><b>ander@kali</b>:<em>~</em>$</span> <span class="t-cursor"></span></p>
+      </div>
+    </div>
+    <script>
+      /* Hide the lines before first paint, so the typing never flashes the
+         finished text. The typing itself runs from the script at the bottom. */
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.currentScript.previousElementSibling.classList.add('is-typing');
+      }
+    </script>
+  </section>
+
+  <!-- 2. Numbers ---------------------------------------------------------- -->
+  <section class="landing-stats" aria-label="{% if is_es %}En cifras{% else %}At a glance{% endif %}">
+    <div class="kpi">
+      <i class="fas fa-flag-checkered kpi-icon" aria-hidden="true"></i>
+      <span class="kpi-num" data-count="{{ ws_total }}">{{ ws_total }}</span>
+      <span class="kpi-label">{% if is_es %}Writeups publicados{% else %}Writeups published{% endif %}</span>
+    </div>
+    <div class="kpi">
+      <i class="fas fa-bug kpi-icon" aria-hidden="true"></i>
+      <span class="kpi-num" data-count="{{ ws_cve_count }}">{{ ws_cve_count }}</span>
+      <span class="kpi-label">{% if is_es %}CVEs explotados{% else %}CVEs exploited{% endif %}</span>
+    </div>
+    <div class="kpi">
+      <i class="fas fa-screwdriver-wrench kpi-icon" aria-hidden="true"></i>
+      <span class="kpi-num" data-count="{{ ws_topic_count }}">{{ ws_topic_count }}</span>
+      <span class="kpi-label">{% if is_es %}Técnicas y herramientas{% else %}Techniques &amp; tools{% endif %}</span>
+    </div>
+    <div class="kpi">
+      <i class="fas fa-layer-group kpi-icon" aria-hidden="true"></i>
+      <span class="kpi-num" data-count="{{ ws_platforms.size }}">{{ ws_platforms.size }}</span>
+      <span class="kpi-label">{% if is_es %}Plataformas{% else %}Platforms{% endif %}</span>
     </div>
   </section>
 
-  <section class="landing-spotlight" aria-label="{% if is_es %}Proyecto destacado{% else %}Featured project{% endif %}">
+  <!-- 3. Latest writeups ------------------------------------------------- -->
+  <section class="landing-section" aria-labelledby="landing-recent-title">
+    <div class="landing-section-head">
+      <div>
+        <p class="landing-kicker">// {% if is_es %}trabajo reciente{% else %}recent work{% endif %}</p>
+        <h2 class="landing-h2" id="landing-recent-title">{% if is_es %}Últimos writeups{% else %}Latest writeups{% endif %}</h2>
+      </div>
+      <a class="landing-more" href="{{ '/machines/' | relative_url }}">
+        {% if is_es %}Ver los {{ ws_total }}{% else %}All {{ ws_total }} writeups{% endif %}
+        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+      </a>
+    </div>
+
+    <div class="landing-recent">
+      {% for p in recent limit: 3 %}
+        <!-- Difficulty, OS and platform, read the same way as on Machines. -->
+        {% assign p_difficulty = '' %}
+        {% assign p_platform = '' %}
+        {% for category in p.categories %}
+          {% if ws_levels contains category %}
+            {% assign p_difficulty = category %}
+          {% elsif p_platform == '' %}
+            {% assign p_platform = category %}
+          {% endif %}
+        {% endfor %}
+        {% assign p_os = '' %}
+        {% for os_name in ws_os_levels %}
+          {% if p.tags contains os_name %}{% assign p_os = os_name %}{% endif %}
+        {% endfor %}
+        {% include post-thumb.html post=p %}
+
+        <a class="recent-card{% if p_difficulty != '' %} diff-{{ p_difficulty | downcase }}{% endif %}" href="{{ p.url | relative_url }}">
+          <span class="recent-top">
+            {% if thumb_src != '' %}
+              <span class="recent-thumb" style="background-image: url('{{ thumb_src }}');" aria-hidden="true"></span>
+            {% endif %}
+            <span class="recent-head">
+              <span class="recent-title">{{ p.title }}</span>
+              <span class="recent-badges">
+                {% if p_difficulty != '' %}
+                  <span class="difficulty-badge difficulty-{{ p_difficulty | downcase }}">{{ p_difficulty }}</span>
+                {% endif %}
+                {% if p_os != '' %}
+                  <span class="os-badge"><i class="fab fa-{{ p_os }} brand-{{ p_os }}" aria-hidden="true"></i> {{ p_os | capitalize }}</span>
+                {% endif %}
+                {% if p.protected %}
+                  <span class="os-badge"><i class="fas fa-lock" aria-hidden="true"></i><span class="visually-hidden">{% if is_es %}Protegido{% else %}Protected{% endif %}</span></span>
+                {% endif %}
+              </span>
+            </span>
+          </span>
+          <span class="recent-meta">
+            <span>{{ p_platform }} · {% include datetime.html date=p.date lang=lang %}</span>
+            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+          </span>
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- 4. Featured project ------------------------------------------------ -->
+  <section class="landing-section landing-spotlight" aria-labelledby="landing-project-title">
+    <div class="landing-section-head">
+      <div>
+        <p class="landing-kicker">// {% if is_es %}en qué estoy trabajando{% else %}what I'm building{% endif %}</p>
+        <h2 class="landing-h2" id="landing-project-title">{% if is_es %}Proyecto destacado{% else %}Featured project{% endif %}</h2>
+      </div>
+      <a class="landing-more" href="{{ '/projects/' | relative_url }}">
+        {% if is_es %}Todos los proyectos{% else %}All projects{% endif %}
+        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+      </a>
+    </div>
     {% include spotlight-card.html %}
   </section>
 
-  <section class="landing-about">
-    {% if is_es %}
-      <p>Hola, soy <strong>Ander</strong> — profesional de la ciberseguridad centrado en la seguridad ofensiva. Soy Ingeniero Informático y tengo un Máster en Ciberseguridad, y dedico mi tiempo a convertir esa base en habilidad práctica frente a un teclado.</p>
-      <p>Esta web es donde documento ese trabajo: <strong>writeups</strong> detallados de las máquinas de HackTheBox y retos CTF que resuelvo —del reconocimiento al root, con el razonamiento detrás de cada paso— y los <strong>proyectos</strong> y herramientas que construyo por el camino.</p>
-    {% else %}
-      <p>Hi, I'm <strong>Ander</strong> — a cybersecurity professional focused on offensive security. I hold a degree in Computer Engineering and a Master's in Cybersecurity, and I spend my time turning that foundation into hands-on skill in front of a keyboard.</p>
-      <p>This site is where I document that work: detailed <strong>writeups</strong> of the HackTheBox machines and CTF challenges I solve — full recon-to-root, with the reasoning behind every step — and the <strong>projects</strong> and tools I build along the way.</p>
-    {% endif %}
+  <!-- 5. About ----------------------------------------------------------- -->
+  <section class="landing-section" aria-labelledby="landing-about-title">
+    <div class="landing-section-head">
+      <div>
+        <p class="landing-kicker">// whoami</p>
+        <h2 class="landing-h2" id="landing-about-title">{% if is_es %}Sobre mí{% else %}About me{% endif %}</h2>
+      </div>
+    </div>
+
+    <div class="landing-about">
+      <div class="landing-about-text">
+        {% if is_es %}
+          <p>Hola, soy <strong>Ander</strong> — profesional de la ciberseguridad centrado en la seguridad ofensiva. Soy Ingeniero Informático y tengo un Máster en Ciberseguridad, y dedico mi tiempo a convertir esa base en habilidad práctica frente a un teclado.</p>
+          <p>Esta web es donde documento ese trabajo: <strong>writeups</strong> detallados de las máquinas de HackTheBox y retos CTF que resuelvo —del reconocimiento al root, con el razonamiento detrás de cada paso— y los <strong>proyectos</strong> y herramientas que construyo por el camino.</p>
+        {% else %}
+          <p>Hi, I'm <strong>Ander</strong> — a cybersecurity professional focused on offensive security. I hold a degree in Computer Engineering and a Master's in Cybersecurity, and I spend my time turning that foundation into hands-on skill in front of a keyboard.</p>
+          <p>This site is where I document that work: detailed <strong>writeups</strong> of the HackTheBox machines and CTF challenges I solve — full recon-to-root, with the reasoning behind every step — and the <strong>projects</strong> and tools I build along the way.</p>
+        {% endif %}
+      </div>
+
+      <div class="landing-topics">
+        <p class="landing-topics-title">{% if is_es %}Temas sobre los que escribo{% else %}Topics I write about{% endif %}</p>
+        <ul class="topic-list">
+          {% for slug in topic_slugs %}
+            <li><a class="topic-chip" href="{{ '/tags/' | append: slug | append: '/' | relative_url }}">{{ topic_names[forloop.index0] }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
   </section>
 
-  <section class="landing-cards" aria-label="{% if is_es %}Explora{% else %}Explore{% endif %}">
-    <a class="landing-card" href="{{ '/machines/' | relative_url }}">
-      <span class="landing-card-icon"><i class="fas fa-server" aria-hidden="true"></i></span>
-      <span class="landing-card-text">
-        <span class="landing-card-title">{% if is_es %}Writeups{% else %}Writeups{% endif %}</span>
-        <span class="landing-card-desc">{% if is_es %}Del reconocimiento al root, explicado. Máquinas de HackTheBox y CTFs, paso a paso.{% else %}Recon to root, explained. HackTheBox machines &amp; CTFs, step by step.{% endif %}</span>
-      </span>
-      <i class="fas fa-arrow-right landing-card-arrow" aria-hidden="true"></i>
-    </a>
-
-    <a class="landing-card" href="{{ '/projects/' | relative_url }}">
-      <span class="landing-card-icon"><i class="fas fa-diagram-project" aria-hidden="true"></i></span>
-      <span class="landing-card-text">
-        <span class="landing-card-title">{% if is_es %}Proyectos{% else %}Projects{% endif %}</span>
-        <span class="landing-card-desc">{% if is_es %}Herramientas, retos y trabajos que he construido.{% else %}Tools, challenges and course work I've built.{% endif %}</span>
-      </span>
-      <i class="fas fa-arrow-right landing-card-arrow" aria-hidden="true"></i>
-    </a>
+  <!-- 6. Contact --------------------------------------------------------- -->
+  <section class="landing-hire" aria-labelledby="landing-hire-title">
+    <div class="landing-hire-text">
+      <h2 class="landing-h2" id="landing-hire-title">{% if is_es %}¿Hablamos?{% else %}Let's talk{% endif %}</h2>
+      <p>
+        {% if is_es %}
+          Busco mi próximo puesto en pentesting y seguridad ofensiva. Si tienes un equipo, un proyecto o simplemente una pregunta, escríbeme.
+        {% else %}
+          I'm looking for my next role in penetration testing and offensive security. Whether you have a team, a project or just a question, drop me a line.
+        {% endif %}
+      </p>
+    </div>
+    <div class="landing-hire-actions">
+      <a class="landing-btn landing-btn--primary" href="mailto:{{ email }}">
+        <i class="fas fa-envelope" aria-hidden="true"></i>
+        {% if is_es %}Escríbeme{% else %}Email me{% endif %}
+      </a>
+      <a class="landing-btn landing-btn--ghost" href="{{ linkedin }}" target="_blank" rel="noopener">
+        <i class="fab fa-linkedin" aria-hidden="true"></i>
+        LinkedIn
+      </a>
+    </div>
   </section>
 
   <p class="landing-disclaimer">
     {% if is_es %}Todo el contenido tiene fines educativos y se comparte solo tras retirarse o resolverse públicamente la máquina o el reto, en entornos de laboratorio autorizados.{% else %}All content is for educational purposes and shared only after the related machine or challenge is retired or publicly solved, in authorized lab environments.{% endif %}
   </p>
 </div>
+
+<script>
+  /* Landing motion, all of it skipped under prefers-reduced-motion:
+       * the terminal types its commands, then prints each output line;
+       * the numbers count up the first time they scroll into view.
+     The final text is in the HTML from the start, so nothing depends on it. */
+  (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    const term = document.querySelector('.terminal.is-typing');
+
+    if (term) {
+      const lines = Array.from(term.querySelectorAll('.t-line'));
+      let i = 0;
+
+      const next = () => {
+        if (i >= lines.length) {
+          term.classList.remove('is-typing');
+          return;
+        }
+
+        const line = lines[i++];
+        const typed = line.querySelector('.t-typed');
+        line.classList.add('is-shown');
+
+        if (!typed) {
+          setTimeout(next, line.classList.contains('t-out') ? 120 : 0);
+          return;
+        }
+
+        const text = typed.textContent;
+        let k = 0;
+        typed.textContent = '';
+        line.classList.add('is-current');
+
+        const tick = () => {
+          typed.textContent = text.slice(0, ++k);
+
+          if (k < text.length) {
+            setTimeout(tick, 35 + Math.random() * 45);
+          } else {
+            line.classList.remove('is-current');
+            setTimeout(next, 280);
+          }
+        };
+
+        setTimeout(tick, 420);
+      };
+
+      setTimeout(next, 350);
+    }
+
+    const counters = document.querySelectorAll('.landing-stats [data-count]');
+
+    /* The real figure stays put until the count actually starts, so a number
+       can never get stuck at 0. */
+    const countUp = (el) => {
+      const target = Number(el.dataset.count);
+      const start = performance.now();
+
+      el.style.minWidth = `${el.offsetWidth}px`; /* no jitter as digits change */
+
+      const step = (now) => {
+        const t = Math.min(1, (now - start) / 1100);
+        el.textContent = Math.round(target * (1 - Math.pow(1 - t, 3)));
+
+        if (t < 1) {
+          requestAnimationFrame(step);
+        }
+      };
+
+      requestAnimationFrame(step);
+    };
+
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              io.unobserve(entry.target);
+              countUp(entry.target);
+            }
+          });
+        },
+        { threshold: 0.6 }
+      );
+
+      counters.forEach((el) => io.observe(el));
+    }
+  })();
+</script>

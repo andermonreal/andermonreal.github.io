@@ -1,0 +1,24 @@
+{% comment %}
+  Resolves a writeup's banner (front-matter `image`, honouring `media_subpath`)
+  into `thumb_src`, which is empty when the post has no image.
+  Usage: {% include post-thumb.html post=post %}
+
+  Callers render it as a CSS background, never an <img>: Chirpy's
+  refactor-content wraps every <img> in a lightbox <a>, which would nest an
+  anchor inside the card links these thumbnails live in.
+{% endcomment %}
+{% assign thumb_src = '' %}
+{% if include.post.image %}
+  {% assign thumb_src = include.post.image.path | default: include.post.image %}
+
+  {% if include.post.media_subpath %}
+    {% unless thumb_src contains '://' %}
+      {% assign thumb_src = include.post.media_subpath
+        | append: '/'
+        | append: thumb_src
+        | replace: '///', '/'
+        | replace: '//', '/'
+      %}
+    {% endunless %}
+  {% endif %}
+{% endif %}

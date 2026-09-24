@@ -5,7 +5,10 @@ layout: default
 # root `/` is now the About landing.
 #
 # Notes:
-#   * A hero with a prominent search box + difficulty and OS filter chips.
+#   * An overview dashboard on top (total + 12-month growth sparkline, then
+#     difficulty / system / platform bars). Its rows double as filter
+#     shortcuts and mirror the active filter.
+#   * A hero with a prominent search box + platform, difficulty and OS chips.
 #   * NO pagination — every writeup is rendered, so the client-side search and
 #     filter reach ANY machine instead of just the current page. That is why
 #     `paginate` is gone from _config.yml; re-adding it would silently cut the
@@ -22,34 +25,19 @@ layout: default
 
 {% include lang.html %}
 
-<!-- Pinned writeups first, then the rest (site.posts is already newest-first
-     and, under jekyll-polyglot, limited to the active language). -->
-{% assign all_pinned = site.posts | where_exp: 'item', 'item.pin == true and item.hidden != true' %}
-{% assign all_normal = site.posts | where_exp: 'item', 'item.pin != true and item.hidden != true' %}
-{% assign posts = all_pinned | concat: all_normal %}
-{% assign total = posts | size %}
-
-<!-- Difficulty levels recognised for the colour-coded badge and the filter -->
-{% assign difficulty_levels = 'Easy,Medium,Hard,Insane' | split: ',' %}
-
-<!-- OS levels for the platform filter. A machine's OS is read from its tags
-     (a post tagged `linux` or `windows`); tag your writeups accordingly. -->
-{% assign os_levels = 'linux,windows' | split: ',' %}
-
-<!-- Platforms are the non-difficulty categories (HackTheBox, Custom, …). The
-     list is built from the posts, so a new platform (e.g. TryHackMe) shows up
-     automatically the first time a writeup uses it as a category. -->
-{% assign platforms = '' | split: '' %}
-{% for p_item in posts %}
-  {% for category in p_item.categories %}
-    {% unless difficulty_levels contains category %}
-      {% unless platforms contains category %}
-        {% assign platforms = platforms | push: category %}
-      {% endunless %}
-    {% endunless %}
-  {% endfor %}
-{% endfor %}
-{% assign platforms = platforms | sort %}
+<!-- Everything counted — posts, difficulties, systems, platforms, CVEs, growth —
+     comes from the shared include, so the landing shows the same numbers.
+       * posts: pinned first, then newest first (under jekyll-polyglot,
+         limited to the active language).
+       * A machine's OS is read from its tags (`linux`, `windows`, `android`).
+       * Platforms are the non-difficulty categories, so a new one (e.g.
+         TryHackMe) shows up the first time a writeup uses it. -->
+{% include writeup-stats.html %}
+{% assign posts = ws_posts %}
+{% assign total = ws_total %}
+{% assign difficulty_levels = ws_levels %}
+{% assign os_levels = ws_os_levels %}
+{% assign platforms = ws_platforms %}
 
 <!-- Language-aware UI strings. Uses jekyll-polyglot's `site.active_lang` when
      present; falls back to English otherwise. (Difficulty names stay in
@@ -62,6 +50,17 @@ layout: default
 {% assign t_difficulty = 'Difficulty' %}
 {% assign t_os = 'System' %}
 {% assign t_platform = 'Platform' %}
+{% assign t_overview = 'Overview' %}
+{% assign t_writeups = 'writeups' %}
+{% assign t_published = 'Writeups published' %}
+{% assign t_this_year = ':n in :year' %}
+{% assign t_growth = 'Total writeups over the last 12 months' %}
+{% assign t_month = 'Month' %}
+{% assign t_months = 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec' | split: ',' %}
+{% assign t_spark_tip = ':n writeups' %}
+{% assign t_cves = 'CVEs exploited' %}
+{% assign t_latest = 'Latest' %}
+{% assign t_share = ':pct% of writeups · click to filter' %}
 {% assign t_all = 'All' %}
 {% assign t_count = 'Showing :shown of :total' %}
 {% assign t_empty = 'No writeup matches your search.' %}
@@ -77,12 +76,236 @@ layout: default
   {% assign t_difficulty = 'Dificultad' %}
   {% assign t_os = 'Sistema' %}
   {% assign t_platform = 'Plataforma' %}
+  {% assign t_overview = 'Resumen' %}
+  {% assign t_writeups = 'writeups' %}
+  {% assign t_published = 'Writeups publicados' %}
+  {% assign t_this_year = ':n en :year' %}
+  {% assign t_growth = 'Writeups acumulados en los últimos 12 meses' %}
+  {% assign t_month = 'Mes' %}
+  {% assign t_months = 'ene,feb,mar,abr,may,jun,jul,ago,sep,oct,nov,dic' | split: ',' %}
+  {% assign t_spark_tip = ':n writeups' %}
+  {% assign t_cves = 'CVEs explotados' %}
+  {% assign t_latest = 'Último' %}
+  {% assign t_share = ':pct % de los writeups · clic para filtrar' %}
   {% assign t_all = 'Todas' %}
   {% assign t_count = 'Mostrando :shown de :total' %}
   {% assign t_empty = 'Ningún writeup coincide con tu búsqueda.' %}
   {% assign t_reset = 'Quitar filtros' %}
   {% assign protected_label = 'Protegido' %}
   {% assign protected_note = 'Protegido con contraseña — ábrelo e introduce la contraseña para leer el writeup completo.' %}
+{% endif %}
+
+<!-- Overview dashboard: a grid of tiles, all computed from the posts so it
+     stays in sync. The hero tile shows the total with its 12-month growth; the
+     other three split it by difficulty, system and platform. Every breakdown
+     row doubles as a shortcut into the matching finder filter below (see the
+     script at the bottom). -->
+{% if total > 0 %}
+  {% assign latest_post = site.posts | where_exp: 'item', 'item.hidden != true' | first %}
+  {% include post-thumb.html post=latest_post %}
+  {% assign latest_thumb = thumb_src %}
+
+  <!-- Sparkline geometry, in a 100×40 viewBox stretched to the tile: x steps
+       evenly across the 12 months, y is the running total (2 units of air
+       top and bottom). The series is cumulative, so its max is its last point. -->
+  {% assign spark_max = ws_spark | last %}
+  {% assign spark_steps = ws_spark.size | minus: 1 %}
+  {% capture spark_line -%}
+    {%- for c in ws_spark -%}
+      {%- assign sx = forloop.index0 | times: 100.0 | divided_by: spark_steps | round: 2 -%}
+      {%- assign sy = c | times: 36.0 | divided_by: spark_max -%}
+      {%- assign sy = 38 | minus: sy | round: 2 -%}
+      {%- if forloop.first %}M{% else %} L{% endif %}{{ sx }},{{ sy }}
+      {%- if forloop.last %}{% assign spark_end_y = sy | times: 2.5 %}{% endif -%}
+    {%- endfor -%}
+  {%- endcapture %}
+  {% capture spark_labels -%}
+    {%- for k in ws_spark_keys -%}
+      {%- assign k_m = k | modulo: 100 | minus: 1 -%}
+      {%- assign k_y = k | divided_by: 100 -%}
+      {{ t_months[k_m] }} {{ k_y }}{% unless forloop.last %}|{% endunless %}
+    {%- endfor -%}
+  {%- endcapture %}
+  {% assign spark_label_list = spark_labels | split: '|' %}
+
+  <section class="machine-stats" aria-label="{{ t_overview }}">
+    <div class="stat-grid">
+      <div class="stat-card stat-hero">
+        <div class="stat-card-head">
+          <p class="stat-label">{{ t_published }}</p>
+          {% if ws_year_count > 0 %}
+            <span class="stat-delta">
+              <i class="fas fa-arrow-trend-up" aria-hidden="true"></i>
+              +{{ t_this_year | replace: ':n', ws_year_count | replace: ':year', ws_year }}
+            </span>
+          {% endif %}
+        </div>
+
+        <div class="stat-hero-main">
+          <span class="stat-hero-num" data-count="{{ total }}">{{ total }}</span>
+
+          <figure
+            class="stat-spark"
+            tabindex="0"
+            aria-label="{{ t_growth }}"
+            data-points="{{ ws_spark | join: ',' }}"
+            data-labels="{{ spark_labels }}"
+            data-tip="{{ t_spark_tip }}"
+          >
+            <svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+              <defs>
+                <linearGradient id="spark-fill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="currentColor" stop-opacity="0.3"></stop>
+                  <stop offset="1" stop-color="currentColor" stop-opacity="0"></stop>
+                </linearGradient>
+              </defs>
+              <path class="spark-area" d="{{ spark_line | replace_first: 'M', 'M0,40 L' }} L100,40 Z"></path>
+              <path class="spark-line" d="{{ spark_line }}"></path>
+            </svg>
+            <span class="spark-end" style="top: {{ spark_end_y }}%;" aria-hidden="true"></span>
+            <span class="spark-cursor" aria-hidden="true" hidden>
+              <span class="spark-cursor-dot"></span>
+              <span class="spark-tip"></span>
+            </span>
+
+            <!-- The same series as a table, for screen readers. -->
+            <table class="visually-hidden">
+              <caption>{{ t_growth }}</caption>
+              <tr><th scope="col">{{ t_month }}</th><th scope="col">{{ t_writeups }}</th></tr>
+              {% for c in ws_spark %}
+                <tr><th scope="row">{{ spark_label_list[forloop.index0] }}</th><td>{{ c }}</td></tr>
+              {% endfor %}
+            </table>
+          </figure>
+        </div>
+
+        <div class="stat-hero-foot">
+          <span class="stat-foot-item">
+            <i class="fas fa-bug" aria-hidden="true"></i><b>{{ ws_cve_count }}</b> {{ t_cves }}
+          </span>
+          {% if latest_post %}
+            <a class="stat-foot-item stat-latest" href="{{ latest_post.url | relative_url }}">
+              {% if latest_thumb != '' %}
+                <span class="stat-latest-thumb" style="background-image: url('{{ latest_thumb }}');" aria-hidden="true"></span>
+              {% endif %}
+              {{ t_latest }}: <b>{{ latest_post.title }}</b>
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="stat-card stat-card--difficulty">
+        <div class="stat-card-head">
+          <p class="stat-label" id="stat-label-difficulty">{{ t_difficulty }}</p>
+          <i class="fas fa-filter stat-hint" aria-hidden="true"></i>
+        </div>
+        <div class="stat-rows" role="group" aria-labelledby="stat-label-difficulty">
+          {% for level in difficulty_levels %}
+            {% assign lv_c = posts | where_exp: 'p', 'p.categories contains level' | size %}
+            {% if lv_c > 0 %}
+              {% assign lv_share = lv_c | times: 100.0 | divided_by: total %}
+              {% assign lv_pct = lv_share | round %}
+              <button
+                type="button"
+                class="stat-row diff-{{ level | downcase }}"
+                data-difficulty="{{ level | downcase }}"
+                data-tip="{{ t_share | replace: ':pct', lv_pct }}"
+                aria-pressed="false"
+                style="--share: {{ lv_share | round: 2 }}%; --i: {{ forloop.index0 }};"
+              >
+                <span class="stat-row-name"><i class="stat-key" aria-hidden="true"></i>{{ level }}</span>
+                <span class="stat-track" aria-hidden="true"><span class="stat-fill"></span></span>
+                <span class="stat-row-val">{{ lv_c }}</span>
+              </button>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="stat-card stat-card--os">
+        <div class="stat-card-head">
+          <p class="stat-label" id="stat-label-os">{{ t_os }}</p>
+          <i class="fas fa-filter stat-hint" aria-hidden="true"></i>
+        </div>
+        <!-- Nominal categories: biggest first. Each entry is keyed
+             "(10000 - count)|name", so a plain ascending sort orders by count
+             (descending) and breaks ties alphabetically. -->
+        {% assign os_items = '' | split: '' %}
+        {% for os in os_levels %}
+          {% assign os_c = posts | where_exp: 'p', 'p.tags contains os' | size %}
+          {% if os_c > 0 %}
+            {% assign os_key = 10000 | minus: os_c | append: '|' | append: os %}
+            {% assign os_items = os_items | push: os_key %}
+          {% endif %}
+        {% endfor %}
+        {% assign os_items = os_items | sort %}
+
+        <div class="stat-rows" role="group" aria-labelledby="stat-label-os">
+          {% for os_item in os_items %}
+            {% assign os_parts = os_item | split: '|' %}
+            {% assign os = os_parts[1] %}
+            {% assign os_c = 10000 | minus: os_parts[0] %}
+            {% if os_c > 0 %}
+              {% assign os_share = os_c | times: 100.0 | divided_by: total %}
+              {% assign os_pct = os_share | round %}
+              <button
+                type="button"
+                class="stat-row"
+                data-os="{{ os }}"
+                data-tip="{{ t_share | replace: ':pct', os_pct }}"
+                aria-pressed="false"
+                style="--share: {{ os_share | round: 2 }}%; --i: {{ forloop.index0 }};"
+              >
+                <span class="stat-row-name"><i class="fab fa-{{ os }} brand-{{ os }}" aria-hidden="true"></i>{{ os | capitalize }}</span>
+                <span class="stat-track" aria-hidden="true"><span class="stat-fill"></span></span>
+                <span class="stat-row-val">{{ os_c }}</span>
+              </button>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="stat-card stat-card--platform">
+        <div class="stat-card-head">
+          <p class="stat-label" id="stat-label-platform">{{ t_platform }}</p>
+          <i class="fas fa-filter stat-hint" aria-hidden="true"></i>
+        </div>
+        {% assign pf_items = '' | split: '' %}
+        {% for platform in platforms %}
+          {% assign pf_c = posts | where_exp: 'p', 'p.categories contains platform' | size %}
+          {% if pf_c > 0 %}
+            {% assign pf_key = 10000 | minus: pf_c | append: '|' | append: platform %}
+            {% assign pf_items = pf_items | push: pf_key %}
+          {% endif %}
+        {% endfor %}
+        {% assign pf_items = pf_items | sort %}
+
+        <div class="stat-rows" role="group" aria-labelledby="stat-label-platform">
+          {% for pf_item in pf_items %}
+            {% assign pf_parts = pf_item | split: '|' %}
+            {% assign platform = pf_parts[1] %}
+            {% assign pf_c = 10000 | minus: pf_parts[0] %}
+            {% if pf_c > 0 %}
+              {% assign pf_share = pf_c | times: 100.0 | divided_by: total %}
+              {% assign pf_pct = pf_share | round %}
+              <button
+                type="button"
+                class="stat-row"
+                data-platform="{{ platform | downcase }}"
+                data-tip="{{ t_share | replace: ':pct', pf_pct }}"
+                aria-pressed="false"
+                style="--share: {{ pf_share | round: 2 }}%; --i: {{ forloop.index0 }};"
+              >
+                <span class="stat-row-name">{{ platform }}</span>
+                <span class="stat-track" aria-hidden="true"><span class="stat-fill"></span></span>
+                <span class="stat-row-val">{{ pf_c }}</span>
+              </button>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </section>
 {% endif %}
 
 <section id="home-hero" aria-labelledby="home-heading">
@@ -227,25 +450,13 @@ layout: default
       data-platform="{{ post_platform | downcase }}"
       data-search="{{ haystack | normalize_whitespace | strip | downcase | escape }}"
     >
-      {% if post.image %}
-        {% assign src = post.image.path | default: post.image %}
-
-        {% if post.media_subpath %}
-          {% unless src contains '://' %}
-            {% assign src = post.media_subpath
-              | append: '/'
-              | append: src
-              | replace: '///', '/'
-              | replace: '//', '/'
-            %}
-          {% endunless %}
-        {% endif %}
-
-        <!-- Thumbnail as a CSS background rather than an <img>, on purpose:
-             `refactor-content.html` only rewrites <img> tags, so this avoids it
-             wrapping the image in a lightbox <a> — which nested an anchor inside
-             this card link and broke the whole layout. -->
-        <span class="machine-thumb" style="background-image: url('{{ src }}');" aria-hidden="true"></span>
+      <!-- Thumbnail as a CSS background rather than an <img>, on purpose:
+           `refactor-content.html` only rewrites <img> tags, so this avoids it
+           wrapping the image in a lightbox <a> — which nested an anchor inside
+           this card link and broke the whole layout. -->
+      {% include post-thumb.html post=post %}
+      {% if thumb_src != '' %}
+        <span class="machine-thumb" style="background-image: url('{{ thumb_src }}');" aria-hidden="true"></span>
       {% endif %}
 
       <div class="machine-body">
@@ -331,10 +542,28 @@ layout: default
     const emptyState = document.getElementById('machine-empty');
     const resetButton = document.getElementById('machine-reset');
     const countTemplate = counter.dataset.template;
+    const statRows = Array.from(document.querySelectorAll('.machine-stats .stat-row'));
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     let difficulty = 'all';
     let os = 'all';
     let platform = 'all';
+
+    /* Mirror a filter onto the dashboard: the selected row lights up and its
+       siblings dim, so the overview and the finder always tell one story.
+       `kind` is the row's data attribute: difficulty, os or platform. */
+    function syncRows(kind, value) {
+      statRows.forEach((row) => {
+        if (!(kind in row.dataset)) {
+          return;
+        }
+
+        const active = row.dataset[kind] === value;
+        row.classList.toggle('is-selected', active);
+        row.setAttribute('aria-pressed', active ? 'true' : 'false');
+        row.parentElement.classList.toggle('has-selection', value !== 'all');
+      });
+    }
 
     function syncUrl() {
       const params = new URLSearchParams(window.location.search);
@@ -411,6 +640,7 @@ layout: default
         chip.setAttribute('aria-pressed', active ? 'true' : 'false');
       });
 
+      syncRows('difficulty', value);
       apply(sync);
     }
 
@@ -423,6 +653,7 @@ layout: default
         chip.setAttribute('aria-pressed', active ? 'true' : 'false');
       });
 
+      syncRows('os', value);
       apply(sync);
     }
 
@@ -435,6 +666,7 @@ layout: default
         chip.setAttribute('aria-pressed', active ? 'true' : 'false');
       });
 
+      syncRows('platform', value);
       apply(sync);
     }
 
@@ -448,6 +680,28 @@ layout: default
 
     platformChips.forEach((chip) => {
       chip.addEventListener('click', () => selectPlatform(chip.dataset.platform));
+    });
+
+    /* A dashboard row applies its filter (a second click clears it). On a tall
+       mobile stack the list may be off-screen, so bring the finder into view
+       then — but never yank the page when the results are already visible. */
+    statRows.forEach((row) => {
+      row.addEventListener('click', () => {
+        if ('difficulty' in row.dataset) {
+          selectDifficulty(difficulty === row.dataset.difficulty ? 'all' : row.dataset.difficulty);
+        } else if ('os' in row.dataset) {
+          selectOs(os === row.dataset.os ? 'all' : row.dataset.os);
+        } else {
+          selectPlatform(platform === row.dataset.platform ? 'all' : row.dataset.platform);
+        }
+
+        if (list.getBoundingClientRect().top > window.innerHeight * 0.8) {
+          document.getElementById('home-hero').scrollIntoView({
+            behavior: reduceMotion ? 'auto' : 'smooth',
+            block: 'start'
+          });
+        }
+      });
     });
 
     input.addEventListener('input', () => apply());
@@ -514,5 +768,87 @@ layout: default
     }
 
     apply(false);
+  })();
+
+  /* Dashboard: the total counts up once, and the growth sparkline gets a
+     cursor (a hairline, a dot and a tooltip) that follows the pointer or the
+     arrow keys. The final values are already in the HTML, so without JS or
+     with reduced motion nothing is lost. */
+  (function () {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const num = document.querySelector('.stat-hero-num');
+
+    if (num && !reduceMotion) {
+      const target = Number(num.dataset.count);
+      const start = performance.now();
+      const duration = 900;
+
+      num.style.minWidth = `${num.offsetWidth}px`; /* no jitter as digits change */
+
+      const step = (now) => {
+        const t = Math.min(1, (now - start) / duration);
+        num.textContent = Math.round(target * (1 - Math.pow(1 - t, 3)));
+
+        if (t < 1) {
+          requestAnimationFrame(step);
+        }
+      };
+
+      requestAnimationFrame(step); /* the real total shows until the first frame */
+    }
+
+    const spark = document.querySelector('.stat-spark');
+
+    if (!spark) {
+      return;
+    }
+
+    const points = spark.dataset.points.split(',').map(Number);
+    const labels = spark.dataset.labels.split('|');
+    const max = Math.max(...points) || 1;
+    const last = points.length - 1;
+    const cursor = spark.querySelector('.spark-cursor');
+    const tip = spark.querySelector('.spark-tip');
+    let index = last;
+
+    function show(i) {
+      index = Math.max(0, Math.min(last, i));
+
+      const x = (index / last) * 100;
+      const y = ((38 - (points[index] * 36) / max) / 40) * 100; /* same maths as the SVG */
+
+      cursor.hidden = false;
+      cursor.style.left = `${x}%`;
+      cursor.style.setProperty('--y', `${y}%`);
+      cursor.dataset.edge = x < 25 ? 'start' : x > 75 ? 'end' : '';
+      tip.textContent = `${labels[index]} · ${spark.dataset.tip.replace(':n', points[index])}`;
+    }
+
+    function hide() {
+      cursor.hidden = true;
+    }
+
+    spark.addEventListener('pointermove', (event) => {
+      const box = spark.getBoundingClientRect();
+      show(Math.round(((event.clientX - box.left) / box.width) * last));
+    });
+
+    spark.addEventListener('pointerleave', () => {
+      if (document.activeElement !== spark) {
+        hide();
+      }
+    });
+
+    spark.addEventListener('focus', () => show(index));
+    spark.addEventListener('blur', hide);
+
+    spark.addEventListener('keydown', (event) => {
+      const moves = { ArrowLeft: index - 1, ArrowRight: index + 1, Home: 0, End: last };
+
+      if (event.key in moves) {
+        event.preventDefault();
+        show(moves[event.key]);
+      }
+    });
   })();
 </script>
