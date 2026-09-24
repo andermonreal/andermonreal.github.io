@@ -9,7 +9,8 @@
     * the "language switcher" block inside .sidebar-bottom (marked below);
     * a "skip to content" link before the <aside>, and a script that makes
       sideways-scrolling code blocks / tables reachable from the keyboard;
-    * a localised aria-label on the <nav>.
+    * a localised aria-label on the <nav>;
+    * loads assets/js/command-palette.js (Ctrl/⌘K or "/" navigation) sitewide.
   Styles: the "Sidebar" section of assets/css/jekyll-theme-chirpy.scss.
 -->
 
@@ -69,6 +70,9 @@
     });
   });
 </script>
+
+<!-- Command palette / keyboard nav (Ctrl/⌘K or "/"): loaded on every page. -->
+<script defer src="{{ '/assets/js/command-palette.js' | relative_url }}?v={{ site.time | date: '%s' }}"></script>
 
 <aside aria-label="Sidebar" id="sidebar" class="d-flex flex-column align-items-end">
   <header class="profile-wrapper">

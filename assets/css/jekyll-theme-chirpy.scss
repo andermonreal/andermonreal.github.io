@@ -5654,6 +5654,305 @@ body:has(.landing) #tail-wrapper > footer {
 }
 
 /* -------------------------------------------------------------------------
+   Arsenal & skills (/arsenal/) — _layouts/arsenal.html. Reuses the Archive
+   header (.arc-head / .arc-kpis). Tools grouped by purpose, techniques bucketed
+   into domain cards; every item is a pill linking to its tag page.
+   ------------------------------------------------------------------------- */
+.ars-section {
+  margin-top: 2.75rem;
+}
+
+.ars-h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 1.25rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--main-border-color);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+
+  i {
+    color: var(--hero-accent);
+    font-size: 1.1rem;
+  }
+}
+
+.ars-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1.1rem 1.5rem;
+}
+
+.ars-group-title,
+.ars-domain-title {
+  margin: 0 0 0.7rem;
+  color: var(--text-muted-color);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ars-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ars-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.6rem;
+  border: 1px solid var(--main-border-color);
+  border-radius: 7px;
+  background: var(--card-bg);
+  color: var(--text-color);
+  font-size: 0.82rem;
+  line-height: 1.3;
+  text-decoration: none;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: var(--hero-accent);
+    color: var(--heading-color);
+    text-decoration: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 2px;
+  }
+}
+
+.ars-chip-name {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+}
+
+.ars-chip-n {
+  min-width: 1.15rem;
+  padding: 0 0.28rem;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--text-muted-color) 18%, transparent);
+  color: var(--text-color);
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Tools read a touch warmer than technique tags. */
+.ars-chip.is-tool {
+  border-color: color-mix(in srgb, var(--hero-accent) 40%, var(--main-border-color));
+  background: color-mix(in srgb, var(--hero-accent) 8%, var(--card-bg));
+
+  .ars-chip-n {
+    background: color-mix(in srgb, var(--hero-accent) 24%, transparent);
+  }
+}
+
+/* Techniques: one card per domain. */
+.ars-domains {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: 1.1rem;
+}
+
+.ars-domain {
+  padding: 1.1rem 1.2rem 1.2rem;
+  border: 1px solid var(--main-border-color);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--main-bg) 55%, var(--card-bg));
+}
+
+.ars-domain-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+
+  .ars-domain-title {
+    margin: 0;
+  }
+}
+
+.ars-domain-n {
+  flex: none;
+  color: var(--hero-accent);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+@media (min-width: 850px) {
+  .ars-domains {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Command palette (assets/js/command-palette.js) — Ctrl/⌘K or "/" to jump to
+   any page or writeup; built lazily and overlaid above everything.
+   ------------------------------------------------------------------------- */
+.cmdk {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 12vh 1rem 1rem;
+  background: rgb(0 0 0 / 45%);
+  backdrop-filter: blur(2px);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.cmdk-panel {
+  width: 100%;
+  max-width: 34rem;
+  overflow: hidden;
+  border: 1px solid var(--main-border-color);
+  border-radius: 14px;
+  background: var(--card-bg);
+  box-shadow: 0 24px 60px -20px rgb(0 0 0 / 55%);
+  animation: cmdk-in 0.14s ease-out;
+}
+
+@keyframes cmdk-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+.cmdk-inputwrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--main-border-color);
+
+  > .fa-magnifying-glass {
+    color: var(--text-muted-color);
+  }
+}
+
+.cmdk-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--heading-color);
+  font-size: 1rem;
+  outline: none;
+
+  &::placeholder {
+    color: var(--text-muted-color);
+  }
+}
+
+.cmdk-esc {
+  flex: none;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--main-border-color);
+  border-radius: 5px;
+  color: var(--text-muted-color);
+  font-size: 0.68rem;
+}
+
+.cmdk-list {
+  max-height: 22rem;
+  margin: 0;
+  padding: 0.4rem;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.cmdk-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 9px;
+  cursor: pointer;
+
+  &.is-active {
+    background: color-mix(in srgb, var(--link-color) 14%, transparent);
+  }
+}
+
+.cmdk-ico {
+  flex: none;
+  width: 1.1rem;
+  color: var(--text-muted-color);
+  text-align: center;
+}
+
+.cmdk-item.is-active .cmdk-ico {
+  color: var(--link-color);
+}
+
+.cmdk-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.05rem;
+  min-width: 0;
+}
+
+.cmdk-name {
+  color: var(--heading-color);
+  font-size: 0.92rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cmdk-sub {
+  color: var(--text-muted-color);
+  font-size: 0.72rem;
+}
+
+.cmdk-lock {
+  color: var(--text-muted-color);
+  font-size: 0.72rem;
+}
+
+.cmdk-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.1rem;
+  padding: 0.6rem 1rem;
+  border-top: 1px solid var(--main-border-color);
+  color: var(--text-muted-color);
+  font-size: 0.72rem;
+
+  kbd {
+    margin: 0 0.1rem;
+    padding: 0.05rem 0.35rem;
+    border: 1px solid var(--main-border-color);
+    border-radius: 4px;
+    background: var(--main-bg);
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 0.68rem;
+  }
+}
+
+/* -------------------------------------------------------------------------
    Print / "Save as PDF" (the button in a writeup's header, or Ctrl+P): the
    writeup as a clean report — no sidebar, topbar, panel or tail; white
    paper whatever the theme; the machine card as the cover block; code

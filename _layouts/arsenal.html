@@ -1,0 +1,96 @@
+---
+layout: default
+# The Arsenal & skills page (/arsenal/). Two views built from the writeups'
+# tags by _plugins/arsenal.rb: the named tools grouped by purpose, and every
+# technique tag bucketed into domains. Each item links to its tag page and
+# shows how many machines it appears on. Bilingual via `site.active_lang`;
+# styles live in the "Arsenal" section of assets/css/jekyll-theme-chirpy.scss.
+---
+
+{% include lang.html %}
+
+{% assign es = false %}
+{% if site.active_lang == 'es' %}{% assign es = true %}{% endif %}
+
+{% assign ar = site.data.arsenal %}
+{% assign machine_count = site.posts | where_exp: 'p', 'p.hidden != true' | size %}
+
+<div class="arsenal">
+  <header class="arc-head">
+    <div class="arc-head-text">
+      <p class="landing-kicker">// {% if es %}cat ~/.arsenal{% else %}cat ~/.arsenal{% endif %}</p>
+      <h1 class="arc-title">{% if es %}Arsenal y skills{% else %}Arsenal &amp; skills{% endif %}</h1>
+      <p class="arc-lede">
+        {% if es %}Las herramientas y técnicas que he usado en los writeups, organizadas y enlazadas a las máquinas donde aparecen.{% else %}The tools and techniques I've used across the writeups, organised and linked to the machines where they show up.{% endif %}
+      </p>
+    </div>
+
+    <div class="arc-kpis">
+      <div class="arc-kpi">
+        <span class="arc-kpi-num">{{ ar.tech_total }}</span>
+        <span class="arc-kpi-label">{% if es %}técnicas{% else %}techniques{% endif %}</span>
+      </div>
+      <div class="arc-kpi">
+        <span class="arc-kpi-num">{{ ar.tool_total }}</span>
+        <span class="arc-kpi-label">{% if es %}herramientas{% else %}tools{% endif %}</span>
+      </div>
+      <div class="arc-kpi">
+        <span class="arc-kpi-num">{{ machine_count }}</span>
+        <span class="arc-kpi-label">{% if es %}máquinas{% else %}machines{% endif %}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Tools -->
+  <section class="ars-section" aria-labelledby="ars-tools-title">
+    <h2 class="ars-h2" id="ars-tools-title">
+      <i class="fas fa-toolbox" aria-hidden="true"></i>
+      {% if es %}Herramientas{% else %}Tools{% endif %}
+    </h2>
+    <div class="ars-groups">
+      {% for group in ar.tools %}
+        <div class="ars-group">
+          <h3 class="ars-group-title">{% if es %}{{ group.category_es }}{% else %}{{ group.category }}{% endif %}</h3>
+          <ul class="ars-chips">
+            {% for item in group.items %}
+              <li>
+                <a class="ars-chip is-tool" href="{{ '/tags/' | append: item.slug | append: '/' | relative_url }}">
+                  <span class="ars-chip-name">{{ item.tag }}</span>
+                  <span class="ars-chip-n">{{ item.count }}</span>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Techniques -->
+  <section class="ars-section" aria-labelledby="ars-tech-title">
+    <h2 class="ars-h2" id="ars-tech-title">
+      <i class="fas fa-crosshairs" aria-hidden="true"></i>
+      {% if es %}Técnicas por dominio{% else %}Techniques by domain{% endif %}
+    </h2>
+    <div class="ars-domains">
+      {% for group in ar.techniques %}
+        <div class="ars-domain">
+          <div class="ars-domain-head">
+            <h3 class="ars-domain-title">{% if es %}{{ group.category_es }}{% else %}{{ group.category }}{% endif %}</h3>
+            <span class="ars-domain-n">{{ group.items | size }}</span>
+          </div>
+          <ul class="ars-chips">
+            {% for item in group.items %}
+              <li>
+                <a class="ars-chip" href="{{ '/tags/' | append: item.slug | append: '/' | relative_url }}">
+                  <span class="ars-chip-name">{{ item.tag }}</span>
+                  {% if item.count > 1 %}<span class="ars-chip-n">{{ item.count }}</span>{% endif %}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
