@@ -107,6 +107,22 @@ module Arsenal
   TOOL_ALIAS_SLUGS.uniq!
   TOOL_ALIAS_SLUGS.freeze
 
+  # For a tool the catalog doesn't know yet, guess its category from its
+  # description column (the second cell of the Tools Used row), so a brand-new
+  # tool in a new writeup lands somewhere sensible on its own. First match wins;
+  # nothing matches → the "Other" card (it still shows, just uncategorised).
+  INFER = [
+    ['Active Directory', /kerberos|ldap|\bsmb\b|domain controller|active directory|bloodhound|\bntlm\b|\bticket|impacket|winrm/],
+    ['Mobile', /android|\bapk\b|\bios\b|mobile|frida|smali|dalvik/],
+    ['Databases', /\bsql\b|database|postgres|mysql|mariadb|sqlite|mongo/],
+    ['Passwords & hashes', /crack|hashcat|\bhash(es|ing)?\b|password|wordlist|rainbow/],
+    ['Reversing & analysis', /decompil|disassembl|revers|debugger|\bbinary\b|packet capture|pcap|traffic|ghidra|ida\b/],
+    ['Web & HTTP', /\bhttp\b|web app|proxy|intercept|\bapi\b|browser|cookie|\bjwt\b|request/],
+    ['Recon & scanning', /scan|enumerat|fingerprint|discovery|\brecon|subdomain|vhost|brute-forc|fuzz|\bport/],
+    ['Shells & transfer', /reverse shell|listener|\bshell\b|transfer|upload|download|tunnel|pivot|\brdp\b|exfiltrat/],
+    ['Scripting & dev', /compil|\bscript|library|framework|exploit development|payload/]
+  ].freeze
+
   # Technique domains, in order. A tag lands in the first domain one of whose
   # keywords is a substring of it; anything left over falls into "Other".
   DOMAINS = [
@@ -202,22 +218,32 @@ module Arsenal
     'Other'
   end
 
-  # A "## Tools Used" cell -> the tool tokens in it. Parentheticals are dropped
-  # (clarifications like "netcat (nc)"), and "a / b", "a + b" split into two.
+  # For a tool the catalog doesn't know yet, guess its category from its
+  # description column so a brand-new tool lands somewhere sensible on its own.
+  def infer_category(description)
+    d = description.to_s.downcase
+    INFER.each { |name, re| return name if d =~ re }
+    'Other'
+  end
+
+  # A "## Tools Used" cell -> the tool tokens in it, in their ORIGINAL case (so
+  # an unknown tool keeps its name). Parentheticals are dropped (clarifications
+  # like "netcat (nc)"), and "a / b", "a + b" split into two.
   def tool_tokens(cell)
     clean = cell.gsub(/[*`]/, '').gsub(/\(.*?\)/, ' ').strip
     return [] if TOOL_EXCLUDE.any? { |re| clean =~ re }
 
-    clean.split(%r{\s*[/+]\s*}).map { |t| t.strip.downcase.gsub(/\s+/, ' ') }.reject(&:empty?)
+    clean.split(%r{\s*[/+]\s*}).map { |t| t.strip.gsub(/\s+/, ' ') }.reject(&:empty?)
   end
 
   # A token -> [canonical, category], by exact alias or the longest alias it
-  # begins/ends with (so "impacket psexec" -> Impacket).
+  # begins/ends with (so "impacket psexec" -> Impacket). Case-insensitive.
   def match_tool(token)
-    return TOOL_LOOKUP[token] if TOOL_LOOKUP.key?(token)
+    t = token.downcase
+    return TOOL_LOOKUP[t] if TOOL_LOOKUP.key?(t)
 
     hit = TOOL_LOOKUP.keys
-                     .select { |a| token == a || token.start_with?("#{a} ") || token.end_with?(" #{a}") }
+                     .select { |a| t == a || t.start_with?("#{a} ") || t.end_with?(" #{a}") }
                      .max_by(&:length)
     hit ? TOOL_LOOKUP[hit] : nil
   end
@@ -240,10 +266,13 @@ module Arsenal
       seen = {}
       rows = table.lines.select { |l| l.strip.start_with?('|') }
       rows.drop(2).each do |row| # header + separator
-        cell = row.strip.sub(/^\|/, '').split('|').first.to_s.strip
+        parts = row.strip.sub(/^\|/, '').split('|')
+        cell = parts[0].to_s.strip
+        desc = parts[1].to_s
         tool_tokens(cell).each do |token|
           hit = match_tool(token)
-          canon, cat = hit || [token, 'Other']
+          # Known tool → catalog category; unknown → guess from its description.
+          canon, cat = hit || [token, infer_category(desc)]
           next if seen[canon]
 
           seen[canon] = true
