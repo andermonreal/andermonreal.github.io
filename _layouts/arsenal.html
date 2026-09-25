@@ -1,96 +1,275 @@
 ---
 layout: default
-# The Arsenal & skills page (/arsenal/). Two views built from the writeups'
-# tags by _plugins/arsenal.rb: the named tools grouped by purpose, and every
-# technique tag bucketed into domains. Each item links to its tag page and
-# shows how many machines it appears on. Bilingual via `site.active_lang`;
-# styles live in the "Arsenal" section of assets/css/jekyll-theme-chirpy.scss.
+# The Arsenal page (/arsenal/), built from the writeups' tags by
+# _plugins/arsenal.rb:
+#   1. Header — the headline numbers.
+#   2. Coverage — how many machines touch each technique domain, as the
+#      Machines dashboard's bar rows; each row jumps to its card.
+#   3. A live filter over every chip on the page.
+#   4. Tools grouped by purpose, then technique domains, then platforms — cards
+#      whose frequent items always show and whose one-offs fold behind
+#      "+N more" (a <details>, so it works without JS too).
+# Bilingual via `site.active_lang`; styles in the "Arsenal" SCSS section.
 ---
 
 {% include lang.html %}
 
+{% assign ar = site.data.arsenal %}
 {% assign es = false %}
 {% if site.active_lang == 'es' %}{% assign es = true %}{% endif %}
 
-{% assign ar = site.data.arsenal %}
-{% assign machine_count = site.posts | where_exp: 'p', 'p.hidden != true' | size %}
+{% if es %}
+  {% assign t_title = 'Arsenal' %}
+  {% assign t_lede = 'Las herramientas y técnicas de mis writeups, agrupadas y enlazadas a las máquinas donde aparecen.' %}
+  {% assign t_techniques = 'técnicas' %}
+  {% assign t_tools = 'herramientas' %}
+  {% assign t_tool = 'herramienta' %}
+  {% assign t_technique = 'técnica' %}
+  {% assign t_domains = 'dominios' %}
+  {% assign t_machines = 'máquinas' %}
+  {% assign t_coverage = 'Cobertura por dominio' %}
+  {% assign t_coverage_sub = 'Máquinas en las que aparece cada dominio' %}
+  {% assign t_tip = ':n de :total máquinas (:pct %)' %}
+  {% assign t_filter = 'Filtrar técnicas y herramientas…' %}
+  {% assign t_filter_label = 'Filtrar técnicas y herramientas' %}
+  {% assign t_matches = ':n coincidencias' %}
+  {% assign t_none = 'Nada coincide con ese filtro.' %}
+  {% assign t_clear = 'Borrar filtro' %}
+  {% assign t_tools_h = 'Herramientas' %}
+  {% assign t_domains_h = 'Técnicas por dominio' %}
+  {% assign t_platforms_h = 'Plataformas y software' %}
+  {% assign t_platforms_sub = 'Tecnologías con las que me he encontrado en las máquinas' %}
+  {% assign t_more = '+:n más' %}
+  {% assign t_less = 'Mostrar menos' %}
+  {% assign t_on = 'en :n máquinas' %}
+  {% assign t_card_meta = ':m máquinas · :t técnicas' %}
+{% else %}
+  {% assign t_title = 'Arsenal' %}
+  {% assign t_lede = 'The tools and techniques from my writeups, grouped and linked to the machines where they show up.' %}
+  {% assign t_techniques = 'techniques' %}
+  {% assign t_tools = 'tools' %}
+  {% assign t_tool = 'tool' %}
+  {% assign t_technique = 'technique' %}
+  {% assign t_domains = 'domains' %}
+  {% assign t_machines = 'machines' %}
+  {% assign t_coverage = 'Coverage by domain' %}
+  {% assign t_coverage_sub = 'Machines each domain shows up on' %}
+  {% assign t_tip = ':n of :total machines (:pct%)' %}
+  {% assign t_filter = 'Filter techniques and tools…' %}
+  {% assign t_filter_label = 'Filter techniques and tools' %}
+  {% assign t_matches = ':n matches' %}
+  {% assign t_none = 'Nothing matches that filter.' %}
+  {% assign t_clear = 'Clear filter' %}
+  {% assign t_tools_h = 'Tools' %}
+  {% assign t_domains_h = 'Techniques by domain' %}
+  {% assign t_platforms_h = 'Platforms & software' %}
+  {% assign t_platforms_sub = "Tech I've run into across the machines" %}
+  {% assign t_more = '+:n more' %}
+  {% assign t_less = 'Show less' %}
+  {% assign t_on = 'on :n machines' %}
+  {% assign t_card_meta = ':m machines · :t techniques' %}
+{% endif %}
 
-<div class="arsenal">
-  <header class="arc-head">
+<div class="ars">
+  <!-- 1. Header ----------------------------------------------------------- -->
+  <header class="arc-head ars-head">
     <div class="arc-head-text">
-      <p class="landing-kicker">// {% if es %}cat ~/.arsenal{% else %}cat ~/.arsenal{% endif %}</p>
-      <h1 class="arc-title">{% if es %}Arsenal y skills{% else %}Arsenal &amp; skills{% endif %}</h1>
-      <p class="arc-lede">
-        {% if es %}Las herramientas y técnicas que he usado en los writeups, organizadas y enlazadas a las máquinas donde aparecen.{% else %}The tools and techniques I've used across the writeups, organised and linked to the machines where they show up.{% endif %}
-      </p>
+      <p class="landing-kicker">// ls ~/.arsenal</p>
+      <h1 class="arc-title">{{ t_title }}</h1>
+      <p class="arc-lede">{{ t_lede }}</p>
     </div>
 
     <div class="arc-kpis">
       <div class="arc-kpi">
         <span class="arc-kpi-num">{{ ar.tech_total }}</span>
-        <span class="arc-kpi-label">{% if es %}técnicas{% else %}techniques{% endif %}</span>
+        <span class="arc-kpi-label">{{ t_techniques }}</span>
       </div>
       <div class="arc-kpi">
         <span class="arc-kpi-num">{{ ar.tool_total }}</span>
-        <span class="arc-kpi-label">{% if es %}herramientas{% else %}tools{% endif %}</span>
+        <span class="arc-kpi-label">{{ t_tools }}</span>
       </div>
       <div class="arc-kpi">
-        <span class="arc-kpi-num">{{ machine_count }}</span>
-        <span class="arc-kpi-label">{% if es %}máquinas{% else %}machines{% endif %}</span>
+        <span class="arc-kpi-num">{{ ar.domain_total }}</span>
+        <span class="arc-kpi-label">{{ t_domains }}</span>
+      </div>
+      <div class="arc-kpi">
+        <span class="arc-kpi-num">{{ ar.machine_total }}</span>
+        <span class="arc-kpi-label">{{ t_machines }}</span>
       </div>
     </div>
   </header>
 
-  <!-- Tools -->
-  <section class="ars-section" aria-labelledby="ars-tools-title">
-    <h2 class="ars-h2" id="ars-tools-title">
-      <i class="fas fa-toolbox" aria-hidden="true"></i>
-      {% if es %}Herramientas{% else %}Tools{% endif %}
-    </h2>
-    <div class="ars-groups">
-      {% for group in ar.tools %}
-        <div class="ars-group">
-          <h3 class="ars-group-title">{% if es %}{{ group.category_es }}{% else %}{{ group.category }}{% endif %}</h3>
-          <ul class="ars-chips">
-            {% for item in group.items %}
-              <li>
-                <a class="ars-chip is-tool" href="{{ '/tags/' | append: item.slug | append: '/' | relative_url }}">
-                  <span class="ars-chip-name">{{ item.tag }}</span>
-                  <span class="ars-chip-n">{{ item.count }}</span>
-                </a>
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
+  <!-- 2. Coverage: one row per domain (the dashboard's bar rows), biggest
+       first; the bar is the share of all machines. -->
+  <section class="stat-card ars-coverage" aria-labelledby="ars-coverage-title">
+    <div class="stat-card-head">
+      <h2 class="stat-label" id="ars-coverage-title">{{ t_coverage }}</h2>
+      <span class="ars-coverage-sub">{{ t_coverage_sub }}</span>
+    </div>
+    <div class="stat-rows">
+      {% for d in ar.domains %}
+        {% if d.category != 'Other' %}
+          {% assign d_pct = d.share | round %}
+          {% capture d_tip %}{{ t_tip | replace: ':n', d.machines | replace: ':total', ar.machine_total | replace: ':pct', d_pct }}{% endcapture %}
+          <a
+            class="stat-row"
+            href="#d-{{ d.anchor }}"
+            data-tip="{{ d_tip }}"
+            style="--share: {{ d.share }}%; --i: {{ forloop.index0 }};"
+          >
+            <span class="stat-row-name">
+              <i class="fas {{ d.icon }}" aria-hidden="true"></i>{% if es %}{{ d.category_es }}{% else %}{{ d.category }}{% endif %}
+            </span>
+            <span class="stat-track" aria-hidden="true"><span class="stat-fill"></span></span>
+            <span class="stat-row-val">{{ d.machines }}<span class="visually-hidden"> {{ t_machines }}</span></span>
+          </a>
+        {% endif %}
       {% endfor %}
     </div>
   </section>
 
-  <!-- Techniques -->
-  <section class="ars-section" aria-labelledby="ars-tech-title">
-    <h2 class="ars-h2" id="ars-tech-title">
-      <i class="fas fa-crosshairs" aria-hidden="true"></i>
-      {% if es %}Técnicas por dominio{% else %}Techniques by domain{% endif %}
+  <!-- 3. Filter ------------------------------------------------------------ -->
+  <div class="ars-toolbar">
+    <div class="finder-search ars-search" role="search">
+      <i class="fas fa-filter" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="ars-filter"
+        class="finder-input"
+        placeholder="{{ t_filter }}"
+        aria-label="{{ t_filter_label }}"
+        aria-describedby="ars-count"
+        autocomplete="off"
+        spellcheck="false"
+      >
+    </div>
+    <p class="ars-count" id="ars-count" aria-live="polite" data-template="{{ t_matches }}"></p>
+  </div>
+
+  <div class="machine-empty" id="ars-empty" hidden>
+    <span class="machine-empty-icon" aria-hidden="true"><i class="fas fa-toolbox"></i></span>
+    <p class="machine-empty-text">{{ t_none }}</p>
+    <button type="button" class="finder-reset" id="ars-reset">
+      <i class="fas fa-rotate-left" aria-hidden="true"></i> {{ t_clear }}
+    </button>
+  </div>
+
+  <!-- 4. Tools --------------------------------------------------------------- -->
+  <section class="ars-section" aria-labelledby="ars-tools-title">
+    <h2 class="ars-h2" id="ars-tools-title">
+      <i class="fas fa-toolbox" aria-hidden="true"></i>{{ t_tools_h }}
+      <span class="ars-h2-n">{{ ar.tool_total }}</span>
     </h2>
-    <div class="ars-domains">
-      {% for group in ar.techniques %}
-        <div class="ars-domain">
-          <div class="ars-domain-head">
-            <h3 class="ars-domain-title">{% if es %}{{ group.category_es }}{% else %}{{ group.category }}{% endif %}</h3>
-            <span class="ars-domain-n">{{ group.items | size }}</span>
-          </div>
-          <ul class="ars-chips">
-            {% for item in group.items %}
-              <li>
-                <a class="ars-chip" href="{{ '/tags/' | append: item.slug | append: '/' | relative_url }}">
-                  <span class="ars-chip-name">{{ item.tag }}</span>
-                  {% if item.count > 1 %}<span class="ars-chip-n">{{ item.count }}</span>{% endif %}
-                </a>
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
+    <div class="ars-cards ars-cards--tools">
+      {% for g in ar.tools %}
+        {% include arsenal-card.html group=g tool=true es=es %}
       {% endfor %}
     </div>
   </section>
+
+  <!-- 5. Technique domains -------------------------------------------------- -->
+  <section class="ars-section" aria-labelledby="ars-domains-title">
+    <h2 class="ars-h2" id="ars-domains-title">
+      <i class="fas fa-crosshairs" aria-hidden="true"></i>{{ t_domains_h }}
+      <span class="ars-h2-n">{{ ar.tech_total }}</span>
+    </h2>
+    <div class="ars-cards ars-cards--domains">
+      {% for g in ar.domains %}
+        {% include arsenal-card.html group=g es=es %}
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- 6. Platforms -------------------------------------------------------- -->
+  {% if ar.platforms %}
+    <section class="ars-section" aria-labelledby="ars-platforms-title">
+      <h2 class="ars-h2" id="ars-platforms-title">
+        <i class="fas fa-server" aria-hidden="true"></i>{{ t_platforms_h }}
+        <span class="ars-h2-n">{{ ar.platform_total }}</span>
+      </h2>
+      <p class="ars-section-sub">{{ t_platforms_sub }}</p>
+      <div class="ars-cards">
+        {% include arsenal-card.html group=ar.platforms es=es wide=true %}
+      </div>
+    </section>
+  {% endif %}
 </div>
+
+<script>
+  /* Live filter over every chip: hides chips (and whole cards) that don't
+     match, opens a card's folded "+N more" while one of its matches is in
+     there, and puts everything back when the box is cleared. */
+  (function () {
+    const input = document.getElementById('ars-filter');
+    const count = document.getElementById('ars-count');
+    const empty = document.getElementById('ars-empty');
+    const reset = document.getElementById('ars-reset');
+    const cards = Array.from(document.querySelectorAll('.ars-card'));
+    const sections = Array.from(document.querySelectorAll('.ars-section'));
+
+    if (!input || !cards.length) {
+      return;
+    }
+
+    const apply = () => {
+      const terms = input.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      const filtering = terms.length > 0;
+      let shown = 0;
+
+      cards.forEach((card) => {
+        let cardShown = 0;
+        let foldedHit = false;
+
+        card.querySelectorAll('.ars-chips > li').forEach((li) => {
+          const name = li.dataset.name || '';
+          const match = !filtering || terms.every((t) => name.includes(t));
+          li.hidden = !match;
+          if (match) {
+            cardShown += 1;
+            if (li.closest('.ars-more')) {
+              foldedHit = true;
+            }
+          }
+        });
+
+        const more = card.querySelector('.ars-more');
+        if (more) {
+          if (filtering) {
+            if (!('wasOpen' in more.dataset)) {
+              more.dataset.wasOpen = more.open ? '1' : '';
+            }
+            more.open = foldedHit;
+          } else if ('wasOpen' in more.dataset) {
+            more.open = more.dataset.wasOpen === '1';
+            delete more.dataset.wasOpen;
+          }
+        }
+
+        card.hidden = filtering && cardShown === 0;
+        card.classList.toggle('is-filtering', filtering);
+        shown += cardShown;
+      });
+
+      sections.forEach((section) => {
+        section.hidden = filtering && !section.querySelector('.ars-card:not([hidden])');
+      });
+
+      count.textContent = filtering ? count.dataset.template.replace(':n', shown) : '';
+      empty.hidden = !filtering || shown > 0;
+    };
+
+    input.addEventListener('input', apply);
+    reset.addEventListener('click', () => {
+      input.value = '';
+      apply();
+      input.focus();
+    });
+
+    /* ?q=… prefills the filter (links from elsewhere can land pre-filtered). */
+    const q = new URLSearchParams(window.location.search).get('q');
+    if (q) {
+      input.value = q;
+      apply();
+    }
+  })();
+</script>

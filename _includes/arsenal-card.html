@@ -1,0 +1,57 @@
+{%- comment -%}
+  One Arsenal card (see _layouts/arsenal.html): an icon, the group's name and
+  numbers, and its items as chips — the frequent ones always shown, one-offs
+  folded behind "+N more". Technique domains (they carry `machines`) also get
+  an anchor for the coverage chart and a thin coverage bar.
+
+  Params: group (from site.data.arsenal), tool (bool), wide (bool).
+  Uses the layout's t_* strings.
+{%- endcomment -%}
+{%- assign g = include.group -%}
+{%- assign g_name = g.category -%}
+{%- if site.active_lang == 'es' -%}{%- assign g_name = g.category_es -%}{%- endif -%}
+
+<article
+  class="ars-card{% if include.tool %} is-tools{% endif %}{% if include.wide %} is-wide{% endif %}"
+  {% if g.machines %}id="d-{{ g.anchor }}"{% endif %}
+  aria-labelledby="c-{{ g.anchor }}{% if include.tool %}-t{% endif %}"
+>
+  <header class="ars-card-head">
+    <span class="ars-ico" aria-hidden="true"><i class="fas {{ g.icon }}"></i></span>
+    <div class="ars-card-title">
+      <h3 id="c-{{ g.anchor }}{% if include.tool %}-t{% endif %}">{{ g_name }}</h3>
+      {%- if g.machines -%}
+        <p class="ars-card-meta">{{ t_card_meta | replace: ':m', g.machines | replace: ':t', g.size }}</p>
+      {%- else -%}
+        <p class="ars-card-meta">{{ g.size }} {% if include.tool %}{% if g.size == 1 %}{{ t_tool }}{% else %}{{ t_tools }}{% endif %}{% else %}{% if g.size == 1 %}{{ t_technique }}{% else %}{{ t_techniques }}{% endif %}{% endif %}</p>
+      {%- endif -%}
+    </div>
+    {%- if g.machines -%}
+      <span class="ars-card-pct">{{ g.share | round }}%</span>
+    {%- endif -%}
+  </header>
+
+  {%- if g.machines -%}
+    <span class="stat-track ars-card-bar" aria-hidden="true" style="--share: {{ g.share }}%;"><span class="stat-fill"></span></span>
+  {%- endif -%}
+
+  <ul class="ars-chips">
+    {%- for item in g.visible -%}
+      {% include arsenal-chip.html item=item tool=include.tool %}
+    {%- endfor -%}
+  </ul>
+
+  {%- if g.rest.size > 0 -%}
+    <details class="ars-more">
+      <summary>
+        <span class="ars-more-closed">{{ t_more | replace: ':n', g.rest.size }}</span>
+        <span class="ars-more-open">{{ t_less }}</span>
+      </summary>
+      <ul class="ars-chips">
+        {%- for item in g.rest -%}
+          {% include arsenal-chip.html item=item tool=include.tool %}
+        {%- endfor -%}
+      </ul>
+    </details>
+  {%- endif -%}
+</article>

@@ -1,0 +1,18 @@
+{%- comment -%}
+  One Arsenal chip: an item linking to its tag page; items used on more than
+  one machine are highlighted and show their count. `data-name` feeds the
+  page's live filter.
+{%- endcomment -%}
+{%- assign it = include.item -%}
+<li data-name="{{ it.tag | escape }}">
+  <a
+    class="ars-chip{% if it.count > 1 %} is-hot{% endif %}{% if include.tool %} is-tool{% endif %}"
+    href="{{ '/tags/' | append: it.slug | append: '/' | relative_url }}"
+  >
+    <span class="ars-chip-name">{{ it.tag }}</span>
+    {%- if it.count > 1 -%}
+      <span class="ars-chip-n" aria-hidden="true">{{ it.count }}</span>
+      <span class="visually-hidden">, {{ t_on | replace: ':n', it.count }}</span>
+    {%- endif -%}
+  </a>
+</li>
