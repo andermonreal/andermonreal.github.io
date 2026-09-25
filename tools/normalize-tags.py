@@ -35,6 +35,18 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 POSTS = sorted(glob.glob(os.path.join(REPO, "_posts", "**", "*.md"), recursive=True))
 TAGS_RE = re.compile(r"^(tags:\s*\[)(.*)(\]\s*)$", re.M)
 
+# Curated synonym merges: tags that name the same thing with different words
+# (the slug pass only catches different spellings of the SAME word). Left is
+# rewritten to right. Keep right a spelling already used elsewhere.
+ALIASES = {
+    "password-reuse": "credential reuse",
+    "path-traversal": "directory traversal",
+    "insecure-deserialization": "deserialization",
+    "null session smb enumeration": "smb null session",
+    "null session smb": "smb null session",
+    "samba force user privesc": "samba force user",
+}
+
 
 def slugify(tag):
     """The slug Chirpy/Jekyll gives a tag page (default slugify mode)."""
@@ -72,6 +84,11 @@ def main():
         for variant in variants:
             if variant != best:
                 canonical[variant] = best
+
+    # Curated merges of tags that mean the same thing but don't share a slug
+    # (so the loop above can't catch them). variant -> canonical spelling.
+    for variant, best in ALIASES.items():
+        canonical[variant] = best
 
     if not canonical:
         print("tags: no conflicting spellings")

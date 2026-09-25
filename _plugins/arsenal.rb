@@ -1,40 +1,111 @@
 # frozen_string_literal: true
 
-# Arsenal & skills (rendered by _layouts/arsenal.html at /arsenal/).
+require 'set'
+
+# Arsenal (rendered by _layouts/arsenal.html at /arsenal/).
 #
-# Turns the flat tag cloud of the writeups into two organised views a visitor
-# (or a recruiter) can scan in seconds:
-#   * Tools    — the named tools used, grouped by what they're for.
-#   * Techniques — every other technique tag, bucketed into domains
-#                  (web, Active Directory, privilege escalation, …).
-# Each item shows how many machines it appears on and links to its tag page.
-#
-# It is all derived from the posts' own tags, so it stays in sync automatically;
-# only the grouping rules below are curated (labels and keywords, no content).
+# Three organised views a visitor (or a recruiter) can scan in seconds:
+#   * Tools      — every tool used, read from each writeup's "## Tools Used"
+#                  table (not the tags), unified across spellings and grouped
+#                  by what it's for.
+#   * Techniques — the technique tags, bucketed into domains (web, Active
+#                  Directory, privilege escalation, …); tool tags are left out
+#                  since tools have their own section.
+#   * Platforms  — the software/stack tags.
+# Each item shows how many machines it appears on. It stays in sync with the
+# writeups automatically; only the grouping rules below are curated.
 # Sets `site.data['arsenal']` for the layout.
 module Arsenal
-  # Named tools → the bucket they belong to. Only these slugs show under "Tools".
-  TOOLS = {
-    'nmap' => 'Recon & scanning', 'gobuster' => 'Recon & scanning',
-    'wpscan' => 'Recon & scanning', 'wappalyzer' => 'Recon & scanning',
-    'wireshark' => 'Recon & scanning', 'ffuf' => 'Recon & scanning',
-    'burp-suite' => 'Web', 'burp suite' => 'Web',
-    'hashcat' => 'Password attacks', 'john the ripper' => 'Password attacks',
-    'pdf2john' => 'Password attacks',
-    'bloodhound' => 'Active Directory', 'impacket' => 'Active Directory',
-    'winpeas' => 'Enumeration',
-    'frida' => 'Mobile', 'mobsf' => 'Mobile', 'drozer' => 'Mobile',
-    'apktool' => 'Mobile', 'adb' => 'Mobile',
-    'netcat' => 'Shells & transfer', 'nc-exe' => 'Shells & transfer',
-    'rlwrap' => 'Shells & transfer', 'rclone' => 'Shells & transfer',
-    'xfreerdp' => 'Shells & transfer',
-    'metasploit' => 'Frameworks', 'msfconsole' => 'Frameworks',
-    'meterpreter' => 'Frameworks'
+  # The tool catalog: category => { canonical name => [aliases, lowercased] }.
+  # The "## Tools Used" tables are matched against this; add an alias here when
+  # a writeup names a tool a new way. Order is the display order.
+  CATALOG = {
+    'Recon & scanning' => {
+      'nmap' => %w[nmap], 'gobuster' => %w[gobuster], 'ffuf' => %w[ffuf],
+      'wfuzz' => %w[wfuzz], 'feroxbuster' => %w[feroxbuster], 'wpscan' => %w[wpscan],
+      'whatweb' => %w[whatweb], 'Wappalyzer' => %w[wappalyzer], 'nikto' => %w[nikto],
+      'arp-scan' => %w[arp-scan], 'netdiscover' => %w[netdiscover], 'ping' => %w[ping],
+      'ss' => %w[ss], 'tcpdump' => %w[tcpdump], 'Wireshark' => %w[wireshark]
+    },
+    'Web & HTTP' => {
+      'Burp Suite' => ['burp suite', 'burpsuite', 'burp'], 'curl' => %w[curl], 'wget' => %w[wget],
+      'Browser DevTools' => ['browser devtools', 'browser', 'web browser', 'browser + devtools', 'devtools'],
+      'jwt.io' => ['jwt.io'], 'wscat' => %w[wscat], 'websocat' => %w[websocat], 'websocket' => %w[websocket]
+    },
+    'Passwords & hashes' => {
+      'hashcat' => %w[hashcat], 'john' => ['john', 'john the ripper'], 'pdf2john' => %w[pdf2john],
+      'hashid' => %w[hashid], 'passlib' => %w[passlib]
+    },
+    'Active Directory' => {
+      'BloodHound' => ['bloodhound', 'bloodhound (legacy)', 'bloodhound-python'],
+      'Impacket' => ['impacket', 'impacket psexec', 'impacket ticketconverter'],
+      'evil-winrm' => %w[evil-winrm], 'Rubeus' => %w[rubeus], 'Powermad' => %w[powermad],
+      'PowerView' => %w[powerview powersploit], 'crackmapexec' => %w[crackmapexec],
+      'netexec' => %w[netexec nxc], 'smbclient' => %w[smbclient], 'smbmap' => %w[smbmap],
+      'ldapsearch' => %w[ldapsearch]
+    },
+    'Shells & transfer' => {
+      'netcat' => ['netcat', 'nc', 'nc.exe'], 'socat' => %w[socat], 'rlwrap' => %w[rlwrap],
+      'ssh' => %w[ssh], 'ssh-keygen' => %w[ssh-keygen], 'xfreerdp' => %w[xfreerdp],
+      'telnet' => %w[telnet], 'ftp' => %w[ftp], 'certutil' => %w[certutil],
+      'Invoke-WebRequest' => ['invoke-webrequest', 'iwr']
+    },
+    'Reversing & analysis' => {
+      'strings' => %w[strings], 'ILSpy' => %w[ilspy], 'jd-gui' => %w[jd-gui], 'jadx' => %w[jadx],
+      'Ghidra' => %w[ghidra], 'dnSpy' => %w[dnspy]
+    },
+    'Mobile' => {
+      'adb' => %w[adb], 'apktool' => %w[apktool], 'apksigner' => %w[apksigner], 'zipalign' => %w[zipalign],
+      'keytool' => %w[keytool], 'Frida' => %w[frida], 'MobSF' => %w[mobsf], 'Genymotion' => %w[genymotion],
+      'pidcat' => %w[pidcat], 'android-backup-extractor' => ['android-backup-extractor', 'abe']
+    },
+    'Databases' => {
+      'mysql' => ['mysql', 'mariadb client', 'mariadb'], 'psql' => ['psql', 'postgresql client'],
+      'sqlite3' => %w[sqlite3]
+    },
+    'Enumeration' => {
+      'linPEAS' => %w[linpeas], 'winPEAS' => %w[winpeas], 'pspy' => %w[pspy], 'getcap' => %w[getcap]
+    },
+    'Scripting & dev' => {
+      'Python' => ['python', 'python 3', 'python3', 'http.server', 'jwcrypto', 'requests', 'pwncat'],
+      'pwntools' => %w[pwntools], 'pycryptodome' => %w[pycryptodome], 'gcc' => %w[gcc],
+      'make' => %w[make], 'git' => %w[git], 'Bash' => %w[bash], 'asyncua' => %w[asyncua], 'PHP' => %w[php]
+    },
+    'Frameworks' => {
+      'Metasploit' => ['metasploit', 'metasploit framework', 'msfconsole']
+    },
+    'System & misc' => {
+      'su' => %w[su], 'sudo' => %w[sudo], 'find' => %w[find], 'ln' => %w[ln],
+      'tar' => %w[tar tarfile], 'dpkg' => %w[dpkg], 'systemctl' => %w[systemctl],
+      'systemd-run' => %w[systemd-run], 'newgrp' => %w[newgrp], 'script' => %w[script],
+      'base64' => %w[base64], '7z' => %w[7z], 'zip' => %w[zip], 'busybox' => %w[busybox],
+      'rclone' => %w[rclone], 'rdiff-backup' => %w[rdiff-backup], 'incron' => %w[incron],
+      'mount' => %w[mount showmount], 'JupyterLab' => %w[jupyterlab jupyter],
+      'docker' => %w[docker], 'echo' => %w[echo]
+    }
   }.freeze
 
-  # The order tool buckets are shown in.
-  TOOL_ORDER = ['Recon & scanning', 'Web', 'Password attacks', 'Active Directory',
-                'Enumeration', 'Shells & transfer', 'Frameworks', 'Mobile'].freeze
+  TOOL_ORDER = CATALOG.keys.freeze
+
+  # "## Tools Used" rows that are not really tools.
+  TOOL_EXCLUDE = [/^cve-/i, /\bpoc\b/i, /\.sh\b/i, /\(custom\)/i, /privesc\.py/i, /^exploit-/i].freeze
+
+  # alias => [canonical, category]; and every alias as a slug, so the technique
+  # buckets can drop tags that are really tools.
+  TOOL_LOOKUP = {}
+  TOOL_ALIAS_SLUGS = []
+  CATALOG.each do |cat, tools|
+    tools.each do |canon, aliases|
+      aliases.each do |a|
+        TOOL_LOOKUP[a] = [canon, cat]
+        TOOL_ALIAS_SLUGS << a.gsub(/[^a-z0-9]+/, '-').gsub(/^-|-$/, '')
+      end
+      TOOL_ALIAS_SLUGS << canon.downcase.gsub(/[^a-z0-9]+/, '-').gsub(/^-|-$/, '')
+    end
+  end
+  TOOL_LOOKUP.freeze
+  TOOL_ALIAS_SLUGS.uniq!
+  TOOL_ALIAS_SLUGS.freeze
 
   # Technique domains, in order. A tag lands in the first domain one of whose
   # keywords is a substring of it; anything left over falls into "Other".
@@ -83,7 +154,10 @@ module Arsenal
 
   # Spanish labels for the category names (for the /es/ page).
   ES = {
-    'Recon & scanning' => 'Reconocimiento', 'Web' => 'Web',
+    'Recon & scanning' => 'Reconocimiento', 'Web' => 'Web', 'Web & HTTP' => 'Web y HTTP',
+    'Passwords & hashes' => 'Contraseñas y hashes', 'Reversing & analysis' => 'Reversing y análisis',
+    'Databases' => 'Bases de datos', 'Scripting & dev' => 'Scripting y desarrollo',
+    'System & misc' => 'Sistema y varios',
     'Password attacks' => 'Ataques a contraseñas', 'Active Directory' => 'Active Directory',
     'Enumeration' => 'Enumeración', 'Shells & transfer' => 'Shells y transferencia',
     'Frameworks' => 'Frameworks', 'Mobile' => 'Móvil',
@@ -101,7 +175,9 @@ module Arsenal
   # Font Awesome icon per category (identity is carried by icon + label, never
   # by colour alone).
   ICONS = {
-    'Recon & scanning' => 'fa-satellite-dish', 'Web' => 'fa-globe',
+    'Recon & scanning' => 'fa-satellite-dish', 'Web' => 'fa-globe', 'Web & HTTP' => 'fa-globe',
+    'Passwords & hashes' => 'fa-key', 'Reversing & analysis' => 'fa-microchip',
+    'Databases' => 'fa-database', 'Scripting & dev' => 'fa-code', 'System & misc' => 'fa-screwdriver-wrench',
     'Password attacks' => 'fa-key', 'Active Directory' => 'fa-sitemap',
     'Enumeration' => 'fa-list-check', 'Shells & transfer' => 'fa-terminal',
     'Frameworks' => 'fa-cubes', 'Mobile' => 'fa-mobile-screen',
@@ -126,6 +202,60 @@ module Arsenal
     'Other'
   end
 
+  # A "## Tools Used" cell -> the tool tokens in it. Parentheticals are dropped
+  # (clarifications like "netcat (nc)"), and "a / b", "a + b" split into two.
+  def tool_tokens(cell)
+    clean = cell.gsub(/[*`]/, '').gsub(/\(.*?\)/, ' ').strip
+    return [] if TOOL_EXCLUDE.any? { |re| clean =~ re }
+
+    clean.split(%r{\s*[/+]\s*}).map { |t| t.strip.downcase.gsub(/\s+/, ' ') }.reject(&:empty?)
+  end
+
+  # A token -> [canonical, category], by exact alias or the longest alias it
+  # begins/ends with (so "impacket psexec" -> Impacket).
+  def match_tool(token)
+    return TOOL_LOOKUP[token] if TOOL_LOOKUP.key?(token)
+
+    hit = TOOL_LOOKUP.keys
+                     .select { |a| token == a || token.start_with?("#{a} ") || token.end_with?(" #{a}") }
+                     .max_by(&:length)
+    hit ? TOOL_LOOKUP[hit] : nil
+  end
+
+  # Tools from each writeup's "## Tools Used" table: canonical name => machines.
+  # Always read the ENGLISH post files on disk (not `site.posts`, which is one
+  # language per build and whose ES tables translate some tool names), so both
+  # the /en and /es pages show the same tools and counts.
+  def tools_from(site)
+    counts = Hash.new(0)
+    cat_of = {}
+
+    Dir.glob(File.join(site.source, '_posts', 'en', '*.md')).sort.each do |path|
+      text = File.read(path, encoding: 'utf-8')
+      next if text =~ /^hidden:\s*true\s*$/
+
+      table = text[/^##\s+Tools Used\s*\n(.*?)(?=^##\s|\z)/m, 1]
+      next unless table
+
+      seen = {}
+      rows = table.lines.select { |l| l.strip.start_with?('|') }
+      rows.drop(2).each do |row| # header + separator
+        cell = row.strip.sub(/^\|/, '').split('|').first.to_s.strip
+        tool_tokens(cell).each do |token|
+          hit = match_tool(token)
+          canon, cat = hit || [token, 'Other']
+          next if seen[canon]
+
+          seen[canon] = true
+          counts[canon] += 1
+          cat_of[canon] = cat
+        end
+      end
+    end
+
+    [counts, cat_of]
+  end
+
   # Frequent items (on 2+ machines) always show; one-offs top the card up to
   # VISIBLE_MIN, and the remainder is folded away.
   def split(items)
@@ -147,26 +277,25 @@ module Arsenal
   def build(site)
     posts = site.posts.docs.reject { |p| p.data['hidden'] }
     total = posts.size
+    existing_tags = site.tags.keys.map { |t| Jekyll::Utils.slugify(t.to_s) }.to_set
 
+    # Technique / platform tags: skip CVEs, the OS tags and anything that is
+    # really a tool (it lives in the Tools section instead).
     counts = Hash.new(0)
     post_tags = posts.map do |post|
       tags = post.data['tags'].to_a.map { |t| t.to_s.strip.downcase }.uniq.reject do |tag|
-        tag.empty? || tag.start_with?('cve-') || NON_TAGS.include?(tag)
+        tag.empty? || tag.start_with?('cve-') || NON_TAGS.include?(tag) ||
+          TOOL_ALIAS_SLUGS.include?(Jekyll::Utils.slugify(tag))
       end
       tags.each { |tag| counts[tag] += 1 }
       tags
     end
 
-    tool_buckets = Hash.new { |h, k| h[k] = [] }
     tech_buckets = Hash.new { |h, k| h[k] = [] }
-
     counts.each do |tag, n|
-      item = { 'tag' => tag, 'slug' => Jekyll::Utils.slugify(tag), 'count' => n }
-      if TOOLS.key?(tag)
-        tool_buckets[TOOLS[tag]] << item
-      else
-        tech_buckets[domain_for(tag)] << item
-      end
+      slug = Jekyll::Utils.slugify(tag)
+      item = { 'tag' => tag, 'slug' => slug, 'count' => n, 'url' => existing_tags.include?(slug) }
+      tech_buckets[domain_for(tag)] << item
     end
 
     by_count = ->(items) { items.sort_by { |i| [-i['count'], i['tag']] } }
@@ -174,10 +303,18 @@ module Arsenal
     # Machines that touch each technique domain at least once.
     coverage = Hash.new(0)
     post_tags.each do |tags|
-      tags.reject { |t| TOOLS.key?(t) }.map { |t| domain_for(t) }.uniq.each { |d| coverage[d] += 1 }
+      tags.map { |t| domain_for(t) }.uniq.each { |d| coverage[d] += 1 }
     end
 
-    tools = TOOL_ORDER.filter_map do |name|
+    # Tools, read from the "## Tools Used" tables.
+    tool_counts, tool_cat = tools_from(site)
+    tool_buckets = Hash.new { |h, k| h[k] = [] }
+    tool_counts.each do |name, n|
+      slug = Jekyll::Utils.slugify(name)
+      tool_buckets[tool_cat[name]] << { 'tag' => name, 'slug' => slug, 'count' => n, 'url' => existing_tags.include?(slug) }
+    end
+
+    tools = (TOOL_ORDER + ['Other']).filter_map do |name|
       items = tool_buckets[name]
       group(name, by_count.call(items)) unless items.empty?
     end

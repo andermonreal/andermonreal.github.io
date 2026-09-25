@@ -5953,6 +5953,22 @@ body:has(.ars) {
   }
 }
 
+/* A tool with no tag page: informative, not a link. */
+.ars-chip.is-static {
+  cursor: default;
+
+  &:hover {
+    transform: none;
+    border-color: var(--main-border-color);
+    color: var(--text-color);
+  }
+
+  &.is-hot:hover {
+    border-color: color-mix(in srgb, var(--card-accent, var(--hero-accent)) 45%, var(--main-border-color));
+    color: var(--heading-color);
+  }
+}
+
 /* Used on more than one machine: stands out and shows how often. */
 .ars-chip.is-hot {
   border-color: color-mix(in srgb, var(--card-accent, var(--hero-accent)) 45%, var(--main-border-color));
@@ -5965,7 +5981,9 @@ body:has(.ars) {
   min-width: 1.2rem;
   padding: 0 0.3rem;
   border-radius: 20px;
-  background: color-mix(in srgb, var(--card-accent, var(--hero-accent)) 26%, transparent);
+  /* Neutral, ink-based background so the count keeps ≥ 4.5:1 regardless of the
+     card's accent (the light-green one is too pale for white text). */
+  background: color-mix(in srgb, var(--heading-color) 15%, transparent);
   color: var(--heading-color);
   font-family: inherit;
   font-size: 0.66rem;
