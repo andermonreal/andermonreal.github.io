@@ -2,7 +2,7 @@
 title: "Vulnversity"
 date: 2026-09-25
 categories: [TryHackMe, Easy]
-tags: [linux, ftp, samba, squid-proxy, apache, gobuster, directory enumeration, file upload, php, phtml, extension filter bypass, content-type bypass, webshell, reverse shell, burp suite, directory listing, SUID, systemctl, gtfobins, privilege escalation]
+tags: [linux, ftp, samba, squid-proxy, apache, gobuster, directory enumeration, file upload, php, phtml, extension filter bypass, content-type bypass, webshell, reverse shell, burp suite, directory listing, SUID, systemctl, gtfobins, privilege escalation, nmap, curl, netcat, find]
 image:
   path: /assets/img/THM/Vulnversity/banner.webp
   lqip: "data:image/webp;base64,UklGRhgBAABXRUJQVlA4WAoAAAAQAAAAHwAAFwAAQUxQSA4AAAABENoQ/x9tsipFRJLdG1ZQOCDkAAAA0AUAnQEqIAAYAD7taqxQqaWkIqgKqTAdiWQAtRskwASQXYAApMhhxXwItMvBX/CHSECzLbBvfAD+6+MExKraB1Mwcf925S7jhg33TTQmvW2H5P3PtuN6JUyT2fXFXbK2tWblpBLoAdL8AG0WNSLpW3VZIECPXSn0eSVhU9BTy8AZgFSyyvr+CT0l0SeDNIROzBT22bao/s6u3F2OVjn0PLhwu9u8vwdbpRCpjIR4f3cb5jIfaj3d4eMmo8SZ+VoR9MRwxe0Rlf4g9J9uRGjtRHIqMMvuhyNIXDc4nRIG5M3QAAAA"

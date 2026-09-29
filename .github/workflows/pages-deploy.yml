@@ -65,6 +65,12 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: ruby tools/fetch-projects.rb
 
+      # Make each writeup's tags include the tools from its "## Tools Used"
+      # table, so tool pages / tag search list every machine that used a tool
+      # (kept in sync with the Arsenal, which reads the same tables).
+      - name: Sync tool tags
+        run: ruby tools/sync-tool-tags.rb
+
       # Different spellings of one tag ("LFI"/"lfi") share a tag page and
       # overwrite each other; unify them before building (stdlib only).
       - name: Normalize tag spellings

@@ -25,7 +25,8 @@ module Arsenal
       'wfuzz' => %w[wfuzz], 'feroxbuster' => %w[feroxbuster], 'wpscan' => %w[wpscan],
       'whatweb' => %w[whatweb], 'Wappalyzer' => %w[wappalyzer], 'nikto' => %w[nikto],
       'arp-scan' => %w[arp-scan], 'netdiscover' => %w[netdiscover], 'ping' => %w[ping],
-      'ss' => %w[ss], 'tcpdump' => %w[tcpdump], 'Wireshark' => %w[wireshark]
+      'ss' => %w[ss], 'tcpdump' => %w[tcpdump], 'Wireshark' => %w[wireshark],
+      'netstat' => %w[netstat], 'searchsploit' => %w[searchsploit]
     },
     'Web & HTTP' => {
       'Burp Suite' => ['burp suite', 'burpsuite', 'burp'], 'curl' => %w[curl], 'wget' => %w[wget],

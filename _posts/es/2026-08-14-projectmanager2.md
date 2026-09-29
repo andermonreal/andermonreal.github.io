@@ -2,7 +2,7 @@
 title: "ProjectManager2"
 date: 2026-08-14
 categories: [Custom, Easy]
-tags: [linux, ftp, anonymous ftp, information disclosure, django, CVE-2025-64459, SQLi, blind sqli, postgresql, sha1, hashcat, credential reuse, command injection, RCE, reverse shell, jinja2, SSTI, port forwarding, pivoting, PATH hijacking, SUID, gtfobins]
+tags: [linux, ftp, anonymous ftp, information disclosure, django, CVE-2025-64459, SQLi, blind sqli, postgresql, sha1, hashcat, credential reuse, command injection, RCE, reverse shell, jinja2, SSTI, port forwarding, pivoting, PATH hijacking, SUID, gtfobins, arp-scan, nmap, gobuster, python, netcat, ssh, strings]
 image:
   path: /assets/img/Custom/ProjectManager2/banner.jpeg
   alt: ProjectManager2 writeup
