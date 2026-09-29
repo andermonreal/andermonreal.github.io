@@ -35,7 +35,7 @@ module Arsenal
     },
     'Passwords & hashes' => {
       'hashcat' => %w[hashcat], 'john' => ['john', 'john the ripper'], 'pdf2john' => %w[pdf2john],
-      'hashid' => %w[hashid], 'passlib' => %w[passlib]
+      'hashid' => %w[hashid], 'passlib' => %w[passlib], 'hydra' => %w[hydra]
     },
     'Active Directory' => {
       'BloodHound' => ['bloodhound', 'bloodhound (legacy)', 'bloodhound-python'],
@@ -53,7 +53,7 @@ module Arsenal
     },
     'Reversing & analysis' => {
       'strings' => %w[strings], 'ILSpy' => %w[ilspy], 'jd-gui' => %w[jd-gui], 'jadx' => %w[jadx],
-      'Ghidra' => %w[ghidra], 'dnSpy' => %w[dnspy]
+      'Ghidra' => %w[ghidra], 'dnSpy' => %w[dnspy], 'exiftool' => %w[exiftool], 'binwalk' => %w[binwalk], 'steghide' => %w[steghide]
     },
     'Mobile' => {
       'adb' => %w[adb], 'apktool' => %w[apktool], 'apksigner' => %w[apksigner], 'zipalign' => %w[zipalign],

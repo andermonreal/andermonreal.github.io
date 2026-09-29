@@ -1545,13 +1545,29 @@ html[data-mode="light"] {
   }
 }
 
+/* Function-name / decorator tokens: the theme's light purple (#8250df) is only
+   4.28:1 on the beige code background — darken it to a purple that clears 4.5:1
+   on every beige surface (code, code header, spec sheet). Matches the theme's
+   own selector list (.nd, .nf, .fm). */
+@mixin beige-light-fn {
+  .highlight {
+    .nd,
+    .nf,
+    .fm {
+      color: #6f42c1;
+    }
+  }
+}
+
 html[data-mode="light"] {
   @include beige-light-comment;
+  @include beige-light-fn;
 }
 
 @media (prefers-color-scheme: light) {
   html:not([data-mode]) {
     @include beige-light-comment;
+    @include beige-light-fn;
   }
 }
 
