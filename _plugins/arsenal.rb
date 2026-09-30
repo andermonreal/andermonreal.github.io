@@ -43,7 +43,7 @@ module Arsenal
       'evil-winrm' => %w[evil-winrm], 'Rubeus' => %w[rubeus], 'Powermad' => %w[powermad],
       'PowerView' => %w[powerview powersploit], 'crackmapexec' => %w[crackmapexec],
       'netexec' => %w[netexec nxc], 'smbclient' => %w[smbclient], 'smbmap' => %w[smbmap],
-      'ldapsearch' => %w[ldapsearch]
+      'ldapsearch' => %w[ldapsearch], 'mimikatz' => %w[mimikatz kiwi]
     },
     'Shells & transfer' => {
       'netcat' => ['netcat', 'nc', 'nc.exe'], 'socat' => %w[socat], 'rlwrap' => %w[rlwrap],
@@ -73,7 +73,8 @@ module Arsenal
       'make' => %w[make], 'git' => %w[git], 'Bash' => %w[bash], 'asyncua' => %w[asyncua], 'PHP' => %w[php]
     },
     'Frameworks' => {
-      'Metasploit' => ['metasploit', 'metasploit framework', 'msfconsole']
+      'Metasploit' => ['metasploit', 'metasploit framework', 'msfconsole'],
+      'msfvenom' => %w[msfvenom]
     },
     'System & misc' => {
       'su' => %w[su], 'sudo' => %w[sudo], 'find' => %w[find], 'ln' => %w[ln],
