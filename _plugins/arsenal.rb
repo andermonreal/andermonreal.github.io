@@ -83,7 +83,7 @@ module Arsenal
       'base64' => %w[base64], '7z' => %w[7z], 'zip' => %w[zip], 'busybox' => %w[busybox],
       'rclone' => %w[rclone], 'rdiff-backup' => %w[rdiff-backup], 'incron' => %w[incron],
       'mount' => %w[mount showmount], 'JupyterLab' => %w[jupyterlab jupyter],
-      'docker' => %w[docker], 'echo' => %w[echo]
+      'docker' => %w[docker], 'echo' => %w[echo], 'env' => %w[env]
     }
   }.freeze
 
