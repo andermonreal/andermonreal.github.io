@@ -86,7 +86,7 @@
   const logoNode = ofKind('logo')[0];
   const logo = logoNode ? logoNode.textContent.replace(/^\n+|\s+$/g, '') : '';
 
-  const LEVELS = ['Easy', 'Medium', 'Hard', 'Insane'];
+  const LEVELS = ['Easy', 'Medium', 'Hard', 'Insane', 'Lab'];
   const SYSTEMS = ['linux', 'windows', 'android'];
   const FILES = ['about.txt', 'certs.txt', 'contact.txt'];
   const DIRS = ['machines', 'cves', 'projects', 'archive'];

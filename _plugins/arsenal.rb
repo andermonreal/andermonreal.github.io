@@ -31,7 +31,8 @@ module Arsenal
     'Web & HTTP' => {
       'Burp Suite' => ['burp suite', 'burpsuite', 'burp'], 'curl' => %w[curl], 'wget' => %w[wget],
       'Browser DevTools' => ['browser devtools', 'browser', 'web browser', 'browser + devtools', 'devtools'],
-      'jwt.io' => ['jwt.io'], 'wscat' => %w[wscat], 'websocat' => %w[websocat], 'websocket' => %w[websocket]
+      'jwt.io' => ['jwt.io'], 'wscat' => %w[wscat], 'websocat' => %w[websocat], 'websocket' => %w[websocket],
+      'davtest' => %w[davtest]
     },
     'Passwords & hashes' => {
       'hashcat' => %w[hashcat], 'john' => ['john', 'john the ripper'], 'pdf2john' => %w[pdf2john],
@@ -48,7 +49,7 @@ module Arsenal
     'Shells & transfer' => {
       'netcat' => ['netcat', 'nc', 'nc.exe'], 'socat' => %w[socat], 'rlwrap' => %w[rlwrap],
       'ssh' => %w[ssh], 'ssh-keygen' => %w[ssh-keygen], 'xfreerdp' => %w[xfreerdp],
-      'telnet' => %w[telnet], 'ftp' => %w[ftp], 'certutil' => %w[certutil],
+      'telnet' => %w[telnet], 'ftp' => %w[ftp], 'cadaver' => %w[cadaver], 'certutil' => %w[certutil],
       'Invoke-WebRequest' => ['invoke-webrequest', 'iwr']
     },
     'Reversing & analysis' => {

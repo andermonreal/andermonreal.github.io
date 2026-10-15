@@ -12,7 +12,7 @@
 {% assign tx_posts = page.posts | where_exp: 'item', 'item.hidden != true' %}
 {% assign tx_total = tx_posts | size %}
 {% assign tx_name = page.title %}
-{% assign tx_levels = 'Easy,Medium,Hard,Insane' | split: ',' %}
+{% assign tx_levels = 'Easy,Medium,Hard,Insane,Lab' | split: ',' %}
 {% assign tx_head = tx_name | downcase | slice: 0, 4 %}
 {% assign tx_is_cve = false %}
 {% if tx_kind == 'tag' and tx_head == 'cve-' %}{% assign tx_is_cve = true %}{% endif %}

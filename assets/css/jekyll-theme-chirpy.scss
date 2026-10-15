@@ -52,17 +52,19 @@ main > article .preview-img {
    its card. `-ink` is the text colour that reads on the fill (≥ 4.5:1) — gold
    needs dark ink. These are the dark steps; the light ones live in the
    beige-light mixin (section 4). */
-$difficulty-levels: easy, medium, hard, insane;
+$difficulty-levels: easy, medium, hard, insane, lab;
 
 html {
   --diff-easy: #0a7e3a;
   --diff-medium: #bb8805;
   --diff-hard: #d90038;
   --diff-insane: #8a4af5;
+  --diff-lab: #15808c; /* practice-lab tier (INE), teal — works on dark + beige */
   --diff-easy-ink: #fff;
   --diff-medium-ink: #1a1a1a;
   --diff-hard-ink: #fff;
   --diff-insane-ink: #fff;
+  --diff-lab-ink: #fff;
   --delta-up: #3fb950; /* "trending up" text in the dashboard */
 }
 
