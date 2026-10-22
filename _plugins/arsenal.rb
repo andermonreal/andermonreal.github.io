@@ -40,7 +40,7 @@ module Arsenal
     },
     'Active Directory' => {
       'BloodHound' => ['bloodhound', 'bloodhound (legacy)', 'bloodhound-python'],
-      'Impacket' => ['impacket', 'impacket psexec', 'impacket ticketconverter', 'impacket-smbserver', 'impacket smbserver'],
+      'Impacket' => ['impacket', 'impacket psexec', 'impacket ticketconverter', 'impacket-smbserver', 'impacket smbserver', 'impacket-mssqlclient', 'impacket mssqlclient'],
       'evil-winrm' => %w[evil-winrm], 'Rubeus' => %w[rubeus], 'Powermad' => %w[powermad],
       'PowerView' => %w[powerview powersploit], 'crackmapexec' => %w[crackmapexec],
       'netexec' => %w[netexec nxc], 'smbclient' => %w[smbclient], 'smbmap' => %w[smbmap],
