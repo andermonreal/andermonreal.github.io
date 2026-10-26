@@ -24,6 +24,7 @@ module Arsenal
       'nmap' => %w[nmap], 'gobuster' => %w[gobuster], 'ffuf' => %w[ffuf],
       'wfuzz' => %w[wfuzz], 'feroxbuster' => %w[feroxbuster], 'wpscan' => %w[wpscan],
       'whatweb' => %w[whatweb], 'Wappalyzer' => %w[wappalyzer], 'nikto' => %w[nikto],
+      'droopescan' => %w[droopescan],
       'arp-scan' => %w[arp-scan], 'netdiscover' => %w[netdiscover], 'ping' => %w[ping],
       'ss' => %w[ss], 'tcpdump' => %w[tcpdump], 'Wireshark' => %w[wireshark],
       'netstat' => %w[netstat], 'searchsploit' => %w[searchsploit]
