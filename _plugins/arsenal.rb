@@ -78,7 +78,7 @@ module Arsenal
       'msfvenom' => %w[msfvenom]
     },
     'System & misc' => {
-      'su' => %w[su], 'sudo' => %w[sudo], 'find' => %w[find], 'ln' => %w[ln],
+      'su' => %w[su], 'sudo' => %w[sudo], 'sudoedit' => %w[sudoedit], 'find' => %w[find], 'ln' => %w[ln],
       'tar' => %w[tar tarfile], 'dpkg' => %w[dpkg], 'systemctl' => %w[systemctl],
       'systemd-run' => %w[systemd-run], 'newgrp' => %w[newgrp], 'script' => %w[script],
       'base64' => %w[base64], '7z' => %w[7z], 'zip' => %w[zip], 'busybox' => %w[busybox],
