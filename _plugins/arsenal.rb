@@ -49,7 +49,7 @@ module Arsenal
     },
     'Shells & transfer' => {
       'netcat' => ['netcat', 'nc', 'nc.exe'], 'socat' => %w[socat], 'rlwrap' => %w[rlwrap],
-      'ssh' => %w[ssh], 'ssh-keygen' => %w[ssh-keygen], 'xfreerdp' => %w[xfreerdp],
+      'ssh' => %w[ssh], 'ssh-keygen' => %w[ssh-keygen], 'scp' => %w[scp], 'xfreerdp' => %w[xfreerdp],
       'telnet' => %w[telnet], 'ftp' => %w[ftp], 'cadaver' => %w[cadaver], 'certutil' => %w[certutil],
       'Invoke-WebRequest' => ['invoke-webrequest', 'iwr']
     },
@@ -85,7 +85,7 @@ module Arsenal
       'base64' => %w[base64], '7z' => %w[7z], 'zip' => %w[zip], 'busybox' => %w[busybox],
       'rclone' => %w[rclone], 'rdiff-backup' => %w[rdiff-backup], 'incron' => %w[incron],
       'mount' => %w[mount showmount], 'JupyterLab' => %w[jupyterlab jupyter],
-      'docker' => %w[docker], 'echo' => %w[echo], 'env' => %w[env]
+      'docker' => %w[docker], 'LXD' => %w[lxd lxc], 'echo' => %w[echo], 'env' => %w[env]
     }
   }.freeze
 
