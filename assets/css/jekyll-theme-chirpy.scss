@@ -3762,6 +3762,83 @@ body:has(.wu-post) {
   }
 }
 
+/* --- Lab chain (_includes/lab-chain.html) ------------------------------
+   Connector under the machine card linking the machines of a `lab:` group —
+   a pivoting lab such as Symfonos 1 → Symfonos 2. Mirrors the attack-path
+   strip; the current machine is highlighted, the others are links. */
+.lab-chain {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.85rem 1.25rem;
+  border-top: 1px solid var(--main-border-color);
+  background: color-mix(in srgb, var(--main-bg) 55%, var(--card-bg));
+}
+
+.lab-label {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-muted-color);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  i {
+    color: var(--hero-accent);
+  }
+}
+
+.lab-steps {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0.15rem 0.1rem;
+  list-style: none;
+}
+
+.lab-step {
+  display: inline-flex;
+  align-items: center;
+
+  a,
+  > span {
+    padding: 0.25rem 0.75rem;
+    border: 1px solid var(--main-border-color);
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    color: var(--text-color);
+    background: var(--card-bg);
+  }
+
+  a:hover {
+    border-color: var(--hero-accent);
+  }
+
+  /* arrow separating the machines in the chain */
+  & + &::before {
+    content: "\2192";
+    margin-right: 0.6rem;
+    color: var(--text-muted-color);
+    font-weight: 700;
+  }
+}
+
+.lab-step.is-current > span {
+  border-color: var(--hero-accent);
+  background: color-mix(in srgb, var(--hero-accent) 12%, var(--card-bg));
+  font-weight: 700;
+}
+
 /* --- Attack path (_includes/attack-path.html) ---------------------------
    The route through the box under the spec sheet: Recon → Initial access →
    User → Root, each node in its phase colour with the account reached and the

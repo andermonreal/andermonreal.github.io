@@ -1,0 +1,50 @@
+{%- comment -%}
+  Pivoting-lab connector. When a writeup sets `lab:` in front matter
+  (lab.name + lab.order), this strip links the machines of that lab together so
+  a visitor sees they are a chained set (e.g. a pivoting lab). Rendered under
+  the machine card by _layouts/post.html, next to the attack-path strip.
+  Styles: the "Lab chain" section of assets/css/jekyll-theme-chirpy.scss.
+
+  site.posts is one language per polyglot build, so the siblings collected here
+  and their URLs are already in the current language; the current post is matched
+  by source path so it is highlighted correctly in both languages.
+{%- endcomment -%}
+{%- assign lab = page.lab -%}
+{%- if lab and lab.name -%}
+  {%- if site.active_lang == 'es' -%}
+    {%- assign lab_label = 'Lab de pivoting' -%}
+  {%- else -%}
+    {%- assign lab_label = 'Pivoting lab' -%}
+  {%- endif -%}
+
+  {%- assign keyed = '' | split: '' -%}
+  {%- for p in site.posts -%}
+    {%- if p.lab.name == lab.name -%}
+      {%- assign ord = p.lab.order | default: 9 -%}
+      {%- assign k = ord | append: '|' | append: p.url | append: '|' | append: p.path | append: '|' | append: p.title -%}
+      {%- assign keyed = keyed | push: k -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- assign keyed = keyed | sort -%}
+
+  {%- if keyed.size > 1 -%}
+  <nav class="lab-chain" aria-label="{{ lab_label }}: {{ lab.name }}">
+    <span class="lab-label"><i class="fas fa-diagram-project" aria-hidden="true"></i> {{ lab_label }} · {{ lab.name }}</span>
+    <ol class="lab-steps">
+      {%- for k in keyed -%}
+        {%- assign parts = k | split: '|' -%}
+        {%- assign k_url = parts[1] -%}
+        {%- assign k_path = parts[2] -%}
+        {%- assign k_title = parts[3] -%}
+        <li class="lab-step{% if k_path == page.path %} is-current{% endif %}">
+          {%- if k_path == page.path -%}
+            <span aria-current="page">{{ k_title }}</span>
+          {%- else -%}
+            <a href="{{ k_url | relative_url }}">{{ k_title }}</a>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ol>
+  </nav>
+  {%- endif -%}
+{%- endif -%}

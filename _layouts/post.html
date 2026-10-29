@@ -197,6 +197,10 @@ script_includes:
     <!-- The route through the box (recon → root), from the post's own
          headings. Hidden for protected writeups. -->
     {% include attack-path.html %}
+
+    <!-- Pivoting-lab connector: links the machines of a `lab:` group (e.g.
+         Symfonos 1 ↔ 2) so the chain is visible on each machine's card. -->
+    {% include lab-chain.html %}
   </header>
 
   {% if enable_toc %}
